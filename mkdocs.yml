@@ -44,95 +44,61 @@ theme:
 # Navigation
 nav:
   - Home: index.md
-  - Setup:
-      - Server Setup Guide: setup/server-setup-guide.md
-  - Guides:
-      - Getting Started: guides/getting-started.md
-  - Network:
-      - Network Overview: network/index.md
-      - Part I — Understand:
-          - Overview: network/00-understand/index.md
-          - The one-sentence idea: network/00-understand/01-the-one-sentence-idea.md
-          - Why "one tool" is wrong: network/00-understand/02-why-one-tool-is-wrong.md
-          - Seven layers: network/00-understand/03-seven-layers.md
-          - Runtime classes: network/00-understand/04-runtime-classes.md
-          - Proxy decision: network/00-understand/05-proxy-decision.md
-          - Tool stack: network/00-understand/06-tool-stack.md
-          - Why not alternatives: network/00-understand/07-why-not-alternatives.md
-          - Nakama social: network/00-understand/08-nakama-social.md
-          - World lifecycle: network/00-understand/09-world-lifecycle.md
-          - User experiences: network/00-understand/10-user-experiences.md
-          - Glossary: network/00-understand/11-glossary.md
-      - Part II — Tools:
-          - Tools: network/01-tools/index.md
-          - Capability cheat sheet: network/01-tools/01-capability-cheat-sheet.md
-          - Maturity tiers: network/01-tools/02-maturity-tiers.md
-          - Verification notes: network/01-tools/03-verification-notes.md
-          - Failure modes: network/01-tools/04-failure-modes.md
-          - Observability: network/01-tools/05-observability.md
-          - Security boundaries: network/01-tools/06-security-boundaries.md
-      - Part III — Implementation:
-          - Implementation: network/02-implementation/index.md
-          - Group 00 — Foundations:
-              - Group overview: network/02-implementation/group-00-foundations.md
-              - Phase 0 — Names: network/02-implementation/phase-00-names.md
-              - Phase 1 — Repo structure: network/02-implementation/phase-01-repo-structure.md
-              - Phase 2 — Namespaces: network/02-implementation/phase-02-namespaces.md
-          - Group 01 — Core deployment:
-              - Group overview: network/02-implementation/group-01-core-deployment.md
-              - Phase 3 — Nakama: network/02-implementation/phase-03-nakama.md
-              - Phase 4 — Velocity: network/02-implementation/phase-04-velocity.md
-              - Phase 5 — Lobby: network/02-implementation/phase-05-lobby.md
-              - Phase 6 — TAB: network/02-implementation/phase-06-tab.md
-              - Phase 7 — Protocol: network/02-implementation/phase-07-protocol.md
-              - Phase 8 — Fantasy runtime: network/02-implementation/phase-08-fantasy-runtime.md
-          - Group 02 — Control plane:
-              - Group overview: network/02-implementation/group-02-control-plane.md
-              - Phase 9 — Runtime catalog: network/02-implementation/phase-09-runtime-catalog.md
-              - Phase 10 — Map metadata: network/02-implementation/phase-10-map-metadata.md
-              - Phase 11 — World Controller: network/02-implementation/phase-11-world-controller.md
-              - Phase 12 — NetworkBridge: network/02-implementation/phase-12-network-bridge.md
-          - Group 03 — Social:
-              - Group overview: network/02-implementation/group-03-social.md
-              - Phase 13 — Friends & parties: network/02-implementation/phase-13-friends-parties.md
-              - Phase 14 — /join: network/02-implementation/phase-14-join.md
-              - Phase 15 — Cross-runtime invites: network/02-implementation/phase-15-cross-runtime-invites.md
-              - Phase 16 — Modrinth: network/02-implementation/phase-16-modrinth.md
-              - Phase 17 — packwiz CI: network/02-implementation/phase-17-packwiz.md
-              - Phase 18 — TAB exact: network/02-implementation/phase-18-tab-exact.md
-          - Group 04 — Dynamic routing:
-              - Group overview: network/02-implementation/group-04-dynamic-routing.md
-              - Phase 19 — Random portal: network/02-implementation/phase-19-random-portal.md
-              - Phase 20 — mc-router: network/02-implementation/phase-20-mc-router.md
-              - Phase 21 — Idle sleep: network/02-implementation/phase-21-idle-sleep.md
-              - Phase 22 — Agones: network/02-implementation/phase-22-agones.md
-              - Phase 23 — AI proximity: network/02-implementation/phase-23-ai-proximity.md
-              - Phase 24 — Map upload: network/02-implementation/phase-24-map-upload.md
-          - Group 05 — Operations:
-              - Group overview: network/02-implementation/group-05-operations.md
-              - Phase 25 — Backups: network/02-implementation/phase-25-backups.md
-              - Phase 26 — Monitoring: network/02-implementation/phase-26-monitoring.md
-              - Phase 27 — Rollout order: network/02-implementation/phase-27-rollout-order.md
-      - Part IV — Reference:
-          - Reference: network/03-reference/index.md
-          - Source of truth: network/03-reference/01-source-of-truth.md
-          - RuntimeDefinition schema: network/03-reference/02-runtime-definition-schema.md
-          - MapInstance schema: network/03-reference/03-map-instance-schema.md
-          - Routing state machine: network/03-reference/04-routing-state-machine.md
-          - Random routing scoring: network/03-reference/05-random-routing-scoring.md
-          - Invite policy: network/03-reference/06-invite-policy.md
-          - World readiness contract: network/03-reference/07-world-readiness-contract.md
-          - Network security checklist: network/03-reference/08-network-security-checklist.md
-          - Functional acceptance test: network/03-reference/09-functional-acceptance-test.md
-          - Performance principles: network/03-reference/10-performance-principles.md
-          - Upgrade policy: network/03-reference/11-upgrade-policy.md
-          - Not fully automatic: network/03-reference/12-not-fully-automatic.md
-      - Part V — References:
-          - References: network/04-references/index.md
-          - Primary references: network/04-references/01-primary-references.md
-          - Final architecture recommendation: network/04-references/02-final-architecture-recommendation.md
-  - Platform:
-      - Platform Overview: platform/index.md
+  - Understand:
+      - Overview: 00-understand/index.md
+      - The one-sentence idea: 00-understand/01-the-one-sentence-idea.md
+      - Why "one tool" is wrong: 00-understand/02-why-one-tool-is-wrong.md
+      - Seven layers: 00-understand/03-seven-layers.md
+      - Runtime classes: 00-understand/04-runtime-classes.md
+      - Proxy decision: 00-understand/05-proxy-decision.md
+      - Tool stack: 00-understand/06-tool-stack.md
+      - Why not alternatives: 00-understand/07-why-not-alternatives.md
+      - Nakama social: 00-understand/08-nakama-social.md
+      - World lifecycle: 00-understand/09-world-lifecycle.md
+      - User experiences: 00-understand/10-user-experiences.md
+      - Glossary: 00-understand/11-glossary.md
+  - Implement:
+      - Roadmap: 01-implement/index.md
+      - Step 1 — Velocity + lobby: 01-implement/step-01-velocity-lobby.md
+      - Step 2 — Forwarding + isolation: 01-implement/step-02-forwarding-isolation.md
+      - Step 3 — TAB: 01-implement/step-03-tab.md
+      - Step 4 — Protocol: 01-implement/step-04-protocol.md
+      - Step 5 — Nakama identity: 01-implement/step-05-nakama-identity.md
+      - Step 6 — Friends + parties: 01-implement/step-06-friends-parties.md
+      - Step 7 — Second backend + /join: 01-implement/step-07-join.md
+      - Step 8 — World Controller: 01-implement/step-08-world-controller.md
+      - Step 9 — Scale-to-zero: 01-implement/step-09-scale-to-zero.md
+      - Step 10 — Portal wake → transfer: 01-implement/step-10-portal-wake-transfer.md
+      - Step 11 — Exact presence + TAB: 01-implement/step-11-tab-exact.md
+      - Step 12 — Random map: 01-implement/step-12-random-map.md
+      - Step 13 — Fantasy Forge: 01-implement/step-13-fantasy-forge.md
+      - Step 14 — Modrinth: 01-implement/step-14-modrinth.md
+      - Step 15 — Cross-runtime invite: 01-implement/step-15-cross-runtime-invite.md
+      - Step 16 — mc-router edge: 01-implement/step-16-mc-router.md
+      - Step 17 — Map upload: 01-implement/step-17-map-upload.md
+      - Step 18 — Agones (optional): 01-implement/step-18-agones.md
+      - Step 19 — AI proximity: 01-implement/step-19-ai-proximity.md
+  - Reference:
+      - Overview: 02-reference/index.md
+      - RuntimeDefinition schema: 02-reference/runtime-definition.md
+      - MapInstance schema: 02-reference/map-instance.md
+      - Routing & wake state machine: 02-reference/routing-state-machine.md
+      - Random map scoring: 02-reference/random-scoring.md
+      - Invite policy: 02-reference/invite-policy.md
+      - World readiness contract: 02-reference/world-readiness.md
+      - Network security checklist: 02-reference/security-checklist.md
+      - Acceptance test: 02-reference/acceptance-test.md
+      - Performance principles: 02-reference/performance-principles.md
+      - Upgrade policy: 02-reference/upgrade-policy.md
+  - Operations:
+      - Overview: 03-operations/index.md
+      - Backups: 03-operations/backups.md
+      - Monitoring: 03-operations/monitoring.md
+      - Security: 03-operations/security.md
+  - Resources:
+      - Overview: 04-resources/index.md
+      - Verified references: 04-resources/verified-references.md
+      - Final architecture: 04-resources/final-architecture.md
 
 # Markdown Extensions & Syntax Plugins
 markdown_extensions:
