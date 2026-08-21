@@ -1,0 +1,4 @@
+---
+# storage role defaults
+storage_mounts: []
+# storage_mounts: list of dicts { device, path, fstype, opts }

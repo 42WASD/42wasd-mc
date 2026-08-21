@@ -1,0 +1,4 @@
+---
+# base role defaults
+base_timezone: "UTC"
+unattended_upgrades_enabled: true

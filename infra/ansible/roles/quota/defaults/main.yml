@@ -1,0 +1,4 @@
+---
+# quota role defaults
+quota_enabled: false
+quota_warn_percent: 85

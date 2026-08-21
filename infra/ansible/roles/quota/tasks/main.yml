@@ -1,0 +1,6 @@
+---
+- name: Install quota tools
+  ansible.builtin.apt:
+    name: quota
+    state: present
+  when: quota_enabled

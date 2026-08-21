@@ -1,0 +1,4 @@
+---
+# build_client role defaults
+build_client_host: "{{ build_node_host | default('build_node') }}"
+build_client_dir: "/srv/build"

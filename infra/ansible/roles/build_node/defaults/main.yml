@@ -1,0 +1,11 @@
+---
+# build_node role defaults
+build_node_dir: "/srv/build"
+build_node_user: "builder"
+build_node_tools:
+  - git
+  - make
+  - cmake
+  - openjdk-21-jre-headless
+  - curl
+  - jq

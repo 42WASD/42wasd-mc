@@ -1,0 +1,32 @@
+---
+# base role tasks: timezone, base packages, unattended upgrades, hosts file.
+- name: Set timezone
+  ansible.builtin.timezone:
+    name: "{{ base_timezone }}"
+
+- name: Install base administration tools
+  ansible.builtin.apt:
+    name:
+      - curl
+      - wget
+      - git
+      - htop
+      - jq
+      - vim
+      - software-properties-common
+    state: present
+    update_cache: true
+
+- name: Configure unattended security upgrades
+  ansible.builtin.template:
+    src: 50unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    mode: "0644"
+  when: unattended_upgrades_enabled
+  notify: restart unattended-upgrades
+
+- name: Render /etc/hosts
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: /etc/hosts
+    mode: 0644

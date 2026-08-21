@@ -1,0 +1,13 @@
+// {{ ansible_managed }}
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-cilium
+  namespace: kube-system
+spec:
+  valuesContent: |
+    ipam:
+      mode: kubernetes
+    kubeProxyReplacement: true
+    securityContext:
+      privileged: true

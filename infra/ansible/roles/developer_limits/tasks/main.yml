@@ -1,0 +1,14 @@
+---
+- name: Apply systemd limits for developer users
+  ansible.builtin.template:
+    src: 99-developer-limits.conf.j2
+    dest: /etc/systemd/system.conf.d/99-developer-limits.conf
+    mode: "0644"
+    directory_mode: "0755"
+  notify: reload systemd
+
+- name: Apply nofile limits for developers
+  ansible.builtin.template:
+    src: 99-developer-nofile.conf.j2
+    dest: /etc/security/limits.d/99-developer-nofile.conf
+    mode: "0644"

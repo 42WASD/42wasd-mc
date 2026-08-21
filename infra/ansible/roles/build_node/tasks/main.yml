@@ -1,0 +1,20 @@
+---
+- name: Install build tooling
+  ansible.builtin.apt:
+    name: "{{ build_node_tools }}"
+    state: present
+
+- name: Create build user
+  ansible.builtin.user:
+    name: "{{ build_node_user }}"
+    shell: /bin/bash
+    create_home: true
+    state: present
+
+- name: Ensure build directory
+  ansible.builtin.file:
+    path: "{{ build_node_dir }}"
+    state: directory
+    owner: "{{ build_node_user }}"
+    group: "{{ build_node_user }}"
+    mode: "0755"

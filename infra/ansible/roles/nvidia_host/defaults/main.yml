@@ -1,0 +1,4 @@
+---
+# nvidia_host role defaults
+nvidia_cuda_ver: "535"
+nvidia_container_toolkit: true

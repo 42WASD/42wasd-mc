@@ -1,0 +1,5 @@
+---
+# firewall role defaults
+# firewall_allowed_ports: list of dicts { port, proto, comment }
+firewall_allowed_ports: []
+firewall_default_zone: "public"

@@ -1,0 +1,5 @@
+// {{ ansible_managed }}
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--kubeconfig /var/lib/rancher/rke2/agent/kubelet.kubeconfig"
+Environment="KUBELET_CONFIG_ARGS=--config /var/lib/rancher/rke2/agent/kubelet/config.yaml"
+EnvironmentFile=-/var/lib/rancher/rke2/agent/kubelet/args

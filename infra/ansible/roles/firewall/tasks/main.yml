@@ -1,0 +1,21 @@
+---
+- name: Install firewalld
+  ansible.builtin.apt:
+    name: firewalld
+    state: present
+
+- name: Ensure firewalld is running
+  ansible.builtin.systemd:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Allow configured ports
+  ansible.posix.firewalld:
+    port: "{{ item.port }}/{{ item.proto | default('tcp') }}"
+    zone: "{{ firewall_default_zone }}"
+    permanent: true
+    immediate: true
+    state: enabled
+    comment: "{{ item.comment | default('') }}"
+  loop: "{{ firewall_allowed_ports }}"

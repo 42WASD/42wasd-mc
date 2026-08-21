@@ -1,7 +1,12 @@
 site_name: 42wasd-mc
-site_description: Technical documentation and guides for the 42wasd-mc project.
+site_description: Technical documentation and guides for the 42wasd-mc Minecraft network.
 site_author: jyao
 site_url: https://42wasd.github.io/42wasd-mc/
+
+# Do not publish the runbook source files as standalone pages; they are
+# embedded into the Implementation page by the generator.
+exclude_docs: |
+  implementation/_runbook/
 
 # Repository Integration
 repo_name: 42WASD/42wasd-mc
@@ -41,64 +46,101 @@ theme:
     - content.code.copy
     - content.code.annotate
 
-# Navigation
+# >>> nav-autogen (generated) >>>
 nav:
-  - Home: index.md
-  - Understand:
-      - Overview: 00-understand/index.md
-      - The one-sentence idea: 00-understand/01-the-one-sentence-idea.md
-      - Why "one tool" is wrong: 00-understand/02-why-one-tool-is-wrong.md
-      - Seven layers: 00-understand/03-seven-layers.md
-      - Runtime classes: 00-understand/04-runtime-classes.md
-      - Proxy decision: 00-understand/05-proxy-decision.md
-      - Tool stack: 00-understand/06-tool-stack.md
-      - Why not alternatives: 00-understand/07-why-not-alternatives.md
-      - Nakama social: 00-understand/08-nakama-social.md
-      - World lifecycle: 00-understand/09-world-lifecycle.md
-      - User experiences: 00-understand/10-user-experiences.md
-      - Glossary: 00-understand/11-glossary.md
-  - Implement:
-      - Roadmap: 01-implement/index.md
-      - Step 1 — Velocity + lobby: 01-implement/step-01-velocity-lobby.md
-      - Step 2 — Forwarding + isolation: 01-implement/step-02-forwarding-isolation.md
-      - Step 3 — TAB: 01-implement/step-03-tab.md
-      - Step 4 — Protocol: 01-implement/step-04-protocol.md
-      - Step 5 — Nakama identity: 01-implement/step-05-nakama-identity.md
-      - Step 6 — Friends + parties: 01-implement/step-06-friends-parties.md
-      - Step 7 — Second backend + /join: 01-implement/step-07-join.md
-      - Step 8 — World Controller: 01-implement/step-08-world-controller.md
-      - Step 9 — Scale-to-zero: 01-implement/step-09-scale-to-zero.md
-      - Step 10 — Portal wake → transfer: 01-implement/step-10-portal-wake-transfer.md
-      - Step 11 — Exact presence + TAB: 01-implement/step-11-tab-exact.md
-      - Step 12 — Random map: 01-implement/step-12-random-map.md
-      - Step 13 — Fantasy Forge: 01-implement/step-13-fantasy-forge.md
-      - Step 14 — Modrinth: 01-implement/step-14-modrinth.md
-      - Step 15 — Cross-runtime invite: 01-implement/step-15-cross-runtime-invite.md
-      - Step 16 — mc-router edge: 01-implement/step-16-mc-router.md
-      - Step 17 — Map upload: 01-implement/step-17-map-upload.md
-      - Step 18 — Agones (optional): 01-implement/step-18-agones.md
-      - Step 19 — AI proximity: 01-implement/step-19-ai-proximity.md
-  - Reference:
-      - Overview: 02-reference/index.md
-      - RuntimeDefinition schema: 02-reference/runtime-definition.md
-      - MapInstance schema: 02-reference/map-instance.md
-      - Routing & wake state machine: 02-reference/routing-state-machine.md
-      - Random map scoring: 02-reference/random-scoring.md
-      - Invite policy: 02-reference/invite-policy.md
-      - World readiness contract: 02-reference/world-readiness.md
-      - Network security checklist: 02-reference/security-checklist.md
-      - Acceptance test: 02-reference/acceptance-test.md
-      - Performance principles: 02-reference/performance-principles.md
-      - Upgrade policy: 02-reference/upgrade-policy.md
-  - Operations:
-      - Overview: 03-operations/index.md
-      - Backups: 03-operations/backups.md
-      - Monitoring: 03-operations/monitoring.md
-      - Security: 03-operations/security.md
-  - Resources:
-      - Overview: 04-resources/index.md
-      - Verified references: 04-resources/verified-references.md
-      - Final architecture: 04-resources/final-architecture.md
+- Home: index.md
+- Setup:
+  - Getting Started: setup/getting-started.md
+  - Server Setup Guide: setup/server-setup-guide.md
+- Guides:
+  - Architecture:
+    - Overview: guides/architecture/index.md
+    - Network Topology: guides/architecture/network-topology.md
+    - Runtime Classes: guides/architecture/runtime-classes.md
+  - Server Ops:
+    - Overview: guides/server-ops/index.md
+    - Deploying a Map: guides/server-ops/deploying-a-map.md
+    - Adding a Backend: guides/server-ops/adding-a-backend.md
+  - Player Experience:
+    - Overview: guides/player-experience/index.md
+    - Joining & Invites: guides/player-experience/joining-and-invites.md
+    - Parties & Friends: guides/player-experience/parties-and-friends.md
+- Reference Design:
+  - Overview: reference-design/index.md
+  - Concepts & Design:
+    - Part I — Understand the architecture before installing anything:
+      - Overview: reference-design/background/01-understand-the-architecture-before-installing-anything/index.md
+      - The one-sentence idea: reference-design/background/01-understand-the-architecture-before-installing-anything/00-0-the-one-sentence-idea/index.md
+      - Why the tempting “one tool solves everything” design is wrong: reference-design/background/01-understand-the-architecture-before-installing-anything/01-1-why-the-tempting-one-tool-solves-everything-design-is-wrong/index.md
+      - "The complete mental model: seven separate layers": reference-design/background/01-understand-the-architecture-before-installing-anything/02-2-the-complete-mental-model-seven-separate-layers/index.md
+      - "Runtime classes: the rule that makes seamless UX possible": reference-design/background/01-understand-the-architecture-before-installing-anything/03-3-runtime-classes-the-rule-that-makes-seamless-ux-possible/index.md
+      - "Proxy decision: Velocity vs Gate after the 2026-08 audit": reference-design/background/01-understand-the-architecture-before-installing-anything/04-4-proxy-decision-velocity-vs-gate-after-the-2026-08-audit/index.md
+      - The selected tool stack: reference-design/background/01-understand-the-architecture-before-installing-anything/05-5-the-selected-tool-stack/index.md
+      - Why several attractive projects are not the foundation: reference-design/background/01-understand-the-architecture-before-installing-anything/06-6-why-several-attractive-projects-are-not-the-foundation/index.md
+      - "Social state: why Nakama belongs beside Minecraft rather than inside it": reference-design/background/01-understand-the-architecture-before-installing-anything/07-7-social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it/index.md
+      - Dynamic world lifecycle: reference-design/background/01-understand-the-architecture-before-installing-anything/08-8-dynamic-world-lifecycle/index.md
+      - End-to-end user experiences: reference-design/background/01-understand-the-architecture-before-installing-anything/09-9-end-to-end-user-experiences/index.md
+      - Plain-English glossary: reference-design/background/01-understand-the-architecture-before-installing-anything/10-10-plain-english-glossary/index.md
+    - Part II — How to interpret the actual tools:
+      - Overview: reference-design/background/02-how-to-interpret-the-actual-tools/index.md
+      - Capability cheat sheet: reference-design/background/02-how-to-interpret-the-actual-tools/00-11-capability-cheat-sheet/index.md
+      - Maturity and deployment tiers: reference-design/background/02-how-to-interpret-the-actual-tools/01-12-maturity-and-deployment-tiers/index.md
+      - Current verification notes — 2026-08-19: reference-design/background/02-how-to-interpret-the-actual-tools/02-13-current-verification-notes-2026-08-19/index.md
+      - Failure modes you must design for: reference-design/background/02-how-to-interpret-the-actual-tools/03-14-failure-modes-you-must-design-for/index.md
+      - Observability: reference-design/background/02-how-to-interpret-the-actual-tools/04-15-observability/index.md
+      - Security boundaries: reference-design/background/02-how-to-interpret-the-actual-tools/05-16-security-boundaries/index.md
+  - Build (Implementation Phases):
+    - Part III — Step-by-step implementation:
+      - Overview: reference-design/build/03-step-by-step-implementation/index.md
+      - Phase 0 — Decide names before deploying: reference-design/build/03-step-by-step-implementation/00-17-phase-0-decide-names-before-deploying/index.md
+      - Phase 1 — Create repository structure: reference-design/build/03-step-by-step-implementation/01-18-phase-1-create-repository-structure/index.md
+      - Phase 2 — Create Kubernetes namespaces: reference-design/build/03-step-by-step-implementation/02-19-phase-2-create-kubernetes-namespaces/index.md
+      - Phase 3 — Deploy CockroachDB and Nakama: reference-design/build/03-step-by-step-implementation/03-20-phase-3-deploy-cockroachdb-and-nakama/index.md
+      - Phase 4 — Deploy Velocity: reference-design/build/03-step-by-step-implementation/04-21-phase-4-deploy-velocity/index.md
+      - Phase 5 — Deploy the Paper lobby: reference-design/build/03-step-by-step-implementation/05-22-phase-5-deploy-the-paper-lobby/index.md
+      - Phase 6 — Install TAB: reference-design/build/03-step-by-step-implementation/06-23-phase-6-install-tab/index.md
+      - Phase 7 — Add ViaVersion and ViaBackwards: reference-design/build/03-step-by-step-implementation/07-24-phase-7-add-viaversion-and-viabackwards/index.md
+      - Phase 8 — Deploy the Forge 1.20.1 fantasy runtime: reference-design/build/03-step-by-step-implementation/08-25-phase-8-deploy-the-forge-1-20-1-fantasy-runtime/index.md
+      - Phase 9 — Define the runtime catalog: reference-design/build/03-step-by-step-implementation/09-26-phase-9-define-the-runtime-catalog/index.md
+      - Phase 10 — Define map metadata: reference-design/build/03-step-by-step-implementation/10-27-phase-10-define-map-metadata/index.md
+      - Phase 11 — Build the World Controller: reference-design/build/03-step-by-step-implementation/11-28-phase-11-build-the-world-controller/index.md
+      - Phase 12 — Build NetworkBridge for Velocity: reference-design/build/03-step-by-step-implementation/12-29-phase-12-build-networkbridge-for-velocity/index.md
+      - Phase 13 — Implement friends and parties: reference-design/build/03-step-by-step-implementation/13-30-phase-13-implement-friends-and-parties/index.md
+      - Phase 14 — Implement `/join <friend>`: reference-design/build/03-step-by-step-implementation/14-31-phase-14-implement-join-friend/index.md
+      - Phase 15 — Implement pending cross-runtime invites: reference-design/build/03-step-by-step-implementation/15-32-phase-15-implement-pending-cross-runtime-invites/index.md
+      - Phase 16 — Publish Modrinth Server Projects: reference-design/build/03-step-by-step-implementation/16-33-phase-16-publish-modrinth-server-projects/index.md
+      - Phase 17 — Add packwiz CI: reference-design/build/03-step-by-step-implementation/17-34-phase-17-add-packwiz-ci/index.md
+      - Phase 18 — Add exact world/dimension TAB information: reference-design/build/03-step-by-step-implementation/18-35-phase-18-add-exact-world-dimension-tab-information/index.md
+      - Phase 19 — Implement the glitch/random portal: reference-design/build/03-step-by-step-implementation/19-36-phase-19-implement-the-glitch-random-portal/index.md
+      - Phase 20 — Add mc-router: reference-design/build/03-step-by-step-implementation/20-37-phase-20-add-mc-router/index.md
+      - Phase 21 — Add idle sleep: reference-design/build/03-step-by-step-implementation/21-38-phase-21-add-idle-sleep/index.md
+      - Phase 22 — Add Agones only for session worlds: reference-design/build/03-step-by-step-implementation/22-39-phase-22-add-agones-only-for-session-worlds/index.md
+      - Phase 23 — Add AI proximity chat: reference-design/build/03-step-by-step-implementation/23-40-phase-23-add-ai-proximity-chat/index.md
+      - Phase 24 — Community map upload pipeline: reference-design/build/03-step-by-step-implementation/24-41-phase-24-community-map-upload-pipeline/index.md
+      - Phase 25 — Backups: reference-design/build/03-step-by-step-implementation/25-42-phase-25-backups/index.md
+      - Phase 26 — Monitoring: reference-design/build/03-step-by-step-implementation/26-43-phase-26-monitoring/index.md
+      - Phase 27 — Rollout order: reference-design/build/03-step-by-step-implementation/27-44-phase-27-rollout-order/index.md
+  - Reference Material:
+    - Part IV — Technical reference:
+      - Overview: reference-design/reference/04-technical-reference/index.md
+      - Recommended source-of-truth model: reference-design/reference/04-technical-reference/00-45-recommended-source-of-truth-model/index.md
+      - RuntimeDefinition schema: reference-design/reference/04-technical-reference/01-46-runtimedefinition-schema/index.md
+      - MapInstance schema: reference-design/reference/04-technical-reference/02-47-mapinstance-schema/index.md
+      - Routing state machine: reference-design/reference/04-technical-reference/03-48-routing-state-machine/index.md
+      - Random routing scoring: reference-design/reference/04-technical-reference/04-49-random-routing-scoring/index.md
+      - Invite policy: reference-design/reference/04-technical-reference/05-50-invite-policy/index.md
+      - World readiness contract: reference-design/reference/04-technical-reference/06-51-world-readiness-contract/index.md
+      - Network security checklist: reference-design/reference/04-technical-reference/07-52-network-security-checklist/index.md
+      - Functional acceptance test: reference-design/reference/04-technical-reference/08-53-functional-acceptance-test/index.md
+      - Performance principles: reference-design/reference/04-technical-reference/09-54-performance-principles/index.md
+      - Upgrade policy: reference-design/reference/04-technical-reference/10-55-upgrade-policy/index.md
+      - Why this architecture is intentionally not “fully automatic” on day one: reference-design/reference/04-technical-reference/11-56-why-this-architecture-is-intentionally-not-fully-automatic-on-day-one/index.md
+    - Part V — Current verification references:
+      - Overview: reference-design/reference/05-current-verification-references/index.md
+      - Final architecture recommendation: reference-design/reference/05-current-verification-references/00-57-final-architecture-recommendation/index.md
+- Implementation:
+  - Progress: implementation/index.md
+# <<< nav-autogen (generated) <<<
 
 # Markdown Extensions & Syntax Plugins
 markdown_extensions:
@@ -131,6 +173,10 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.tilde
+
+# Extra stylesheets
+extra_css:
+  - stylesheets/extra.css
 
 # Plugins
 plugins:

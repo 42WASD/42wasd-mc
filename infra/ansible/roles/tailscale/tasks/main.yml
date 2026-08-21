@@ -1,0 +1,10 @@
+---
+- name: Install tailscale
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+
+- name: Start tailscale with authkey
+  ansible.builtin.command: tailscale up --authkey={{ tailscale_authkey }} --hostname={{ inventory_hostname }} --advertise-routes={{ tailscale_advertise_routes | join(',') }} --exit-node-allow-routing={{ 'true' if tailscale_exit_node else 'false' }}
+  when: tailscale_authkey != ''
+  changed_when: false
