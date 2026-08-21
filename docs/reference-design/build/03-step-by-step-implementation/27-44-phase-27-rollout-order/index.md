@@ -26,4 +26,19 @@ Use this exact order:
 
 This order intentionally proves one contract at a time.
 
+> **Note — curated proof sequence, not a 1:1 phase map.**
+> The 19 items above are a *verification sequence* ("prove one contract at a time"), not a
+> one-to-one enumeration of Phases 0–27. Phases 0–2 (naming, repository structure, Kubernetes
+> namespaces) are prerequisites completed before any of this order begins and so are not listed.
+> Phases 25 (backups) and 26 (monitoring) are cross-cutting operational concerns and are also not
+> itemized here.
+>
+> **Prerequisite to items 8, 11 and 12:** Phase 9 (runtime catalog) and Phase 10 (map metadata)
+> must be defined before the World Controller (item 8), exact presence (item 11) and random-map
+> routing (item 12) can function. They are captured by their own phases and are intentionally not
+> restated as rollout items, but item 8 in particular assumes them.
+>
+> Item 5 ("Nakama identity mapping") bundles the Phase 3 CockroachDB + Nakama deployment; it
+> appears here ahead of friends/parties (item 6), which depend on it.
+
 ---
