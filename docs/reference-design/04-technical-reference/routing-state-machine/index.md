@@ -67,17 +67,11 @@ ASLEEP            back to replicas=0
   └── ERROR/UNHEALTHY (crashed, stuck startup) — operator/SRE attention
 ```
 
-The two machines interlock at exactly one point:
-
-```text
-Axis 1 TRANSFERRING  ==>  requires Axis 2 == READY (or becomes READY first)
-```
-
-In other words, the routing machine drives a world *toward* `READY`, but only
-the operational machine *is* `READY`. A routing request can complete
-(`COMPLETE`) while the world remains in `READY` indefinitely — they are
-independent lifetimes.
-
+> `draining` is represented in `MapInstance` as a separate boolean/derived flag
+> while the world is otherwise `READY` — it is **not** a value of the `state`
+> enum. The `MapInstance.state` enum keeps the five atomic values `ASLEEP`,
+> `STARTING`, `READY`, `STOPPING`, `ERROR`; `draining` is a qualifier on `READY`
+> (see [mapinstance-schema](../mapinstance-schema/index.md)).
 ---
 
 ## State vocabulary (summary)

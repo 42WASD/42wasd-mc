@@ -27,7 +27,7 @@ A Kubernetes-first Minecraft network with:
 
 ```text
 1. Understand  -> reference-design/ (concepts)
-2. Deploy      -> build phases (Phase 0 → 27), tracked in Implementation
+2. Deploy      -> build phases (Phase 0 → 30), tracked in Implementation
 3. Operate     -> guides/ (common tasks), reference-design/ (reference material)
 ```
 

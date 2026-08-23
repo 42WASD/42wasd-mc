@@ -24,6 +24,26 @@ The scoring code reads these fields. Their source is noted where they live in
 reservations`. Keep it in sync with `reservations` (see reservations semantics
 below) so a reservation doesn't over-admit a party that then can't fit.
 
+### Factor bounds and the health gate
+
+Each factor is a value in **[0, 1]** (0 excludes, 1 neutral/no penalty) and the
+final score is their product times the base `weight`. A factor at 0 forces the
+score to 0.
+
+**`health_factor` is a hard gate, not just a down-weight:** any map whose
+readiness/ping is failing (`health_factor == 0`) is **excluded**, regardless of
+how high its other scores are. The remaining factors only *rank* among the
+gated-eligible set. This keeps an unhealthy map from ever being selected just
+because it is new, promoted, or underused. Concretely:
+
+```text
+health_factor = 0          -> excluded (gate), regardless of weight/freshness/novelty
+health_factor in (0, 1]    -> down-weights relative to other healthy maps
+```
+
+Because the factors are bounded to [0,1], no factor can be negative or >1, so
+the weighted-random selection always sees a well-formed probability mass.
+
 Example:
 
 ```python
@@ -33,15 +53,16 @@ eligible = [
     and m.runtime_id == player.runtime_id
     and m.random_eligible
     and m.free_slots >= party_size
+    and m.health_factor > 0        # hard gate
 ]
 
 for m in eligible:
     score = (
         m.weight
-        * freshness_factor(m)
-        * health_factor(m)
-        * capacity_factor(m)
-        * novelty_factor(player, m)
+        * freshness_factor(m)      # in [0,1]
+        * m.health_factor          # in (0,1]; 0 already gated out
+        * capacity_factor(m)       # in [0,1]
+        * novelty_factor(player, m) # in [0,1]
     )
 
 selected = weighted_random(eligible, score)
@@ -57,7 +78,7 @@ not recently visited
 community-promoted
 ```
 
-without violating compatibility.
+without violating compatibility and without ever selecting an unhealthy map.
 
 ---
 

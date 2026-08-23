@@ -1,6 +1,8 @@
 # Monitoring
 
-Use your existing Prometheus/Grafana stack.
+The Prometheus/Grafana stack is installed in
+[Phase 4 — install-keda-and-observability](../install-keda-and-observability/index.md).
+This phase configures what to scrape and what to alert on.
 
 World Controller metrics:
 

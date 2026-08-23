@@ -34,16 +34,18 @@ per invite; it survives launcher restarts so a reconnect can consume it (see
   "invitee_nakama_id": "nakama-user-b",
   "inviter_minecraft_uuid": "123e4567-...",
   "invitee_minecraft_uuid": "123e4567-...",
-  "target": {
-    "map_id": "fantasy-kingdom-001",
-    "runtime_id": "fantasy-1.20.1-forge"
-  },
+  "target": null,   // null until acceptance for FOLLOW_PLAYER; always set for JOIN_MAP
   "state": "PENDING",
   "created_at": "2026-08-19T...",
   "expires_at": "2026-08-19T...",
   "consumed_by_routing_id": null
 }
 ```
+
+> `target` is **nullable**: for `FOLLOW_PLAYER` it is `null` until acceptance,
+> when the World Controller resolves the inviter's current runtime/map. For
+> `JOIN_MAP` it is populated at invite creation. The schema below marks it
+> nullable to match that behavior.
 
 ### Invite state machine
 

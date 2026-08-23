@@ -20,7 +20,7 @@ the proxy can route to it.
 
 - A Forge runtime needs the Ambassador + ProxyCompatibleForge so modern
   forwarding works behind Velocity. See
-  [Phase 8 — Deploy the Forge runtime](../../reference-design/03-step-by-step-implementation/deploy-the-forge-1-20-1-fantasy-runtime/index.md).
+  [Phase 10 — Deploy the Forge runtime](../../reference-design/03-step-by-step-implementation/deploy-the-forge-1-20-1-fantasy-runtime/index.md).
 
 ## Validation
 

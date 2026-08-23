@@ -19,6 +19,11 @@ client:
   required: false
   distribution: modrinth-server-project
 
+proxy:
+  kind: velocity
+  ambassadorRequired: false
+  modernForwarding: true   # must be uniform across all runtimes
+
 routing:
   instantSwitchWithinRuntime: true
   viaTranslationAllowed: true

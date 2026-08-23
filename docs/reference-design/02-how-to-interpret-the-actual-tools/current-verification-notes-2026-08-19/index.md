@@ -168,9 +168,9 @@ Modrinth App "offline mode" = play already-installed mods without internet
 it does NOT provide offline/cracked ACCOUNT authentication
 ```
 
-This architecture runs backends in offline mode behind the authenticated proxy (see Phase 6), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
+This architecture runs backends in offline mode behind the authenticated proxy (see Phase 7), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
 
-**AstralRinth** (github.com/SmilerRyan/AstralRinth) is the candidate:
+**AstralRinth** (github.com/42WASD/AstralRinth) is the candidate:
 
 ```text
 fork of the Modrinth App (Theseus core)
@@ -185,11 +185,26 @@ active fork (AstralRinth's own README + releases confirm)
 
 It keeps the exact Modrinth App UX (modpack/mod auto-download, server-project onboarding), so players who cannot enter a world with their current client get the same "install requirements and launch directly" flow.
 
+> **License / ToS caveat:** AstralRinth is a *cracked/pirate-account launcher* —
+> it supports offline authorization without a Mojang/Microsoft license and is
+> primarily aimed at unlicensed (offline/cracked) play. This is a real
+> Minecraft-Terms-of-Service / legal risk and must be recorded as a deliberate
+> decision, not treated as neutral. This design's identity model is **Nakama
+> OAuth-first** (Discord/Google at the in-game auth gate, see
+> `social-state` 7.1.0): every player — cracked *or* licensed — still
+> authenticates to a verified Nakama account before leaving the gate. AstralRinth
+> is therefore only the *client that can launch an offline-mode runtime*; it is
+> **not** the identity authority and does not grant access by itself. Keep this
+> division explicit so the offline-launcher choice and the OAuth-first identity
+> anchor do not appear to conflict.
+
 Caveat to record in the design:
 
 ```
 It is a third-party, community-maintained fork. Pin a known-good stable build
-(no dev/nightly/dirty prefix) and get it from a trusted source.
+(no dev/nightly/dirty prefix) and get it from a trusted source. We track the
+fork under our own org (42WASD/AstralRinth) so the pinned build is ours to
+re-verify, rather than a floating upstream.
 ```
 
 ---

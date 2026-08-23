@@ -29,7 +29,7 @@ social authentication** (Discord and/or Google). Minecraft identity is a linked,
 secondary attribute — never the identity anchor.
 
 Why OAuth-first: this network permits offline/cracked accounts behind the
-authenticated proxy (see Phase 6). An offline-mode Minecraft UUID is generated
+authenticated proxy (see Phase 7). An offline-mode Minecraft UUID is generated
 from the username and is spoofable — anyone can join with any name, so it
 cannot be trusted as a canonical identity. A Discord/Google OAuth token proves
 who the player is, prevents impersonation, and makes bans attach to a real,
@@ -113,6 +113,14 @@ a linked, per-session runtime binding. So "cracked vs premium" changes *which
 client* reaches the gate, not *whether* identity exists — both paths converge
 on the same Nakama OAuth session at the gate.
 
+> **Premium-player note:** a legitimate Mojang player is already signed into
+> Microsoft in their client, but that does **not** skip our gate. They still
+> complete the one-time Nakama sign-up/login (Discord or Google) exactly once,
+> because the network treats the Nakama account — not the Mojang session — as
+> the identity anchor. This is a one-time friction for every user (premium and
+> cracked alike); it is not a recurring login. Do not market this as
+> "no login needed" — everyone registers/linked their network account once.
+
 This is why the auth gate is a required part of the proxy (NetworkBridge +
 Nakama), not an optional convenience: without it, an offline/cracked client
 could reach a world with no verified identity at all.
@@ -136,6 +144,42 @@ backend sees the UUID the bridge assigned
 
 The bridge, not the offline client, is the trusted source for the
 UUID->Nakama mapping.
+
+### 7.1.2 Session persistence across launcher restarts
+
+A player must **not** re-gate every time they restart the launcher to switch
+runtimes. The Nakama OAuth session survives a reconnect:
+
+```text
+player authenticates once at the gate
+   ↓
+Nakama returns a session token + refresh token
+   ↓
+NetworkBridge persists the session (Nakama session/refresh tokens) keyed to
+   the linked account (server-side, in Nakama / CockroachDB)
+   ↓
+player restarts the launcher to switch runtimes
+   ↓
+reconnect: NetworkBridge restores/renews the Nakama session from the refresh
+   token — no new Discord/Google prompt
+   ↓
+player is routed onward immediately
+```
+
+Mechanics, per Nakama's session model:
+
+- The Nakama **access token** is short-lived; the **refresh token** is
+  long-lived and lets the server renew the session without re-authenticating.
+- On a fresh join the bridge authenticates the (offline) Minecraft UUID/name
+  to the *same* Nakama account by looking up the stored session/refresh token
+  (scoped to that account), not by re-running the Discord/Google OAuth.
+- Only when the **refresh token also expires** (or the player explicitly signs
+  out) does the player go back through the gate.
+
+This is what makes the "seamless" cross-runtime invite (Example D) hold: the
+launcher restart to install a new runtime does **not** force a re-login,
+because the Nakama session persists. Document this explicitly so the auth gate
+("sign in before transfer") is understood to be *one-time*, not *per-join*.
 
 ---
 
@@ -192,5 +236,38 @@ invite routing
 party-follow
 web status page
 ```
+
+### 7.3.1 Presence source of truth
+
+Two systems look like they could own "where is the player / what world":
+
+- **Nakama** — owns the *social/presence* graph (who is online, friends,
+  parties, invites). This is the object's owner and the answer to
+  "who is where, socially".
+- **World Controller** — owns the *operational* world facts (is this
+  `MapInstance` READY/ASLEEP, what's the service endpoint, capacity,
+  reservations). This is the source for "can a world accept a transfer".
+
+The split is by *kind of truth*:
+
+```text
+Nakama presence      = the player's social view (who/where among friends)
+World Controller     = the world's operational truth (READY/ASLEEP, capacity,
+                       routing-eligibility)
+```
+
+- **Presence (the object above) is owned by Nakama.** The backend/bridge
+  reports runtime/map/dimension *changes* to Nakama (through NetworkBridge),
+  and Nakama is the authority for `/join`, friend lists, and the web status
+  page. TAB reads presence from Nakama.
+- **Operational readiness is owned by the World Controller.** It is the only
+  source for `MapInstance.state`, capacity, and reservations, because only it
+  can wake a sleeping world or know whether a transfer can land.
+
+So: **Nakama is the source of truth for *presence*; the World Controller is
+the source of truth for *operational world state*.** They agree on `map_id`
+and `runtime_id`; they never double-author the same fact. When NetworkBridge
+resolves a `/join`, it asks the World Controller for operational readiness and
+Nakama for the friend's current presence, then reconciles the two.
 
 ---

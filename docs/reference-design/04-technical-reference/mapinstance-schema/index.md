@@ -22,9 +22,17 @@
 **not** a routing-request state (`REQUESTED`/`TRANSFERRING`/`COMPLETE` belong
 to a per-join operation and are not stored here).
 
+`draining` is **not** a value of `state`. It is a separate boolean/derived flag
+used while the world is otherwise `READY` (winding down for scale-to-zero). Keep
+it out of the `state` enum so the five atomic operational states stay clean.
+
 `reservations` counts seats already promised to joining players/parties but
 not yet connected; see `random-routing-scoring` and `reservations` semantics.
 
-Use a revision/version for optimistic concurrency if state is persisted outside Kubernetes.
+`revision` is an **optimistic-concurrency token** (an integer) for the *running
+state*, used to guard idempotent releases if this state is persisted outside
+Kubernetes. It is a different notion from the `RuntimeDefinition.revision`
+(a `r1`-style **pack/runtime revision** string) and from a `MapDefinition`
+revision — see [runtimedefinition-schema](../runtimedefinition-schema/index.md)
+and the [world-readiness-contract](../world-readiness-contract/index.md).
 
----

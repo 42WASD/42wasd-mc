@@ -61,7 +61,7 @@ The default modern Minecraft proxy used here. It is the single public entry poin
 Your small custom Velocity plugin that binds the Minecraft UUID/name to the Nakama account and triggers World Controller routing (/worlds, /join, /invite).
 
 ## Auth gate
-The stage every player passes through after joining the network but before reaching a real world. It requires the player to sign in (Discord/Google OAuth → Nakama) and links their Minecraft identity to a verified Nakama account before allowing transfer onward. It is what makes an offline/cracked-capable network safe.
+The stage every player passes through after joining the network but before reaching a real world. It requires the player to sign in (Discord/Google OAuth → Nakama) and links their Minecraft identity to a verified Nakama account before allowing transfer onward. It is what makes an offline/cracked-capable network safe. Sign-in here is **one-time**: the Nakama session (with a refresh token) persists across launcher restarts, so switching runtimes does not force a re-login.
 
 ## Nakama
 An open-source game backend that owns accounts, sessions, friends, parties, invites, presence and chat. Here it is the OAuth-first identity anchor.
@@ -88,7 +88,7 @@ The standard Docker image for running any Minecraft server type/version/modpack.
 A Modrinth feature that lets a server publish "the required content to play here", so the launcher can install it and launch directly.
 
 ## AstralRinth
-A maintained fork of the Modrinth launcher app that also supports offline/cracked accounts.
+A fork of the Modrinth launcher app that also supports offline/cracked accounts. This design tracks the fork under our own GitHub org (`42WASD/AstralRinth`) so we pin a known-good build rather than a floating upstream.
 
 ## packwiz
 A Git-friendly tool for defining and updating a modpack that server and launcher both consume.

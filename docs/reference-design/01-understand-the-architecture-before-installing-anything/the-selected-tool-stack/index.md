@@ -16,7 +16,7 @@
 | Persistent world workload | **OpenKruiseGame `GameServerSet` + PVC** | CNCF-incubated game-server workload; in-place update, per-world ops protection, scale-to-zero |
 | Ephemeral session maps | **Agones, optional** | Mature Kubernetes game-server Fleet/Allocation model |
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
-| Player client (launcher) | **AstralRinth** | Actively maintained 2026 fork of the Modrinth App; adds offline/cracked account auth; no ads, no telemetry |
+| Player client (launcher) | **AstralRinth** | Offline/cracked-capable Modrinth App fork; pinned in `42WASD/AstralRinth` (our own tracked fork) |
 | Pack source/CI | **packwiz, optional** | Git-friendly modpack definition and launcher/server update workflow |
 | Minecraft readiness probe & metrics | **itzg/mc-monitor** | Maintained status/ping probe (`status` subcommand); exports online count, latency, MOTD to Prometheus/Influx — shared source for readiness and perf metrics |
 | Scale trigger (idle / player-count) | **KEDA, optional** | CNCF-graduated; `ScaledObject` → HPA fires the GameServerSet 0↔1 transition; safe-to-stop decision stays in World Controller |

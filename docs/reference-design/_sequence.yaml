@@ -54,6 +54,7 @@ parts:
         - create-repository-structure
         - create-kubernetes-namespaces
         - install-openkruisegame
+        - install-keda-and-observability
         - deploy-cockroachdb-and-nakama
         - deploy-velocity
         - deploy-the-paper-lobby
@@ -75,6 +76,7 @@ parts:
         - add-idle-sleep
         - add-agones-only-for-session-worlds
         - add-ai-proximity-chat
+        - add-object-storage
         - community-map-upload-pipeline
         - backups
         - monitoring

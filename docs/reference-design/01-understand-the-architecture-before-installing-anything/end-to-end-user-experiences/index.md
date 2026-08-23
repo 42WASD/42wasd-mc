@@ -120,6 +120,14 @@ World Controller starts/resolves kingdom-7
 Velocity transfers Steve
 ```
 
-The launcher restart is real, but the user does **not** need to manually discover mods, loader versions, or server addresses.
+The launcher restart is real, but the user does **not** need to manually
+discover mods, loader versions, or server addresses.
+
+> **No re-login on the restart:** the launcher restart that installs the
+> fantasy runtime drops Steve's TCP connection, but his Nakama session persists
+> (session + refresh token, see `social-state` 7.1.2). On reconnect, NetworkBridge
+> restores the Nakama session from the refresh token, so Steve is **not**
+> prompted for Discord/Google again — the pending invite is resolved and he is
+> transferred without re-gating.
 
 ---

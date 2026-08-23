@@ -2,6 +2,9 @@
 
 Do not mount arbitrary user archives directly into a running server.
 
+> **Prerequisite:** the object storage (`quarantine` + `published` buckets) is
+> installed in [Phase 26 — add-object-storage](../add-object-storage/index.md).
+
 Pipeline:
 
 ```text

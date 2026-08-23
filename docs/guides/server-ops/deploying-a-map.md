@@ -1,7 +1,7 @@
 # Deploying a Map
 
 How to bring a new map onto the network. The full pipeline is defined in
-[Phase 24 — Community map upload pipeline](../../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md).
+[Phase 27 — Community map upload pipeline](../../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md).
 
 ## Steps
 
@@ -11,7 +11,7 @@ How to bring a new map onto the network. The full pipeline is defined in
    (`vanilla-current`, `fantasy-1.20.1-forge`, etc.).
 3. **Register map metadata** — add a map definition with its `runtimeId` to the
    World Controller (see
-   [Phase 10 — map metadata](../../reference-design/03-step-by-step-implementation/define-map-metadata/index.md)).
+   [Phase 12 — map metadata](../../reference-design/03-step-by-step-implementation/define-map-metadata/index.md)).
 4. **Deploy the backend** — for a static map, a StatefulSet; for a dynamic map,
    a scale-to-zero StatefulSet with a PVC.
 5. **Point routing** — the proxy / controller now resolves the map to its

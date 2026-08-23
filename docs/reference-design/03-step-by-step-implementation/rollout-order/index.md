@@ -33,10 +33,11 @@ This order intentionally proves one contract at a time.
 > the **verification order** and intentionally proves contracts before later
 > dependencies exist. The two are related by phase number, not by position.
 >
-> Phases 0–3 (naming, repository structure, Kubernetes namespaces,
-> OpenKruiseGame install) are prerequisites completed before any of this order
-> begins and so are not listed. Phases 26 (backups) and 27 (monitoring) are
-> cross-cutting operational concerns and are also not itemized here.
+> Phases 0–4 (naming, repository structure, Kubernetes namespaces,
+> OpenKruiseGame install, KEDA + observability install) are prerequisites
+> completed before any of this order begins and so are not listed. Phases 28
+> (backups) and 29 (monitoring) are cross-cutting operational concerns and are
+> also not itemized here.
 
 ### Item → phase mapping
 
@@ -46,34 +47,37 @@ verified before an earlier one):
 
 | # | Rollout item | Index phase(s) |
 |---|--------------|----------------|
-| 1 | Velocity + one static Paper lobby | Phase 5 (Velocity), Phase 6 (Paper lobby) |
-| 2 | secure forwarding + backend isolation | Phase 5 (forwarding secret) |
-| 3 | TAB | Phase 7 |
-| 4 | ViaVersion/Backwards | Phase 8 |
-| 5 | Nakama identity mapping | Phase 4 (CockroachDB + Nakama) |
-| 6 | friends + parties | Phase 14 |
-| 7 | one static second backend + `/join` | Phase 15 (join-friend) |
-| 8 | World Controller | Phase 12 |
-| 9 | one persistent GameServerSet scale-to-zero map | Phase 3 (OKG), Phase 11 (map metadata) |
-| 10 | portal → wake → transfer | Phase 20 |
-| 11 | exact map presence + TAB | Phase 19 |
-| 12 | random compatible map | Phase 12 (random routing) |
-| 13 | fantasy Forge runtime + Ambassador | Phase 9 (Forge) |
-| 14 | Modrinth Server Project | Phase 17 |
-| 15 | pending cross-runtime invite | Phase 16 |
-| 16 | mc-router edge wake | Phase 21 |
-| 17 | community upload pipeline | Phase 25 |
-| 18 | optional Agones ephemeral fleet | Phase 23 |
-| 19 | AI proximity bot | Phase 24 |
+| 1 | Velocity + one static Paper lobby | Phase 6 (Velocity), Phase 7 (Paper lobby) |
+| 2 | secure forwarding + backend isolation | Phase 6 (forwarding secret) |
+| 3 | TAB | Phase 8 |
+| 4 | ViaVersion/Backwards | Phase 9 |
+| 5 | Nakama identity mapping | Phase 5 (CockroachDB + Nakama) |
+| 6 | friends + parties | Phase 15 |
+| 7 | one static second backend + `/join` | Phase 16 (join-friend) |
+| 8 | World Controller | Phase 13 |
+| 9 | one persistent GameServerSet scale-to-zero map | Phase 3 (OKG), Phase 4 (KEDA), Phase 12 (map metadata) |
+| 10 | portal → wake → transfer | Phase 21 |
+| 11 | exact map presence + TAB | Phase 20 |
+| 12 | random compatible map | Phase 13 (random routing) |
+| 13 | fantasy Forge runtime + Ambassador | Phase 10 (Forge) |
+| 14 | Modrinth Server Project | Phase 18 |
+| 15 | pending cross-runtime invite | Phase 17 |
+| 16 | mc-router edge wake | Phase 22 |
+| 17 | community upload pipeline | Phase 26 (object storage), Phase 27 (upload pipeline) |
+| 18 | optional Agones ephemeral fleet | Phase 24 |
+| 19 | AI proximity bot | Phase 25 |
 
-> **Prerequisite to items 8, 11 and 12:** Phase 10 (runtime catalog) and
-> Phase 11 (map metadata) must be defined before the World Controller (item 8),
+> **Prerequisite to items 8, 11 and 12:** Phase 11 (runtime catalog) and
+> Phase 12 (map metadata) must be defined before the World Controller (item 8),
 > exact presence (item 11) and random-map routing (item 12) can function. They
 > are captured by their own phases and intentionally not restated as rollout
 > items, but item 8 in particular assumes them.
 >
-> Item 5 ("Nakama identity mapping") bundles the Phase 4 CockroachDB + Nakama
+> Item 5 ("Nakama identity mapping") bundles the Phase 5 CockroachDB + Nakama
 > deployment; it appears here ahead of friends/parties (item 6), which depend
 > on it.
+>
+> Item 9 now also lists Phase 4 (KEDA + observability), since a scale-to-zero
+> map requires the KEDA `ScaledObject` from that phase.
 
 ---
