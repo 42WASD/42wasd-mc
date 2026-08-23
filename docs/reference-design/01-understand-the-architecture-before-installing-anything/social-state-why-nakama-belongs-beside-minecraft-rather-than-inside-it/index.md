@@ -29,7 +29,7 @@ social authentication** (Discord and/or Google). Minecraft identity is a linked,
 secondary attribute — never the identity anchor.
 
 Why OAuth-first: this network permits offline/cracked accounts behind the
-authenticated proxy (see Phase 5). An offline-mode Minecraft UUID is generated
+authenticated proxy (see Phase 6). An offline-mode Minecraft UUID is generated
 from the username and is spoofable — anyone can join with any name, so it
 cannot be trusted as a canonical identity. A Discord/Google OAuth token proves
 who the player is, prevents impersonation, and makes bans attach to a real,
@@ -64,6 +64,58 @@ current session, not the security anchor. They must be re-derived from the
 verified Nakama session, never trusted from the offline client alone.
 
 Do not make usernames authoritative; usernames can change.
+
+### 7.1.0 How an offline/cracked player is authenticated (in-game auth gate)
+
+The apparent contradiction is: *this network permits offline/cracked accounts,
+but identity is OAuth-first (Discord/Google). How does a cracked player get an
+OAuth token?*
+
+The answer is an **in-game authentication gate**, not a launcher-side handoff.
+The player connects to the network with any (even unverified) Minecraft client
+and lands on a **login/gate stage**; they authenticate and link their account
+**there, after joining**, before they are allowed into any real world. This is
+the standard proxy pattern — e.g. a Velocity auth gate (VeloAuth) that blocks
+transfers until "you must link your Discord account to play", or an in-game
+registration/login plugin that drops new players on the lobby until they
+`/register` / `/login`.
+
+```text
+1. Player joins the network (any offline/cracked client)
+   ↓
+2. Velocity routes them to the gate stage (a login lobby), NOT to a world
+   ↓
+3. NetworkBridge prompts: "Sign in with Google / Discord"
+   (a one-time network account creation / login — NOT Mojang)
+   ↓
+4. Player completes the OAuth flow (browser or in-game prompt)
+   ↓
+5. Nakama verifies the token and creates/returns the canonical
+   Nakama user account (authenticateGoogle / custom Discord provider)
+   ↓
+6. NetworkBridge links the incoming (offline) Minecraft UUID/name to the
+   verified account (Nakama account.link/custom)
+   ↓
+7. Only now is the player routed from the gate to the lobby/world
+```
+
+So the OAuth happens **server-side in the gate**, not in the launcher and not
+before join. Offline/cracked clients can reach the network because the backend
+worlds run offline-mode behind the proxy — but they cannot leave the gate until
+they authenticate. The gate is what makes the offline network safe: a username
+alone grants nothing until a verified Nakama account is linked to it.
+
+For a player with a legit Microsoft/Mojang account, the flow is the same —
+they are **not** asked for a Microsoft login on the server side. The network
+never trusts the Mojang session to *authorize* anything; it only uses the
+Nakama session as the canonical identity and treats the Minecraft UUID/name as
+a linked, per-session runtime binding. So "cracked vs premium" changes *which
+client* reaches the gate, not *whether* identity exists — both paths converge
+on the same Nakama OAuth session at the gate.
+
+This is why the auth gate is a required part of the proxy (NetworkBridge +
+Nakama), not an optional convenience: without it, an offline/cracked client
+could reach a world with no verified identity at all.
 
 ### 7.1.1 Linking Minecraft UUID to the OAuth account
 

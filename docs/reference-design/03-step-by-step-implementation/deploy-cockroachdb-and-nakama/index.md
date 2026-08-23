@@ -70,10 +70,12 @@ This is what prevents abuse from anonymous users and removes the
 need to build your own user management. The offline Minecraft UUID is only a
 runtime binding, never the identity anchor.
 
-Flow when a player first connects through Velocity:
+Flow when a player first connects through Velocity (in-game auth gate):
 
 ```text
-Discord/Google OAuth (browser or launcher)
+player joins network -> lands on the gate/login stage (not a world)
+   ↓
+Discord/Google OAuth completed at the gate (browser or in-game prompt)
    ↓
 Nakama social-provider authentication (authenticateGoogle for Google,
   or a custom OAuth provider for Discord)
@@ -81,6 +83,8 @@ Nakama social-provider authentication (authenticateGoogle for Google,
 Nakama user (canonical identity)
    ↓
 NetworkBridge links the incoming Minecraft UUID/name to that Nakama account
+   ↓
+gate routes the now-authenticated player to the lobby/world
 ```
 
 Pseudo-flow (server-side, in NetworkBridge):

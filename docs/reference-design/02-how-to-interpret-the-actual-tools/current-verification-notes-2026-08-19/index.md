@@ -168,7 +168,7 @@ Modrinth App "offline mode" = play already-installed mods without internet
 it does NOT provide offline/cracked ACCOUNT authentication
 ```
 
-This architecture runs backends in offline mode behind the authenticated proxy (see Phase 5), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
+This architecture runs backends in offline mode behind the authenticated proxy (see Phase 6), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
 
 **AstralRinth** (github.com/SmilerRyan/AstralRinth) is the candidate:
 

@@ -16,6 +16,15 @@
 }
 ```
 
+`state` uses the **operational (Axis-2)** vocabulary from
+[routing-state-machine](../routing-state-machine/index.md): `ASLEEP`,
+`STARTING`, `READY`, `STOPPING`, `ERROR`. It is the world's long-lived health,
+**not** a routing-request state (`REQUESTED`/`TRANSFERRING`/`COMPLETE` belong
+to a per-join operation and are not stored here).
+
+`reservations` counts seats already promised to joining players/parties but
+not yet connected; see `random-routing-scoring` and `reservations` semantics.
+
 Use a revision/version for optimistic concurrency if state is persisted outside Kubernetes.
 
 ---

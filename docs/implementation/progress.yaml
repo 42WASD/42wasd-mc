@@ -14,28 +14,29 @@
   # Phase 0 — Decide names before deploying
   # Phase 1 — Create repository structure
   # Phase 2 — Create Kubernetes namespaces
-  # Phase 3 — Deploy CockroachDB and Nakama
-  # Phase 4 — Deploy Velocity
-  # Phase 5 — Deploy the Paper lobby
-  # Phase 6 — Install TAB
-  # Phase 7 — Add ViaVersion and ViaBackwards
-  # Phase 8 — Deploy the Forge 1.20.1 fantasy runtime
-  # Phase 9 — Define the runtime catalog
-  # Phase 10 — Define map metadata
-  # Phase 11 — Build the World Controller
-  # Phase 12 — Build NetworkBridge for Velocity
-  # Phase 13 — Implement friends and parties
-  # Phase 14 — Implement /join <friend>
-  # Phase 15 — Implement pending cross-runtime invites
-  # Phase 16 — Publish Modrinth Server Projects
-  # Phase 17 — Add packwiz CI
-  # Phase 18 — Add exact world/dimension TAB information
-  # Phase 19 — Implement the glitch/random portal
-  # Phase 20 — Add mc-router
-  # Phase 21 — Add idle sleep
-  # Phase 22 — Add Agones only for session worlds
-  # Phase 23 — Add AI proximity chat
-  # Phase 24 — Community map upload pipeline
-  # Phase 25 — Backups
-  # Phase 26 — Monitoring
-  # Phase 27 — Rollout order
+  # Phase 3 — Install OpenKruiseGame
+  # Phase 4 — Deploy CockroachDB and Nakama
+  # Phase 5 — Deploy Velocity
+  # Phase 6 — Deploy the Paper lobby
+  # Phase 7 — Install TAB
+  # Phase 8 — Add ViaVersion and ViaBackwards
+  # Phase 9 — Deploy the Forge 1.20.1 fantasy runtime
+  # Phase 10 — Define the runtime catalog
+  # Phase 11 — Define map metadata
+  # Phase 12 — Build the World Controller
+  # Phase 13 — Build NetworkBridge for Velocity
+  # Phase 14 — Implement friends and parties
+  # Phase 15 — Implement /join <friend>
+  # Phase 16 — Implement pending cross-runtime invites
+  # Phase 17 — Publish Modrinth Server Projects
+  # Phase 18 — Add packwiz CI
+  # Phase 19 — Add exact world/dimension TAB information
+  # Phase 20 — Implement the glitch/random portal
+  # Phase 21 — Add mc-router
+  # Phase 22 — Add idle sleep
+  # Phase 23 — Add Agones only for session worlds
+  # Phase 24 — Add AI proximity chat
+  # Phase 25 — Community map upload pipeline
+  # Phase 26 — Backups
+  # Phase 27 — Monitoring
+  # Phase 28 — Rollout order

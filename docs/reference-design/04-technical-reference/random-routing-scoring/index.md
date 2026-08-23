@@ -2,6 +2,28 @@
 
 Do not use pure random if maps differ in health and capacity.
 
+## Input fields (from MapInstance + MapDefinition)
+
+The scoring code reads these fields. Their source is noted where they live in
+[mapinstance-schema](../mapinstance-schema/index.md) or
+[define-map-metadata](../../03-step-by-step-implementation/define-map-metadata/index.md).
+
+| Field            | Type    | Source         | Meaning                                                        |
+|------------------|---------|----------------|----------------------------------------------------------------|
+| `enabled`        | bool    | MapDefinition  | world may be routed to at all (the World Controller guard)     |
+| `runtime_id`     | string  | MapDefinition  | compatibility gate; must equal player's runtime                |
+| `random_eligible`| bool    | MapDefinition  | whether the map can be chosen by the random portal at all      |
+| `weight`         | float   | MapDefinition  | relative promotion among eligible maps (community/manual boost)|
+| `free_slots`     | int     | derived        | `max_players - players - reservations` (see below)             |
+| `freshness`      | derived | derived        | how recently updated/maintained; decays over age               |
+| `health`         | derived | operational    | TPS/latency/ping success (mc-monitor) — prefer healthy only    |
+| `capacity`       | derived | operational    | how many free slots vs a threshold — prefer underused          |
+| `novelty`        | derived | per-player     | how long since this player last visited — prefer not-recent    |
+
+`free_slots` is always **derived**, never stored: `max_players - players -
+reservations`. Keep it in sync with `reservations` (see reservations semantics
+below) so a reservation doesn't over-admit a party that then can't fit.
+
 Example:
 
 ```python
@@ -36,5 +58,36 @@ community-promoted
 ```
 
 without violating compatibility.
+
+---
+
+## Reservations semantics (how free_slots is computed)
+
+A reservation is a **seat promise**, not a connection. When the World Controller
+starts to route a player or party toward a world, it reserves seats so the world
+does not over-admit while the party is still loading/transferring.
+
+```text
+free_slots = max_players - players - reservations
+```
+
+- `players` = currently connected (observed from mc-monitor / backend).
+- `reservations` = seats promised to in-flight joins not yet connected.
+- A map is `eligible` for a party only if `free_slots >= party_size`.
+
+Invariants:
+
+```text
+reservations >= 0
+players + reservations <= max_players   (never over-commit a starting world)
+```
+
+On transfer success, `players` increases and the reservation is consumed; on
+failure or timeout, the reservation is released. Releasing must be idempotent
+(guard with the revision token) so a duplicate release can't under-count.
+
+Why reserve at all: without reservations, two parties could both see a last
+free slot, both wake/transfer, and the second over-admits. Reservations make
+the slot-counting linearizable before the backend ever connects anyone.
 
 ---

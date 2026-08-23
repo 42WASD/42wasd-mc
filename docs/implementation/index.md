@@ -22,7 +22,7 @@ section of the Reference Design.
 
 ## Overall progress
 
-**0 / 28** phases/sections complete (**0%**).
+**0 / 29** phases/sections complete (**0%**).
 
 <div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:0.0%"></div></div><div class="progress-pct">0%</div></div>
 
@@ -30,7 +30,7 @@ section of the Reference Design.
 |--------|-------|
 | ✅ done | 0 |
 | 🔶 in-progress | 0 |
-| ⬜ not-started | 28 |
+| ⬜ not-started | 29 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
@@ -40,10 +40,11 @@ section of the Reference Design.
 
 <div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:0.0%"></div></div><div class="progress-pct" style="font-size:.85em;">0%</div><div class="tip-box"><strong>Done (0)</strong>
 —
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (28)</strong>
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (29)</strong>
 • Decide names before deploying
 • Create repository structure
 • Create Kubernetes namespaces
+• Install OpenKruiseGame
 • Deploy CockroachDB and Nakama
 • Deploy Velocity
 • Deploy the Paper lobby
@@ -220,15 +221,84 @@ uv run mkdocs build --strict -f ../mkdocs.yml
 </details>
 
 - ⬜ `not-started` — [Phase 2 — Create Kubernetes namespaces](../reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md)
-- ⬜ `not-started` — [Phase 3 — Deploy CockroachDB and Nakama](../reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md)
-- ⬜ `not-started` — [Phase 4 — Deploy Velocity](../reference-design/03-step-by-step-implementation/deploy-velocity/index.md)
-- ⬜ `not-started` — [Phase 5 — Deploy the Paper lobby](../reference-design/03-step-by-step-implementation/deploy-the-paper-lobby/index.md)
-- ⬜ `not-started` — [Phase 6 — Install TAB](../reference-design/03-step-by-step-implementation/install-tab/index.md)
-- ⬜ `not-started` — [Phase 7 — Add ViaVersion and ViaBackwards](../reference-design/03-step-by-step-implementation/add-viaversion-and-viabackwards/index.md)
-- ⬜ `not-started` — [Phase 8 — Deploy the Forge 1.20.1 fantasy runtime](../reference-design/03-step-by-step-implementation/deploy-the-forge-1-20-1-fantasy-runtime/index.md)
-- ⬜ `not-started` — [Phase 9 — Define the runtime catalog](../reference-design/03-step-by-step-implementation/define-the-runtime-catalog/index.md)
-- ⬜ `not-started` — [Phase 10 — Define map metadata](../reference-design/03-step-by-step-implementation/define-map-metadata/index.md)
-- ⬜ `not-started` — [Phase 11 — Build the World Controller](../reference-design/03-step-by-step-implementation/build-the-world-controller/index.md)
+- ⬜ `not-started` — [Phase 3 — Install OpenKruiseGame](../reference-design/03-step-by-step-implementation/install-openkruisegame/index.md)
+
+<details markdown="1" class="runbook">
+<summary>⬜ 📜 Build log — Install OpenKruiseGame</summary>
+
+# Install OpenKruiseGame (new Phase 3)
+
+## What was done
+
+Created the `install-openkruisegame` phase (new Phase 3, inserted after
+`create-kubernetes-namespaces`) so the World Controller's `GameServerSet`
+driving is grounded in an actual platform install step. Verified the install
+mechanics against the current OpenKruiseGame docs:
+
+- OKG requires **both** Kruise and Kruise-Game, Kubernetes >= 1.18.
+- `helm repo add openkruise` → `helm install kruise openkruise/kruise` →
+  `helm install kruise-game openkruise/kruise-game`.
+- Installs the `game.kruise.io/v1alpha1` API group (GameServerSet, GameServer).
+- Also added to this phase: an OKG→World Controller ownership note (World
+  Controller scales the GameServerSet via narrow RBAC; it does not install OKG).
+
+## Effects on numbering
+
+Inserting this phase after `create-kubernetes-namespaces` shifted all later
+phases +1. Regenerated nav + implementation page; updated the hand-written
+prose "Phase N" references:
+
+- `social-state...`: "Phase 5" (Paper lobby) → "Phase 6"
+- `current-verification-notes-2026-08-19`: "Phase 5" → "Phase 6"
+- `rollout-order`: "Phases 0–27" → "0–28"; CockroachDB "Phase 3" → "4";
+  runtime catalog "9 → 10"; map metadata "10 → 11"; added item→phase mapping
+  table.
+- `docs/implementation/progress.yaml`: inserted Phase 3 comment + renumbered.
+
+## Commands
+
+```bash
+# Add the new phase folder + page, then register it in the manifest
+# (edits to _sequence.yaml, install-openkruisegame/index.md)
+
+# Regenerate nav + implementation page (must match committed output)
+cd /home/jyao/42wasd-mc
+python3 scripts/docs/docs-generate-nav.py
+python3 scripts/docs/docs-generate-implementation.py
+
+# Full verification pipeline
+bash scripts/docs/verify.sh
+```
+
+## Result
+
+`bash scripts/docs/verify.sh` → **VERIFY OK** (Layer 1+2 VALIDATION OK, 7
+pytest passed, strict mkdocs build succeeded). Generated files were staged so
+the golden test compared against the regenerated output.
+
+## Related doc edits (same review pass)
+
+- `social-state...` §7.1.0: corrected the offline/cracked auth model to an
+  **in-game auth gate** — player joins, lands on a login stage, completes
+  Discord/Google OAuth there, is linked to a Nakama account, then routed on.
+- `deploy-cockroachdb-and-nakama`: aligned the flow diagram to the gate model.
+- `add-exact-world-dimension-tab-information`: added the missing **backend-side
+  presence bridge** description (a per-runtime plugin/mod that reports
+  dimension changes keyed by UUID to NetworkBridge/Nakama) — closing the gap
+  where exact dimension data never reached TAB.
+- `plain-english-glossary`: added "Auth gate".
+
+</details>
+
+- ⬜ `not-started` — [Phase 4 — Deploy CockroachDB and Nakama](../reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md)
+- ⬜ `not-started` — [Phase 5 — Deploy Velocity](../reference-design/03-step-by-step-implementation/deploy-velocity/index.md)
+- ⬜ `not-started` — [Phase 6 — Deploy the Paper lobby](../reference-design/03-step-by-step-implementation/deploy-the-paper-lobby/index.md)
+- ⬜ `not-started` — [Phase 7 — Install TAB](../reference-design/03-step-by-step-implementation/install-tab/index.md)
+- ⬜ `not-started` — [Phase 8 — Add ViaVersion and ViaBackwards](../reference-design/03-step-by-step-implementation/add-viaversion-and-viabackwards/index.md)
+- ⬜ `not-started` — [Phase 9 — Deploy the Forge 1.20.1 fantasy runtime](../reference-design/03-step-by-step-implementation/deploy-the-forge-1-20-1-fantasy-runtime/index.md)
+- ⬜ `not-started` — [Phase 10 — Define the runtime catalog](../reference-design/03-step-by-step-implementation/define-the-runtime-catalog/index.md)
+- ⬜ `not-started` — [Phase 11 — Define map metadata](../reference-design/03-step-by-step-implementation/define-map-metadata/index.md)
+- ⬜ `not-started` — [Phase 12 — Build the World Controller](../reference-design/03-step-by-step-implementation/build-the-world-controller/index.md)
 
 <details markdown="1" class="runbook">
 <summary>⬜ 📜 Build log — Build the World Controller</summary>
@@ -290,21 +360,21 @@ bash /home/jyao/42wasd-mc/scripts/docs/verify.sh
 
 </details>
 
-- ⬜ `not-started` — [Phase 12 — Build NetworkBridge for Velocity](../reference-design/03-step-by-step-implementation/build-networkbridge-for-velocity/index.md)
-- ⬜ `not-started` — [Phase 13 — Implement friends and parties](../reference-design/03-step-by-step-implementation/implement-friends-and-parties/index.md)
-- ⬜ `not-started` — [Phase 14 — Implement `/join <friend>`](../reference-design/03-step-by-step-implementation/implement-join-friend/index.md)
-- ⬜ `not-started` — [Phase 15 — Implement pending cross-runtime invites](../reference-design/03-step-by-step-implementation/implement-pending-cross-runtime-invites/index.md)
-- ⬜ `not-started` — [Phase 16 — Publish Modrinth Server Projects](../reference-design/03-step-by-step-implementation/publish-modrinth-server-projects/index.md)
-- ⬜ `not-started` — [Phase 17 — Add packwiz CI](../reference-design/03-step-by-step-implementation/add-packwiz-ci/index.md)
-- ⬜ `not-started` — [Phase 18 — Add exact world/dimension TAB information](../reference-design/03-step-by-step-implementation/add-exact-world-dimension-tab-information/index.md)
-- ⬜ `not-started` — [Phase 19 — Implement the glitch/random portal](../reference-design/03-step-by-step-implementation/implement-the-glitch-random-portal/index.md)
-- ⬜ `not-started` — [Phase 20 — Add mc-router](../reference-design/03-step-by-step-implementation/add-mc-router/index.md)
-- ⬜ `not-started` — [Phase 21 — Add idle sleep](../reference-design/03-step-by-step-implementation/add-idle-sleep/index.md)
-- ⬜ `not-started` — [Phase 22 — Add Agones only for session worlds](../reference-design/03-step-by-step-implementation/add-agones-only-for-session-worlds/index.md)
-- ⬜ `not-started` — [Phase 23 — Add AI proximity chat](../reference-design/03-step-by-step-implementation/add-ai-proximity-chat/index.md)
-- ⬜ `not-started` — [Phase 24 — Community map upload pipeline](../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md)
-- ⬜ `not-started` — [Phase 25 — Backups](../reference-design/03-step-by-step-implementation/backups/index.md)
-- ⬜ `not-started` — [Phase 26 — Monitoring](../reference-design/03-step-by-step-implementation/monitoring/index.md)
-- ⬜ `not-started` — [Phase 27 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md)
+- ⬜ `not-started` — [Phase 13 — Build NetworkBridge for Velocity](../reference-design/03-step-by-step-implementation/build-networkbridge-for-velocity/index.md)
+- ⬜ `not-started` — [Phase 14 — Implement friends and parties](../reference-design/03-step-by-step-implementation/implement-friends-and-parties/index.md)
+- ⬜ `not-started` — [Phase 15 — Implement `/join <friend>`](../reference-design/03-step-by-step-implementation/implement-join-friend/index.md)
+- ⬜ `not-started` — [Phase 16 — Implement pending cross-runtime invites](../reference-design/03-step-by-step-implementation/implement-pending-cross-runtime-invites/index.md)
+- ⬜ `not-started` — [Phase 17 — Publish Modrinth Server Projects](../reference-design/03-step-by-step-implementation/publish-modrinth-server-projects/index.md)
+- ⬜ `not-started` — [Phase 18 — Add packwiz CI](../reference-design/03-step-by-step-implementation/add-packwiz-ci/index.md)
+- ⬜ `not-started` — [Phase 19 — Add exact world/dimension TAB information](../reference-design/03-step-by-step-implementation/add-exact-world-dimension-tab-information/index.md)
+- ⬜ `not-started` — [Phase 20 — Implement the glitch/random portal](../reference-design/03-step-by-step-implementation/implement-the-glitch-random-portal/index.md)
+- ⬜ `not-started` — [Phase 21 — Add mc-router](../reference-design/03-step-by-step-implementation/add-mc-router/index.md)
+- ⬜ `not-started` — [Phase 22 — Add idle sleep](../reference-design/03-step-by-step-implementation/add-idle-sleep/index.md)
+- ⬜ `not-started` — [Phase 23 — Add Agones only for session worlds](../reference-design/03-step-by-step-implementation/add-agones-only-for-session-worlds/index.md)
+- ⬜ `not-started` — [Phase 24 — Add AI proximity chat](../reference-design/03-step-by-step-implementation/add-ai-proximity-chat/index.md)
+- ⬜ `not-started` — [Phase 25 — Community map upload pipeline](../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md)
+- ⬜ `not-started` — [Phase 26 — Backups](../reference-design/03-step-by-step-implementation/backups/index.md)
+- ⬜ `not-started` — [Phase 27 — Monitoring](../reference-design/03-step-by-step-implementation/monitoring/index.md)
+- ⬜ `not-started` — [Phase 28 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md)
 
 <!-- END_GENERATED_IMPLEMENTATION -->

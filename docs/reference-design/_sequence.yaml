@@ -53,6 +53,7 @@ parts:
         - decide-names-before-deploying
         - create-repository-structure
         - create-kubernetes-namespaces
+        - install-openkruisegame
         - deploy-cockroachdb-and-nakama
         - deploy-velocity
         - deploy-the-paper-lobby

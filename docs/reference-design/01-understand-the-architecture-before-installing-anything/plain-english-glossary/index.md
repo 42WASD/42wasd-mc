@@ -60,6 +60,9 @@ The default modern Minecraft proxy used here. It is the single public entry poin
 ## NetworkBridge
 Your small custom Velocity plugin that binds the Minecraft UUID/name to the Nakama account and triggers World Controller routing (/worlds, /join, /invite).
 
+## Auth gate
+The stage every player passes through after joining the network but before reaching a real world. It requires the player to sign in (Discord/Google OAuth → Nakama) and links their Minecraft identity to a verified Nakama account before allowing transfer onward. It is what makes an offline/cracked-capable network safe.
+
 ## Nakama
 An open-source game backend that owns accounts, sessions, friends, parties, invites, presence and chat. Here it is the OAuth-first identity anchor.
 
