@@ -24,29 +24,66 @@ Use Minecraft as one client/frontend of that social system.
 
 ## 7.1 Identity mapping
 
-The canonical identity should be the authenticated Minecraft UUID.
+The canonical identity is the **Nakama user account, created via OAuth-first
+social authentication** (Discord and/or Google). Minecraft identity is a linked,
+secondary attribute — never the identity anchor.
+
+Why OAuth-first: this network permits offline/cracked accounts behind the
+authenticated proxy (see Phase 5). An offline-mode Minecraft UUID is generated
+from the username and is spoofable — anyone can join with any name, so it
+cannot be trusted as a canonical identity. A Discord/Google OAuth token proves
+who the player is, prevents impersonation, and makes bans attach to a real,
+verified account.
 
 Example:
 
 ```text
-minecraft_uuid = 123e4567-e89b-12d3-a456-426614174000
+Discord / Google OAuth token
        ↓
-Nakama custom authentication ID
+Nakama social-provider authentication (authenticateGoogle / authenticateApple /
+                                        custom OAuth for Discord)
        ↓
-nakama_user_id
+nakama_user_id  (canonical identity)
+       ↓
+linked Minecraft identity (per-lookup, see below)
 ```
 
 Maintain a table/mapping such as:
 
 ```json
 {
-  "minecraft_uuid": "123e4567-e89b-12d3-a456-426614174000",
   "nakama_user_id": "....",
+  "discord_id": "...",          // or google_id, if chosen
+  "minecraft_uuid": "123e4567-e89b-12d3-a456-426614174000",
   "minecraft_name": "Steve"
 }
 ```
 
+The Minecraft UUID/name here are **runtime/presentation bindings** for the
+current session, not the security anchor. They must be re-derived from the
+verified Nakama session, never trusted from the offline client alone.
+
 Do not make usernames authoritative; usernames can change.
+
+### 7.1.1 Linking Minecraft UUID to the OAuth account
+
+Because the backends run in offline mode, the proxy (Velocity NetworkBridge)
+is the only party that sees both the OAuth-verified Nakama account and the
+incoming Minecraft connection. It must bind them server-side:
+
+```text
+player joins Velocity
+   ↓
+NetworkBridge authenticates to Nakama with OAuth-verified session
+   ↓
+NetworkBridge links the incoming offline UUID/name to that Nakama account
+      (Nakama account.link/custom, scoped to that session)
+   ↓
+backend sees the UUID the bridge assigned
+```
+
+The bridge, not the offline client, is the trusted source for the
+UUID->Nakama mapping.
 
 ---
 

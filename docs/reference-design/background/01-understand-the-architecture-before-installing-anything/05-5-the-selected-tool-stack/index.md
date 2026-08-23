@@ -7,7 +7,7 @@
 | Global TAB | **TAB 6.1.2** | Current Aug 2026 release; all-in-one; Velocity support; MiniPlaceholders integration |
 | Protocol translation | **ViaVersion 5.11.0 + ViaBackwards 5.11.0** | Current Jul 2026 release line; mature protocol bridge |
 | Forge 1.20.1 proxy compatibility | **Ambassador + ProxyCompatibleForge** | PaperMC's documented path for Velocity + Forge 1.13–1.20.1 and modern forwarding |
-| Social/meta backend | **Nakama 3.40.0** | Mature open-source game backend; friends, parties, presence, chat, matchmaking primitives |
+| Social/meta backend | **Nakama 3.40.0** | Mature open-source game backend; friends, parties, presence, chat, matchmaking primitives. Also the **OAuth-first identity anchor** (Discord/Google social login), with the Minecraft UUID linked as a runtime binding |
 | Nakama production DB | **CockroachDB** | Current Nakama server config documentation treats CockroachDB as required/supported production database |
 | Minecraft containers | **itzg/minecraft-server 2026.8.1 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |

@@ -14,7 +14,7 @@ VELOCITY
   custom NetworkBridge
 
 SOCIAL
-  Nakama 3.40.0
+  Nakama 3.40.0 (OAuth-first identity: Discord/Google login)
   CockroachDB
 
 DYNAMIC WORLD CONTROL

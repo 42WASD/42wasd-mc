@@ -16,4 +16,8 @@
 
 The boundaries are deliberate.
 
+> **Identity note:** Nakama is also the **OAuth-first identity anchor** (Discord/Google
+> social login). It owns the canonical user account and session; the Minecraft UUID is a
+> linked runtime binding, not the identity anchor.
+
 ---

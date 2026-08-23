@@ -79,6 +79,13 @@ matchmaking/listing primitives
 custom runtime functions
 ```
 
+Nakama natively supports **social-provider authentication** for OAuth-first
+identity: `authenticateGoogle`, `authenticateApple`, and `authenticateCustom`
+(plus the matching `link*` calls to attach additional identifiers). This makes
+Nakama the canonical identity anchor for Discord/Google login; the Minecraft
+UUID/name is a linked runtime binding. Discord is added as a custom OAuth
+provider (not built-in), verified server-side.
+
 Current server configuration documentation treats CockroachDB as the production-supported database. Some install examples still mention PostgreSQL for development, but do not make PostgreSQL the production Nakama database in this architecture.
 
 ---

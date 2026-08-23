@@ -62,32 +62,48 @@ Do not expose its console publicly without authentication/network controls.
 
 ---
 
-## 20.4 Create Minecraft identity authentication
+## 20.4 Create identity authentication (OAuth-first)
 
-When a player first connects through authenticated Velocity:
+The canonical identity is the **Nakama account created via Discord/Google OAuth**
+(see page 07). This is what prevents abuse from anonymous users and removes the
+need to build your own user management. The offline Minecraft UUID is only a
+runtime binding, never the identity anchor.
+
+Flow when a player first connects through Velocity:
 
 ```text
-Velocity UUID
+Discord/Google OAuth (browser or launcher)
    ↓
-NetworkBridge
+Nakama social-provider authentication (authenticateGoogle / authenticateApple
+   or a custom OAuth provider for Discord)
    ↓
-Nakama custom authentication
+Nakama user (canonical identity)
    ↓
-Nakama user
+NetworkBridge links the incoming Minecraft UUID/name to that Nakama account
 ```
 
-Use UUID as the stable custom ID.
-
-Pseudo-flow:
+Pseudo-flow (server-side, in NetworkBridge):
 
 ```java
-String minecraftUuid = player.getUniqueId().toString();
+// OAuth token obtained from Discord/Google (not the offline MC UUID).
+String oauthToken = getDiscordOrGoogleToken();   // verified by Nakama
 
 NakamaSession session =
-    nakama.authenticateCustom(minecraftUuid, true, player.getUsername());
+    nakama.authenticateGoogle(oauthToken, true, "google");
+
+// Link the incoming offline Minecraft identity to this verified account.
+String minecraftUuid = player.getUniqueId().toString();
+nakama.linkCustom(session, minecraftUuid, player.getUsername());
 ```
 
-Store the Nakama session/token server-side, not on the vanilla Minecraft client.
+Notes:
+
+- `authenticateGoogle`/`authenticateApple` are built into Nakama. For Discord,
+  register a **custom OAuth provider** (or use Nakama's custom auth once the
+  token is validated) and call `authenticateCustom`.
+- Store the Nakama session/token server-side, not on the vanilla Minecraft
+  client.
+- Never derive the canonical identity from an offline-mode UUID or username.
 
 ---
 
@@ -100,6 +116,8 @@ Acceptance criteria:
 [ ] NetworkBridge can authenticate/find Nakama account
 [ ] reconnect returns same Nakama identity
 [ ] username changes do not create new social identity
+[ ] a player cannot impersonate another player's identity by using their name
+[ ] banned/verified OAuth account is rejected at the edge
 ```
 
 Do not proceed to parties until this is deterministic.
