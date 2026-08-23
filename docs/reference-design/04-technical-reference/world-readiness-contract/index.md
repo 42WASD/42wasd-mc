@@ -6,12 +6,12 @@ The World Controller's `ensure-ready` returns READY only when:
 GameServerSet desired replicas >= 1
 Pod Ready
 Minecraft status check succeeds
-backend registered with the proxy
 ```
 
 A fuller, staging-time contract can additionally require:
 
 ```text
+backend registered with the proxy
 Service endpoints exist
 runtime revision matches expected revision
 server is not draining

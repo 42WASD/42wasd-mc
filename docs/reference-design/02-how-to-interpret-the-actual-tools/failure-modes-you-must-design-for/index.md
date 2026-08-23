@@ -54,17 +54,17 @@ Pending invite should contain:
 
 ```text
 inviter
-target runtime
-target map
+target runtime_id
+target map_id
 creation time
 expiry
-policy
+mode
 ```
 
 On reconnect:
 
 ```text
-if inviter moved and policy=follow_player:
+if inviter moved and mode=FOLLOW_INVITER:
     resolve new location
 else:
     use original target map
@@ -117,7 +117,9 @@ manual approval for executable additions
 
 ## Sleeping world never wakes
 
-Timeout and fall back:
+Timeout and fall back (a world stuck in `STARTING` past its timeout is marked
+`DEGRADED` — an operational flag outside the normal `ASLEEP`/`STARTING`/`READY`/
+`STOPPING` state axis, never served to players):
 
 ```text
 start

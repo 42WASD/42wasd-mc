@@ -33,7 +33,6 @@ Recommended default: **Velocity**.
 Responsibilities:
 
 ```text
-Mojang authentication
 backend connection switching
 proxy commands
 TAB plugin
@@ -41,6 +40,11 @@ ViaVersion/ViaBackwards
 Forge compatibility bridge
 NetworkBridge
 ```
+
+Identity is handled by the **SOCIAL** layer (Nakama) — backends run in offline
+mode behind the authenticated proxy, so Velocity itself does not perform Mojang
+authentication (Mojang auth applies only if you run with `online-mode=true`,
+which this design does not).
 
 Velocity is the selected default because this architecture values the **usable Minecraft plugin ecosystem** more than minimizing proxy process size.
 

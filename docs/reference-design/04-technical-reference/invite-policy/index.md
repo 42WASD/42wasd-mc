@@ -6,7 +6,7 @@ Possible invite modes:
 
 ```text
 JOIN_MAP        join a specific world/map
-FOLLOW_PLAYER   follow the inviter to wherever they are
+FOLLOW_INVITER  follow the inviter to wherever they are
 JOIN_PARTY      join the inviter's party
 JOIN_SESSION    join a transient session (Agones match)
 ```
@@ -14,7 +14,7 @@ JOIN_SESSION    join a transient session (Agones match)
 Recommended default for friend invites:
 
 ```text
-FOLLOW_PLAYER until accepted
+FOLLOW_INVITER until accepted
 then freeze target during transfer
 ```
 
@@ -29,23 +29,21 @@ per invite; it survives launcher restarts so a reconnect can consume it (see
 ```json
 {
   "id": "invite-uuid",
-  "mode": "FOLLOW_PLAYER",
-  "inviter_nakama_id": "nakama-user-a",
-  "invitee_nakama_id": "nakama-user-b",
+  "mode": "FOLLOW_INVITER",
   "inviter_minecraft_uuid": "123e4567-...",
-  "invitee_minecraft_uuid": "123e4567-...",
-  "target": null,   // null until acceptance for FOLLOW_PLAYER; always set for JOIN_MAP
+  "recipient_minecraft_uuid": "123e4567-...",
+  "target_runtime_id": null,   // null until acceptance for FOLLOW_INVITER; set for JOIN_MAP
+  "target_map_id": null,       // null until acceptance for FOLLOW_INVITER; set for JOIN_MAP
   "state": "PENDING",
   "created_at": "2026-08-19T...",
-  "expires_at": "2026-08-19T...",
-  "consumed_by_routing_id": null
+  "expires_at": "2026-08-19T..."
 }
 ```
 
-> `target` is **nullable**: for `FOLLOW_PLAYER` it is `null` until acceptance,
-> when the World Controller resolves the inviter's current runtime/map. For
-> `JOIN_MAP` it is populated at invite creation. The schema below marks it
-> nullable to match that behavior.
+> `target_runtime_id`/`target_map_id` are **nullable**: for `FOLLOW_INVITER`
+> they are `null` until acceptance, when the World Controller resolves the
+> inviter's current runtime/map. For `JOIN_MAP` they are populated at invite
+> creation. The schema below marks them nullable to match that behavior.
 
 ### Invite state machine
 
@@ -62,7 +60,7 @@ PENDING  ── accepted ──► ACCEPTED ── routed ──► CONSUMED
   NetworkBridge re-resolves it (see the pending-invite flow).
 - `ACCEPTED` → the World Controller begins `ensure-ready` + transfer, then the
   record flips to `CONSUMED` (or `EXPIRED` if the target is no longer valid).
-- `target` may be empty/`null` for `FOLLOW_PLAYER` until acceptance — the World
+- `target_runtime_id`/`target_map_id` may be empty/`null` for `FOLLOW_INVITER` until acceptance — the World
   Controller resolves the inviter's current runtime/map at that moment.
 
 ### Matching modes to routing
@@ -70,7 +68,7 @@ PENDING  ── accepted ──► ACCEPTED ── routed ──► CONSUMED
 | Mode           | Resolves target when | Behavior on acceptance |
 |----------------|----------------------|------------------------|
 | `JOIN_MAP`     | at invite creation   | ensure-ready for that map |
-| `FOLLOW_PLAYER`| at acceptance        | route to inviter's current runtime/map (freeze target) |
+| `FOLLOW_INVITER`| at acceptance        | route to inviter's current runtime/map (freeze target) |
 | `JOIN_PARTY`   | at acceptance        | route into the party's world |
 | `JOIN_SESSION` | at acceptance        | atomic session allocation (Agones, optional) |
 

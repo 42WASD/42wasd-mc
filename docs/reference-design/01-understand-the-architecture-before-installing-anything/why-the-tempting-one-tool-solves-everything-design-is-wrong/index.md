@@ -120,12 +120,10 @@ The correct flow is:
 
 ```text
 Paper/Forge bridge
-    ↓ player world/dimension changed
-World Controller / Nakama presence
+    ↓ player world/dimension changed (reported through NetworkBridge)
+Nakama presence   (owner of the player's social/world position)
     ↓
-NetworkBridge placeholder
-    ↓
-TAB on Velocity
+TAB on Velocity   (reads presence from Nakama)
 ```
 
 ---

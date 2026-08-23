@@ -7,7 +7,7 @@
 | TAB | ❌ | display only | ❌ | ❌ | ❌ | ❌ |
 | ViaVersion/Backwards | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Nakama | ❌ MC routing | ✅ | ❌ | ❌ | ❌ | metadata only |
-| mc-router | hostname edge routing | ❌ | ✅ limited 0↔1 GameServerSet wake | ❌ | ❌ | ❌ |
+| mc-router | hostname edge routing | ❌ | ✅ edge wake (webhook; native 0↔1 is StatefulSet-only) | ❌ | ❌ | ❌ |
 | World Controller | policy decision | integrates | ✅ | compatibility metadata | launcher link selection | coordinates GameServerSet + PVC workload |
 | itzg/minecraft-server | ❌ | ❌ | runs inside K8s | server-specific | server-side pack install | with PVC |
 | Agones | connection allocation | ❌ | ✅ ephemeral/session model | ❌ | ❌ | not the default persistence model |

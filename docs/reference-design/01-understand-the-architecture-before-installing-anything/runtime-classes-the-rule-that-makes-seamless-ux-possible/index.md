@@ -35,6 +35,7 @@ Prefer a Paper/server-side implementation where possible:
 ```yaml
 id: backrooms-current
 kind: paper
+minecraft_protocol_policy: via-compatible
 client_modpack_required: false
 required_resource_pack: true
 community_maps_allowed: true

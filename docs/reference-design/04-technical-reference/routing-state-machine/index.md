@@ -20,7 +20,7 @@ REQUESTED
          RESERVING
             │
             ▼
-         STARTING
+       PROVISIONING
             │
             ▼
      WAITING_K8S_READY
@@ -54,7 +54,8 @@ ASLEEP            replicas=0, no process, PVC retained
 STARTING          replicas>=1, K8s pod not ready yet (or MC not ready)
   │
   ▼
-READY             pod ready + Minecraft status/ping OK + backend registered
+READY             pod ready + Minecraft status/ping OK (+ backend registered
+                  once the fuller staging contract is in place)
   │
   ├── draining    (a sub-state of READY: winding down for scale-to-zero)
   │
@@ -64,7 +65,7 @@ STOPPING          saving/stopping gracefully, safe-to-stop verified
   ▼
 ASLEEP            back to replicas=0
   │
-  └── ERROR/UNHEALTHY (crashed, stuck startup) — operator/SRE attention
+  └── ERROR (crashed, stuck startup) — operator/SRE attention
 ```
 
 > `draining` is represented in `MapInstance` as a separate boolean/derived flag
@@ -79,6 +80,7 @@ ASLEEP            back to replicas=0
 | Term          | Axis | Meaning                                                    |
 |---------------|------|------------------------------------------------------------|
 | `REQUESTED`…`FAILED` | 1 (routing) | A single join/transfer operation |
+| `PROVISIONING` | 1 (routing) | routing-side step while the world comes up (distinct from Axis-2 `STARTING`) |
 | `READY`       | 2 (operational) | World is acceptive + registered; can be joined |
 | `ASLEEP`      | 2 (operational) | scaled to 0, PVC kept; wake on demand |
 | `STARTING` / `STOPPING` | 2 (operational) | in-flight world startup/shutdown |

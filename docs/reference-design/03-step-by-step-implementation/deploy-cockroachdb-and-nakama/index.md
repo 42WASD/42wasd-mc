@@ -2,9 +2,11 @@
 
 ## Why CockroachDB
 
-For production Nakama in this design, follow current Nakama documentation and use CockroachDB.
-
-Do not choose PostgreSQL merely because older/community examples are familiar.
+Nakama requires a Postgres-wire-compatible database server. Nakama's current
+docs list PostgreSQL and CockroachDB as supported production options; this
+design picks CockroachDB for its distributed, auto-healing behavior on
+Kubernetes. PostgreSQL is not "wrong" — it is simply not this design's
+production choice.
 
 ---
 

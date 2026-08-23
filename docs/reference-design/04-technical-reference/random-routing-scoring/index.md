@@ -12,6 +12,7 @@ The scoring code reads these fields. Their source is noted where they live in
 |------------------|---------|----------------|----------------------------------------------------------------|
 | `enabled`        | bool    | MapDefinition  | world may be routed to at all (the World Controller guard)     |
 | `runtime_id`     | string  | MapDefinition  | compatibility gate; must equal player's runtime                |
+| `routing.public` | bool    | MapDefinition  | whether the map is exposed to the random portal / world browser |
 | `random_eligible`| bool    | MapDefinition  | whether the map can be chosen by the random portal at all      |
 | `weight`         | float   | MapDefinition  | relative promotion among eligible maps (community/manual boost)|
 | `free_slots`     | int     | derived        | `max_players - players - reservations` (see below)             |
@@ -51,6 +52,7 @@ eligible = [
     m for m in maps
     if m.enabled
     and m.runtime_id == player.runtime_id
+    and m.routing.public           # only maps exposed to the portal
     and m.random_eligible
     and m.free_slots >= party_size
     and m.health_factor > 0        # hard gate

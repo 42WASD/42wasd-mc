@@ -10,7 +10,8 @@ OpenKruiseGame requires **both** components:
 
 ```text
 Kruise        (the core OpenKruise controllers)
-Kruise-Game   (the game-server CRDs: GameServer, GameServerSet, opsState, ...)
+Kruise-Game   (the game-server CRDs: GameServer, GameServerSet; plus
+               features such as opsState and service qualities)
 ```
 
 Kubernetes version must be **>= 1.18** (per current OKG install docs).
@@ -40,8 +41,7 @@ helm install kruise-game openkruise/kruise-game
 ```
 
 By default this creates and runs in the `kruise-game-system` namespace and
-installs the `game.kruise.io/v1alpha1` API group (GameServerSet, GameServer,
-GameState).
+installs the `game.kruise.io/v1alpha1` API group (GameServerSet, GameServer).
 
 If you run a China-region cluster and need an accessible image registry,
 override the image repository, e.g.:

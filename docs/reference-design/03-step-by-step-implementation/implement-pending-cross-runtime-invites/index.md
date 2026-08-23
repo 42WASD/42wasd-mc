@@ -10,6 +10,7 @@ Data contract:
   "target_runtime_id": "fantasy-1.20.1-forge",
   "target_map_id": "fantasy-kingdom-001",
   "mode": "FOLLOW_INVITER",
+  "state": "PENDING",           // PENDING -> ACCEPTED -> CONSUMED/DECLINED/EXPIRED
   "created_at": "2026-08-19T...",
   "expires_at": "2026-08-19T..."
 }

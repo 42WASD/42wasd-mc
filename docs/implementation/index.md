@@ -5,7 +5,7 @@ This page tracks the build status of every phase in the
 section of the Reference Design.
 
 > The phase-by-phase **rollout order** is defined in
-> [Phase 27 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md).
+> [Phase 30 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md).
 
 ## How to update
 

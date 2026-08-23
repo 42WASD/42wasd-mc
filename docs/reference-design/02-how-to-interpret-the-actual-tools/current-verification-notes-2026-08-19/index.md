@@ -86,7 +86,7 @@ Nakama the canonical identity anchor for Discord/Google login; the Minecraft
 UUID/name is a linked runtime binding. Discord is added as a custom OAuth
 provider (not built-in), verified server-side.
 
-Current server configuration documentation treats CockroachDB as the production-supported database. Some install examples still mention PostgreSQL for development, but do not make PostgreSQL the production Nakama database in this architecture.
+Nakama requires a Postgres-wire-compatible database (CockroachDB or another Postgres-compatible server). We use CockroachDB as the production database. Some install examples still mention PostgreSQL for development, but do not make PostgreSQL the production Nakama database in this architecture.
 
 ---
 
@@ -116,7 +116,7 @@ Current repository documentation verifies:
 hostname-based routing
 Kubernetes discovery
 Docker discovery
-GameServerSet scale 0↔1
+native auto-scale 0↔1 (StatefulSet-only)
 webhook integration
 metrics
 optional proxyServerName routing through Velocity/Bungee after waking backend
@@ -168,7 +168,7 @@ Modrinth App "offline mode" = play already-installed mods without internet
 it does NOT provide offline/cracked ACCOUNT authentication
 ```
 
-This architecture runs backends in offline mode behind the authenticated proxy (see Phase 7), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
+This architecture runs backends in offline mode behind the authenticated proxy (see Phase 6), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
 
 **AstralRinth** (github.com/42WASD/AstralRinth) is the candidate:
 

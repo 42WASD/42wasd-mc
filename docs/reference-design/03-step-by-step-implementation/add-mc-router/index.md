@@ -9,7 +9,11 @@ survival.example.com
 map-123.example.com
 ```
 
-`mc-router` can discover annotated Kubernetes services and can scale a GameServerSet from 0 to 1.
+`mc-router` can discover annotated Kubernetes services. Its built-in auto-scale
+(0↔1) targets `StatefulSet` backends (or Docker containers) only — it does not
+scale an OpenKruiseGame `GameServerSet` directly. For the dynamic worlds in this
+design, use its webhook integration to notify the World Controller to wake the
+`GameServerSet` (KEDA + `ScaledObject` is an alternative scale trigger).
 
 It can also use a proxy server name so the final player route still goes to Velocity after the backend is awakened.
 

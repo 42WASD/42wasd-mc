@@ -23,23 +23,23 @@ OpenKruiseGame GameServerSet
 + podUpdatePolicy: InPlaceIfPossible
 ```
 
-Lifecycle:
+Lifecycle (Axis-2 operational states; matches `mapinstance-schema`):
 
 ```text
-SLEEPING
+ASLEEP
    ↓ request
 STARTING
    ↓ pod Ready + Minecraft ping Ready
-READY
-   ↓ reservation
-JOINABLE
-   ↓ no players / idle timeout
-DRAINING
+READY (draining = qualifier while winding down)
+   ↓ no players / idle timeout (draining -> save + stop)
+STOPPING
    ↓ save + stop
-SLEEPING
+ASLEEP
 ```
 
-The PVC remains while replicas become zero.
+`draining` is a separate flag on `READY` (not a state value); a world that is
+`READY` but draining is being wound down for scale-to-zero. The PVC remains
+while replicas become zero.
 
 ---
 

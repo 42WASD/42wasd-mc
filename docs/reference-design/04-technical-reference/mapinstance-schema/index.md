@@ -26,6 +26,15 @@ to a per-join operation and are not stored here).
 used while the world is otherwise `READY` (winding down for scale-to-zero). Keep
 it out of the `state` enum so the five atomic operational states stay clean.
 
+`backend_id` identifies the concrete backing workload (the `GameServerSet` name
++ ordinal). It may coincide with `map_id` for a single-instance map, but is
+distinct in general — a map can be backed by multiple replicas or an Agones
+`GameServer`, so `backend_id` disambiguates which instance is READY.
+
+`last_activity` records the latest player activity or world update time. It is
+the raw signal behind the `freshness` factor in `random-routing-scoring` and the
+idle-drain decision (see `add-idle-sleep`).
+
 `reservations` counts seats already promised to joining players/parties but
 not yet connected; see `random-routing-scoring` and `reservations` semantics.
 

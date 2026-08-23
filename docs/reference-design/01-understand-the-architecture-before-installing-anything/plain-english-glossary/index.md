@@ -73,7 +73,10 @@ The production database Nakama uses for accounts and social state.
 A plugin that shows a sidebar/tab list with player info (here: global presence and current world), powered by MiniPlaceholders.
 
 ## ViaVersion / ViaBackwards
-Protocol-translation plugins that let clients on other Minecraft versions connect to a newer server (ViaVersion) or let newer clients join older servers (ViaBackwards). They do not install missing mods.
+Protocol-translation plugins that let newer clients connect to a server running an older Minecraft version (ViaVersion) or let older clients join a newer server (ViaBackwards). They do not install missing mods.
+
+## ViaLite
+Gate's built-in protocol-translation path (Gate's analogue of ViaVersion/ViaBackwards). Referenced when comparing Gate to Velocity; the selected default here is Velocity + ViaVersion/ViaBackwards.
 
 ## Ambassador / ProxyCompatibleForge
 Paper's documented way to make Velocity + Forge 1.13–1.20.1 work together (modern forwarding compatible with Forge).

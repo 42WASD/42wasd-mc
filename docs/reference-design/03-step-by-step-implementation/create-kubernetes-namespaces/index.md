@@ -21,7 +21,7 @@ minecraft
   -> actual game servers
 
 minecraft-system
-  -> proxy, world-controller, social bridge, mc-router,
+  -> proxy, world-controller, NetworkBridge, mc-router,
      CockroachDB, Nakama
 ```
 

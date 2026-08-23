@@ -5,15 +5,15 @@ the proxy can route to it.
 
 ## Static backend (always running)
 
-1. Deploy a StatefulSet (e.g. a Paper lobby) with a stable logical ID.
+1. Deploy a GameServerSet (e.g. a Paper lobby) with a stable logical ID.
 2. Create a `ClusterIP` Service (never `LoadBalancer`).
 3. Register the backend with the World Controller.
 4. Add a network policy so only the proxy can reach it.
 
 ## Dynamic backend (scale-to-zero)
 
-1. Deploy a scale-to-zero StatefulSet with a PVC for world data.
-2. Register the map in the World Controller with its `runtimeId`.
+1. Deploy a scale-to-zero GameServerSet with a PVC for world data.
+2. Register the map in the World Controller with its `runtime_id`.
 3. The controller will scale `0 → 1` on wake, and back to `0` when idle.
 
 ## Fantasy / modded runtime
@@ -32,5 +32,5 @@ the proxy can route to it.
 
 ## See also
 
-- [Phase 12 — NetworkBridge](../../reference-design/03-step-by-step-implementation/build-networkbridge-for-velocity/index.md)
+- [Phase 14 — NetworkBridge](../../reference-design/03-step-by-step-implementation/build-networkbridge-for-velocity/index.md)
 - [Runtime classes](../architecture/runtime-classes.md)

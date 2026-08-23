@@ -9,11 +9,20 @@ Velocity
 TAB
 ViaVersion + ViaBackwards
 itzg/minecraft-server
+itzg/mc-monitor (readiness + metrics)
 OpenKruiseGame GameServerSet + PVC
 World Controller
 ```
 
 These form the minimum dynamic network.
+
+> **Security gate (important):** the backends in Tier A run in offline mode and
+> are only safe because they sit behind the authenticated proxy. Do **not**
+> expose them publicly until the Nakama-gated Velocity exists (Tier B +
+> `deploy-velocity`/`build-networkbridge-for-velocity`). In the build order this
+> means CockroachDB + Nakama (Phase 5) are deployed **before** Velocity (Phase 6)
+> and the Paper lobby (Phase 7), so the gate is in place before any backend is
+> reachable.
 
 ---
 
@@ -32,6 +41,9 @@ presence
 world browser
 ```
 
+> Tier B is a hard prerequisite for exposing the Tier A backends, not an
+> optional add-on — see the note above.
+
 ---
 
 ## Tier C — operational efficiency
@@ -40,9 +52,11 @@ Add after basic switching works:
 
 ```text
 mc-router
+KEDA (scale-to-zero trigger)
 scale-to-zero
 idle draining
-Prometheus metrics
+Prometheus metrics (scraping mc-monitor output, KEDA triggers)
+Velero (PVC backups)
 backups
 ```
 

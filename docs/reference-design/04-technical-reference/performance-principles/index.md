@@ -51,7 +51,7 @@ server at 20 TPS (smooth) with **maximum MSPT headroom** — including handling 
   - MSPT 30–50 → near the edge, prone to dips under spikes
   - MSPT > 50 → TPS drops below 20 → visible stutter / rubber-banding
 - **Therefore "smoother experience" = reducing MSPT / increasing headroom, not
-  raising TPS.** Raising TPS above 20 (`/tick rate N`, Java 1.20.5+) only *speeds
+  raising TPS.** Raising TPS above 20 (`/tick rate N`, Java 1.20.3+) only *speeds
   up the game clock* (faster day/night, faster crops) and desyncs clients — it is
   never a smoothness improvement for a real server.
 - **Ping vs TPS are orthogonal.** Player ping is network RTT (mac → VPS → tunnel →
@@ -221,6 +221,6 @@ mods/plugins working.
 
 ---
 
-_Originally researched as part of the platform's game-networking phase
-(Phase 56). Relocated here so the platform stays game-agnostic; this page is the
-Minecraft repo's performance source of truth._
+_Originally researched as part of the platform's game-networking work. Relocated
+here so the platform stays game-agnostic; this page is the Minecraft repo's
+performance source of truth._

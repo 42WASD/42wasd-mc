@@ -121,6 +121,11 @@ rules:
     resources: ["gameserversets", "gameservers"]
     verbs: ["get", "list", "watch", "patch", "update"]
 
+  # scaling the GameServerSet requires the /scale subresource
+  - apiGroups: ["game.kruise.io"]
+    resources: ["gameserversets/scale"]
+    verbs: ["update", "patch"]
+
   - apiGroups: [""]
     resources: ["pods", "services"]
     verbs: ["get", "list", "watch"]

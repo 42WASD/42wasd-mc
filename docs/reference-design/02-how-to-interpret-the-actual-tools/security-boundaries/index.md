@@ -26,8 +26,13 @@ World Controller:
 get/list/watch pods
 get/list/watch services
 get/list/watch/patch GameServerSets (game.kruise.io)
-optional create/delete only in map namespace if design requires it
+create/delete GameServerSets in the map namespace(s) it manages
 ```
+
+The World Controller creates and deletes `GameServerSet`s for dynamic maps, so
+`create`/`delete` are scoped to the map namespace(s) — not cluster-wide. It
+scales via `patch` on `spec.replicas` (it does **not** install or delete the
+OpenKruiseGame operator itself).
 
 Avoid:
 

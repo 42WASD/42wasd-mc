@@ -96,8 +96,8 @@ Flow:
 Alex -> /invite Steve
         ↓
 Nakama stores pending invite:
-  target_runtime=fantasy-1.20.1-forge
-  target_map=kingdom-7
+  target_runtime_id=fantasy-1.20.1-forge
+  target_map_id=fantasy-kingdom-001
   inviter=Alex
   expires_at=...
         ↓
@@ -115,7 +115,7 @@ NetworkBridge authenticates Steve
         ↓
 looks up pending invite
         ↓
-World Controller starts/resolves kingdom-7
+World Controller starts/resolves fantasy-kingdom-001
         ↓
 Velocity transfers Steve
 ```

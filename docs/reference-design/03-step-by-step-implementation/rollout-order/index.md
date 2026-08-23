@@ -33,11 +33,12 @@ This order intentionally proves one contract at a time.
 > the **verification order** and intentionally proves contracts before later
 > dependencies exist. The two are related by phase number, not by position.
 >
-> Phases 0–4 (naming, repository structure, Kubernetes namespaces,
-> OpenKruiseGame install, KEDA + observability install) are prerequisites
-> completed before any of this order begins and so are not listed. Phases 28
-> (backups) and 29 (monitoring) are cross-cutting operational concerns and are
-> also not itemized here.
+> Phases 0–2 (naming, repository structure, Kubernetes namespaces) are
+> prerequisites completed before any of this order begins and so are not listed.
+> Phases 3 (OpenKruiseGame install) and 4 (KEDA + observability install) appear
+> where their capability is first exercised (item 9), and Phases 28 (backups)
+> and 29 (monitoring) are cross-cutting operational concerns and are also not
+> itemized here.
 
 ### Item → phase mapping
 
@@ -58,8 +59,8 @@ verified before an earlier one):
 | 9 | one persistent GameServerSet scale-to-zero map | Phase 3 (OKG), Phase 4 (KEDA), Phase 12 (map metadata) |
 | 10 | portal → wake → transfer | Phase 21 |
 | 11 | exact map presence + TAB | Phase 20 |
-| 12 | random compatible map | Phase 13 (random routing) |
-| 13 | fantasy Forge runtime + Ambassador | Phase 10 (Forge) |
+| 12 | random compatible map | Phase 21 (random routing) |
+| 13 | fantasy Forge runtime + Ambassador + ProxyCompatibleForge | Phase 10 (Forge) |
 | 14 | Modrinth Server Project | Phase 18 |
 | 15 | pending cross-runtime invite | Phase 17 |
 | 16 | mc-router edge wake | Phase 22 |

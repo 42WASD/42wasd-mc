@@ -12,7 +12,7 @@ metadata:
   id: backrooms-current
 
 minecraft:
-  serverType: PAPER
+  server_type: PAPER
   version: "PIN_TESTED_VERSION"
 
 client:
@@ -21,23 +21,23 @@ client:
 
 proxy:
   kind: velocity
-  ambassadorRequired: false
-  modernForwarding: true   # must be uniform across all runtimes
+  ambassador_required: false
+  modern_forwarding: true   # must be uniform across all runtimes
 
 routing:
-  instantSwitchWithinRuntime: true
-  viaTranslationAllowed: true
+  instant_switch_within_runtime: true
+  via_translation_allowed: true
 
 resources:
   memory: "2Gi"
-  cpuLimit: "4"
+  cpu_limit: "4"
 
 startup:
-  timeoutSeconds: 300
+  timeout_seconds: 300
 
 idle:
-  sleepAllowed: true
-  timeoutSeconds: 1200
+  sleep_allowed: true
+  timeout_seconds: 1200
 ```
 
 Content policy (world uploads, plugins-from-map, client mods-from-map) is a

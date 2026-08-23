@@ -106,7 +106,7 @@ and RBAC exist, and the concrete per-map scrape selectors are finalized in the
 ```text
 kubectl get scaledobject -A          # KEDA can create ScaledObjects (0)
 kubectl get svc -n monitoring        # prometheus + grafana up
-kubectl get servicemonitor -n minecraft mc-servers   # scrape target exists
+kubectl get servicemonitor -n minecraft minecraft-servers   # scrape target exists
 ```
 
 None of these existed before this phase; adding them closes the gap where

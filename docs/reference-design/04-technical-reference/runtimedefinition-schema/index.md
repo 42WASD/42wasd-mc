@@ -1,6 +1,7 @@
 # RuntimeDefinition schema
 
-Illustrative:
+Illustrative (naming follows the same flat-top-level snake_case convention as
+`MapDefinition`/`MapInstance`):
 
 ```yaml
 metadata:
@@ -9,36 +10,36 @@ metadata:
 
 minecraft:
   version: "1.20.1"
-  serverType: FORGE
-  loaderVersion: "47.2.0"   # pin to the exact tested loader
+  server_type: FORGE
+  loader_version: "47.2.0"   # pin to the exact tested loader
 
 client:
   required: true
   distribution: modrinth-server-project
-  projectId: "your-network-fantasy-runtime"   # Modrinth Server Project slug
+  project_id: "your-network-fantasy-runtime"   # Modrinth Server Project slug
 
 proxy:
   kind: velocity
-  ambassadorRequired: true
-  modernForwarding: true   # must be uniform across all runtimes (proxy-wide)
+  ambassador_required: true
+  modern_forwarding: true   # must be uniform across all runtimes (proxy-wide)
 
 routing:
-  instantSwitchWithinRuntime: true
-  viaTranslationAllowed: false
+  instant_switch_within_runtime: true
+  via_translation_allowed: false
 
 resources:
   memory: "12Gi"
-  cpuLimit: "8"
+  cpu_limit: "8"
 
 startup:
-  timeoutSeconds: 300
+  timeout_seconds: 300
 
 idle:
-  sleepAllowed: true
-  timeoutSeconds: 1200
+  sleep_allowed: true
+  timeout_seconds: 1200
 ```
 
-> Note: `modernForwarding` is a **network-wide** setting (Velocity serves all
+> Note: `modern_forwarding` is a **network-wide** setting (Velocity serves all
 > backends behind one secret). It must therefore be **the same across every
 > runtime** — you cannot run some runtimes with modern forwarding and others
 > without on the same proxy. Treat it as an invariant, not a per-runtime toggle.

@@ -29,7 +29,7 @@ social authentication** (Discord and/or Google). Minecraft identity is a linked,
 secondary attribute — never the identity anchor.
 
 Why OAuth-first: this network permits offline/cracked accounts behind the
-authenticated proxy (see Phase 7). An offline-mode Minecraft UUID is generated
+authenticated proxy (see Phase 6). An offline-mode Minecraft UUID is generated
 from the username and is spoofable — anyone can join with any name, so it
 cannot be trusted as a canonical identity. A Discord/Google OAuth token proves
 who the player is, prevents impersonation, and makes bans attach to a real,
@@ -170,9 +170,12 @@ Mechanics, per Nakama's session model:
 
 - The Nakama **access token** is short-lived; the **refresh token** is
   long-lived and lets the server renew the session without re-authenticating.
-- On a fresh join the bridge authenticates the (offline) Minecraft UUID/name
-  to the *same* Nakama account by looking up the stored session/refresh token
-  (scoped to that account), not by re-running the Discord/Google OAuth.
+- On a fresh join the bridge restores the session to the *same* Nakama account
+  by presenting the stored **refresh token** (a bearer secret scoped to that
+  account), not by re-running the Discord/Google OAuth. The offline Minecraft
+  UUID/name alone is **never** enough to claim a session — the refresh token
+  is the credential that binds the reconnect to the account, so a spoofed UUID
+  cannot hijack a stored session without that token.
 - Only when the **refresh token also expires** (or the player explicitly signs
   out) does the player go back through the gate.
 

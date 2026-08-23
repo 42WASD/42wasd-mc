@@ -17,9 +17,9 @@ the natural fit:
 ```text
 upload (public/internal endpoint)
   ↓
-s3://minecraft-maps/quarantine/     # untrusted, pending scan/validation
+s3://minecraft/maps-quarantine/     # untrusted, pending scan/validation
   ↓  (validate -> scan -> extract)
-s3://minecraft-maps/published/      # immutable revisions, served to runtimes
+s3://minecraft/maps-published/      # immutable revisions, served to runtimes
 ```
 
 Object storage also decouples map blobs from the K8s cluster lifecycle: the
@@ -31,7 +31,7 @@ of any Minecraft server.
 ## Install MinIO (private S3-compatible store)
 
 ```bash
-helm repo add minio https://operator.min.io/  # or use the bitnami chart
+helm repo add minio https://charts.min.io/  # community MinIO chart
 helm repo update
 helm install minio minio/minio \
   --namespace minecraft-system \
@@ -92,7 +92,7 @@ execution).
 kubectl get deploy -n minecraft-system minio      # running
 kubectl get pods -n minecraft-system -l app=minio  # ready
 mc ls minecraft/maps-quarantine                    # can list the bucket
-mc ls minecraft/maps-public                        # can list the bucket
+mc ls minecraft/maps-published                     # can list the bucket
 ```
 
 After this phase, the community-map-upload-pipeline can actually quarantine,
