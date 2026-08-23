@@ -13,6 +13,9 @@
 | Agones | connection allocation | ❌ | ✅ ephemeral/session model | ❌ | ❌ | not the default persistence model |
 | Modrinth Server Projects | ❌ | ❌ | ❌ | selects correct runtime | ✅ | ❌ |
 | packwiz | ❌ | ❌ | ❌ | pack definition | ✅ pre-launch/update workflow | ❌ |
+| itzg/mc-monitor | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ (readiness + metrics) |
+| KEDA | ❌ | ❌ | ✅ scale trigger (0↔1) | ❌ | ❌ | ❌ |
+| Velero | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ PVC backup/restore |
 
 The boundaries are deliberate.
 

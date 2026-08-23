@@ -36,3 +36,16 @@ secrets through your secret-management process
 ```
 
 ---
+
+## Use a maintained backup operator
+
+The PVC snapshot/restore/schedule half of this pipeline is owned by a
+maintained operator — **Velero** — rather than hand-rolled scripts. Velero
+backs up cluster objects and PVCs, runs on a schedule with retention, and
+supports pre/post hooks (for the Minecraft save/quiesce step) and restore
+testing. It is Apache-2.0 and CNCF- governed.
+
+The World Controller still decides *when* a world is quiescent to back up; Velero
+owns the snapshot/restore mechanics and the off-machine copy to object storage.
+
+---

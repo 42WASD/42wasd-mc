@@ -38,6 +38,11 @@ mc-router = edge wake/routing
 World Controller = authoritative in-game lifecycle
 ```
 
+If the 0→1 edge wake should be event-driven rather than polled, **KEDA**
+(`ScaledObject` → HPA on the GameServerSet) can serve as the scale trigger
+alongside mc-router, while the World Controller still owns the safe-to-stop
+logic on scale-down.
+
 ---
 
 ## 37.2 Prefer webhook isolation if desired

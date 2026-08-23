@@ -33,6 +33,11 @@ memory
 disk
 ```
 
+The per-server status metrics (`online`, `latency`, `MOTD`) and the map
+`status/ping` readiness probe come from the same maintained agent —
+**itzg/mc-monitor** — exported to Prometheus, so the readiness and the metrics
+are one trusted source.
+
 Alert on:
 
 ```text

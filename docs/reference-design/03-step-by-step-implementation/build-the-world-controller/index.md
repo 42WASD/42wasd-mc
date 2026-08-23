@@ -91,6 +91,12 @@ For Forge, startup can take substantially longer than a small Paper map.
 
 Set per-runtime startup timeout.
 
+The Minecraft `status/ping` probe is provided by a maintained agent —
+**itzg/mc-monitor** (`status` subcommand) — rather than hand-rolled ping code.
+`mc-monitor` doubles as the Prometheus/Influx metrics exporter, so the
+readiness probe and the per-map perf metrics (TPS, latency, player count) share
+one trusted source.
+
 ---
 
 ## 28.4 RBAC
