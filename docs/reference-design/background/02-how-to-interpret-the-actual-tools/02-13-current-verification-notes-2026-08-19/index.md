@@ -149,3 +149,37 @@ This is the strongest existing public UX primitive for your cross-runtime invite
 It still does not hot-load a new Forge/NeoForge/Fabric classpath into an already-running incompatible Minecraft process.
 
 ---
+
+## AstralRinth (player launcher)
+
+Verified: actively maintained fork of the Modrinth App, updated through 2026.
+
+Why the official Modrinth App is not sufficient here:
+
+```text
+Modrinth App "offline mode" = play already-installed mods without internet
+it does NOT provide offline/cracked ACCOUNT authentication
+```
+
+This architecture runs backends in offline mode behind the authenticated proxy (see Phase 5), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
+
+**AstralRinth** (github.com/DIDIRUS4/AstralRinth, mirrored by community forks) is the candidate:
+
+```text
+fork of the Modrinth App (Theseus core)
+OFFLINE AUTH for cracked + licensed accounts (also elyby)
+no ads, forced telemetry/metrics disabled
+macOS .dmg build (Apple Silicon / Intel) available
+not in maintenance mode (Migurinth's own README confirms)
+```
+
+It keeps the exact Modrinth App UX (modpack/mod auto-download, server-project onboarding), so players who cannot enter a world with their current client get the same "install requirements and launch directly" flow.
+
+Caveat to record in the design:
+
+```
+It is a third-party, community-maintained fork. Pin a known-good stable build
+(no dev/nightly/dirty prefix) and get it from a trusted source.
+```
+
+---

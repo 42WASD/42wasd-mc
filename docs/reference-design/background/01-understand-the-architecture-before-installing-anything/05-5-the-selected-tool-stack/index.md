@@ -15,6 +15,7 @@
 | Persistent world orchestration | **Custom World Controller + StatefulSet + PVC** | Exact fit for persistent maps, portals, invites, readiness and policy |
 | Ephemeral session maps | **Agones, optional** | Mature Kubernetes game-server Fleet/Allocation model |
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
+| Player client (launcher) | **AstralRinth** | Actively maintained 2026 fork of the Modrinth App; adds offline/cracked account auth; no ads, no telemetry |
 | Pack source/CI | **packwiz, optional** | Git-friendly modpack definition and launcher/server update workflow |
 | Dynamic infra source of truth | **Git + Kubernetes manifests** | Auditable, deterministic runtime/map definitions |
 

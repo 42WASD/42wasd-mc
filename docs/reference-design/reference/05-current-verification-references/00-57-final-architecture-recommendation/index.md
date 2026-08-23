@@ -27,6 +27,7 @@ DYNAMIC WORLD CONTROL
 CLIENT RUNTIMES
   runtime classes
   Modrinth Server Projects
+  AstralRinth (offline-capable Modrinth fork launcher)
   packwiz as optional Git/CI source
 ```
 

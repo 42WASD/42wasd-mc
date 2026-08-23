@@ -50,6 +50,8 @@ packwiz gives you Git-friendly source control.
 
 Modrinth gives players the usable installer/launcher experience.
 
+Use the **AstralRinth** launcher (offline-capable Modrinth App fork) so players on offline/cracked accounts can still receive the required client pack and launch into the runtime.
+
 ---
 
 ## 25.3 Server installation
