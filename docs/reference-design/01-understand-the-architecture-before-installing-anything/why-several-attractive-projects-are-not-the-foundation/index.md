@@ -86,14 +86,23 @@ you want scale-to-zero controlled by K8s
 
 ## AutoModpack
 
-AutoModpack is useful in a trusted, closed modded community.
+AutoModpack can auto-sync mods from a server to joining clients, but it is only
+a good fit for a trusted, closed modded community. Three reasons:
 
-But the client already needs AutoModpack, and installing/updating executable mods from a remote server has an explicit trust/security dimension.
+- **The client must already have AutoModpack installed.** It can only download
+  and apply mods after AutoModpack itself is running, so a vanilla client gains
+  nothing from it — the setup is not seamless for new players.
+- **It pushes executable code to players.** Minecraft mods (`.jar` files) are
+  executable code. Letting a remote server download and run them on a player's
+  machine is an explicit trust/security decision, not an automatic convenience.
+- **Java cannot hot-load a new classpath.** Even after the mods are downloaded,
+  they cannot be injected into an already-running game; the player must fully
+  restart their Minecraft client to apply them.
 
-It also cannot make Java hot-load a new classpath without restart.
+Use it only if you intentionally operate a trusted, fixed modded community.
 
-Use it only if you intentionally operate a trusted fixed modded community.
-
-For public onboarding, Modrinth Server Projects is cleaner.
+For public onboarding, **Modrinth Server Projects** is cleaner: the launcher
+installs the required pack before the game starts, so nothing is fetched from a
+remote server at runtime.
 
 ---
