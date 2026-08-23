@@ -9,7 +9,7 @@
 | Forge 1.20.1 proxy compatibility | **Ambassador + ProxyCompatibleForge** | PaperMC's documented path for Velocity + Forge 1.13–1.20.1 and modern forwarding |
 | Social/meta backend | **Nakama 3.40.0** | Mature open-source game backend; friends, parties, presence, chat, matchmaking primitives |
 | Nakama production DB | **CockroachDB** | Current Nakama server config documentation treats CockroachDB as required/supported production database |
-| Minecraft containers | **itzg/minecraft-server 2026.8.0 line** | Very active; supports versions/loaders/modpacks |
+| Minecraft containers | **itzg/minecraft-server 2026.8.1 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |
 | Edge hostname routing / external wake | **itzg/mc-router** | K8s discovery; StatefulSet scale 0↔1; webhook; metrics |
 | Persistent world orchestration | **Custom World Controller + StatefulSet + PVC** | Exact fit for persistent maps, portals, invites, readiness and policy |

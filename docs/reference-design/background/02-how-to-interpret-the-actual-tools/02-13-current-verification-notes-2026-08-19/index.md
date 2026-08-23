@@ -85,7 +85,7 @@ Current server configuration documentation treats CockroachDB as the production-
 
 ## itzg/minecraft-server
 
-Verified current release line: **2026.8.0**, August 4, 2026.
+Verified current release line: **2026.8.1**, August 19, 2026.
 
 It remains an actively maintained general Minecraft Java container image that can install versions, loaders and modpacks.
 

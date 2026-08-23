@@ -64,7 +64,7 @@ The following primary/current sources were checked for this edition. Re-audit th
 
 18. **itzg/docker-minecraft-server releases**  
     https://github.com/itzg/docker-minecraft-server/releases  
-    2026.8.0 released August 4, 2026.
+    2026.8.1 released August 19, 2026.
 
 19. **itzg/docker-mc-proxy**  
     https://github.com/itzg/docker-mc-proxy  

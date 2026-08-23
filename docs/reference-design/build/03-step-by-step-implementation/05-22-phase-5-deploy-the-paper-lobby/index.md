@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: minecraft
-          image: itzg/minecraft-server:2026.8.0
+          image: itzg/minecraft-server:2026.8.1
           env:
             - name: EULA
               value: "TRUE"
