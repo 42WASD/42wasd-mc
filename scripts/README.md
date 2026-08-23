@@ -4,7 +4,9 @@ Utility scripts for the `42wasd-mc` project. Add operational scripts here (mirro
 
 ## Layout
 
-- `scripts/docs-split-platform.py` — placeholder for a docs organization utility.
+- `docs/docs-split-minecraft.py` — splits the Minecraft architecture source doc into the `docs/reference-design/` tree.
+- `docs/docs-generate-nav.py` — regenerates the nav in `mkdocs.yml`.
+- `docs/docs-generate-implementation.py` — regenerates `docs/implementation/index.md` from the runbook.
 
 ## Usage
 
