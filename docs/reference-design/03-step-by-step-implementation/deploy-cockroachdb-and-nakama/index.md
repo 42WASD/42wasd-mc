@@ -65,7 +65,8 @@ Do not expose its console publicly without authentication/network controls.
 ## 20.4 Create identity authentication (OAuth-first)
 
 The canonical identity is the **Nakama account created via Discord/Google OAuth**
-(see page 07). This is what prevents abuse from anonymous users and removes the
+(see [Social state: why Nakama belongs beside Minecraft rather than inside it](../../01-understand-the-architecture-before-installing-anything/social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it/index.md)).
+This is what prevents abuse from anonymous users and removes the
 need to build your own user management. The offline Minecraft UUID is only a
 runtime binding, never the identity anchor.
 

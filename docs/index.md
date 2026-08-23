@@ -11,10 +11,12 @@ top tab:
 
 1. **[Setup](setup/getting-started.md)** — get oriented and up to speed.
 2. **[Guides](guides/architecture/index.md)** — architecture, server ops, and player experience.
-3. **[Reference Design](reference-design/index.md)** — the full technical design, split into:
-   - **Concepts & Design** (background),
-   - **Build (Implementation Phases)**, and
-   - **Reference Material**.
+3. **[Reference Design](reference-design/index.md)** — the full technical design, in five parts:
+   - **I. Understand the architecture**,
+   - **II. How to interpret the tools**,
+   - **III. Step-by-step implementation**,
+   - **IV. Technical reference**, and
+   - **V. Current verification references**.
 4. **[Implementation](implementation/index.md)** — a live progress tracker for the phased build.
 
 ## The core rule
@@ -34,8 +36,5 @@ repo's `infra/` carries only the Minecraft **game-layer** workloads (proxy,
 lobby, Nakama, CockroachDB) that run on that platform. See
 [Reference Design](reference-design/index.md) for the phased plan that builds
 toward this.
-18. Agones ephemeral fleet (optional)
-19. AI proximity bot
-```
 
 Start with the [Reference Design overview](reference-design/index.md).
