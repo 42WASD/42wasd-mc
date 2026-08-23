@@ -24,20 +24,21 @@ flowchart TB
 
 ## Host layout
 
-- **alpha** — RKE2 control-plane server (`rke2_servers`).
-- **build01** — build node (`build_nodes`) for packaging worlds/plugins.
-
-See `inventory/production.yml` for group membership.
+The platform host (`alpha`) and the RKE2 cluster are owned by
+[`42WASD/ubuntu-server-iac`](https://github.com/42WASD/ubuntu-server-iac). This
+repo carries only the Minecraft **game-layer** workloads that run on that
+cluster.
 
 ## GitOps
 
-Argo CD bootstraps two roots:
+Argo CD is bootstrapped by the platform repo and points at the game workloads
+here:
 
-- `kubernetes/platform` — shared platform components (proxy, lobby).
-- `kubernetes/tenants` — tenant-owned workloads (game backends).
+- `kubernetes/platform` — shared game components (proxy, lobby).
+- `kubernetes/tenants` — game backends (Nakama, CockroachDB).
 
 ## Secrets
 
-Secrets (RKE2 token, DB passwords, Tailscale authkey) are never committed.
-They are injected at the right phase via `ansible-vault`, sealed-secrets, or
-env-provided values. See `ansible/README.md` and `.gitignore`.
+Secrets (DB passwords, Nakama API keys) are never committed. They are injected
+via `sealed-secrets` or env-provided values, following the platform repo's
+secret conventions.

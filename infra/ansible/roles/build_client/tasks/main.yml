@@ -1,6 +1,0 @@
----
-- name: Create build client mount point
-  ansible.builtin.file:
-    path: "{{ build_client_dir }}"
-    state: directory
-    mode: "0755"

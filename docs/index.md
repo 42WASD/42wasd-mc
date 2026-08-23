@@ -27,10 +27,13 @@ every invite into dependency troubleshooting.
 
 ## Infrastructure
 
-The platform is operated as code from `infra/` — the single source of truth for
-the hosts (Ansible), the cluster (RKE2 + Kubernetes manifests), and GitOps
-(Argo CD). See [Reference Design](reference-design/index.md) for the phased plan
-that builds toward this.
+The hosting platform — the RKE2 cluster, hosts (`alpha`), GitOps (Argo CD), and
+host-level IaC — is owned by
+[42WASD/ubuntu-server-iac](https://github.com/42WASD/ubuntu-server-iac). This
+repo's `infra/` carries only the Minecraft **game-layer** workloads (proxy,
+lobby, Nakama, CockroachDB) that run on that platform. See
+[Reference Design](reference-design/index.md) for the phased plan that builds
+toward this.
 18. Agones ephemeral fleet (optional)
 19. AI proximity bot
 ```

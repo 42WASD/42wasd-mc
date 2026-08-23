@@ -1,9 +1,0 @@
-// {{ ansible_managed }}
-write-kubeconfig-mode: "0644"
-cni: {{ rke2_cni }}
-token: {{ rke2_token | default('CHANGE_ME') }}
-tls-san:
-  - "{{ rke2_tls_san | default('127.0.0.1') }}"
-{% for arg in rke2_server_extra_args %}
-{{ arg }}
-{% endfor %}

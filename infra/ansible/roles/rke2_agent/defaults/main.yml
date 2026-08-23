@@ -1,4 +1,0 @@
----
-# rke2_agent role defaults
-rke2_agent_server: "https://{{ rke2_server_host | default('rke2-server') }}:9345"
-rke2_agent_cni: "cilium"

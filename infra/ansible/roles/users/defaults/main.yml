@@ -1,4 +1,0 @@
----
-# users role defaults
-# users: list of dicts with { name, shell, groups, sudo, ssh_key }
-users: []

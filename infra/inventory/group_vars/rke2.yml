@@ -1,3 +1,0 @@
----
-# Variables applied to the RKE2 server group.
-# Populate as phases progress (rke2 config, cilium, storage, etc.).

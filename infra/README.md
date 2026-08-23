@@ -1,39 +1,25 @@
 # infra
 
-Infrastructure-as-Code for the 42wasd-mc Kubernetes Minecraft network.
+Minecraft **workload** manifests for the 42wasd-mc Kubernetes network.
 
-This repository is the source of truth for building and operating the platform
-cluster and the Minecraft workloads it runs. It is created up front, before any
-configuration spreads across ad-hoc scripts.
+> **Hosting platform:** the RKE2 cluster, hosts (`alpha`, `build01`), GitOps
+> (Argo CD), and host-level IaC are owned by
+> [`42WASD/ubuntu-server-iac`](https://github.com/42WASD/ubuntu-server-iac).
+> This repo carries only the **game-layer** manifests that run on that platform.
 
 ## Layout
 
-- `ansible/` — configuration management for the platform hosts (the source of truth)
-- `inventory/` — Ansible inventory (production, group_vars, host_vars)
-- `kubernetes/` — manifests applied to the cluster (bootstrap, platform, tenants)
-- `docs/` — architecture, disaster recovery, and upgrade runbook
-- `autoinstall/` — Ubuntu autoinstall configs for fresh host installs
-- `tofu/` — OpenTofu/Terraform for external infrastructure
-- `developer/` — developer build experience (templates, skaffold, remote-build)
+- `kubernetes/platform` — shared Minecraft platform components (proxy, lobby).
+- `kubernetes/tenants` — tenant-owned game backends (Nakama, CockroachDB).
+- `docs/` — operator-facing architecture for the game layer.
 
-## Day-to-day operations
+## Ownership seam
 
-The long-term goal is that an administrator remembers a few commands:
+- The **host platform** (Ansible, RKE2, Argo CD bootstrap, storage, monitoring,
+  OpenTofu, Ubuntu autoinstall) lives in `42WASD/ubuntu-server-iac`.
+- This repo owns only what is **Minecraft-specific**: the proxy/lobby
+  workloads and the Nakama/CockroachDB game backends.
+- Argo CD is bootstrapped by the platform repo; its `Applications` point at the
+  game manifests here via the cluster.
 
-```bash
-make check     # validate inventory + connectivity
-make bootstrap # run the full site playbook
-make verify    # confirm the platform is healthy
-```
-
-instead of remembering 80 one-off commands.
-
-## Quick reference
-
-- `make check` — validate inventory graph and ping all hosts
-- `make ansible` — run `ansible/site.yml`
-- `make bootstrap` — `check` then `ansible`
-- `make verify` — check for failed systemd units on RKE2 servers
-
-See `docs/architecture.md`, `docs/disaster-recovery.md`, and
-`docs/upgrade-runbook.md` for design and operational detail.
+See `docs/architecture.md` for the game-layer operator detail.

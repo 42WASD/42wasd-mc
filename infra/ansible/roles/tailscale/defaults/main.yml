@@ -1,5 +1,0 @@
----
-# tailscale role defaults
-tailscale_authkey: "{{ lookup('env', 'TAILSCALE_AUTHKEY') | default('', true) }}"
-tailscale_advertise_routes: []
-tailscale_exit_node: false

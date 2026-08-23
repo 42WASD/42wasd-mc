@@ -1,3 +1,0 @@
----
-# Per-host facts for alpha (the RKE2 server node).
-# Populate as phases progress (hardware, storage plan, network).

@@ -1,4 +1,0 @@
----
-# developer_limits role defaults
-developer_limit_max_user_instances: "4"
-developer_limit_nofile: "65535"
