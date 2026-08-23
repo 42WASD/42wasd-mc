@@ -69,6 +69,12 @@ async def ensure_ready(map_id):
     }
 ```
 
+`ensure_registered` is the proxy-registration safeguard that is added once
+invites and routing are in place (the "block two" safeguards in
+[world-readiness-contract](../../04-technical-reference/world-readiness-contract/index.md));
+before that, the two-stage Pod-Ready + Minecraft-ready check is enough for a
+direct-join path.
+
 This operation must be idempotent.
 
 The 0->1 scale of the GameServerSet is the one transition a maintained scaler

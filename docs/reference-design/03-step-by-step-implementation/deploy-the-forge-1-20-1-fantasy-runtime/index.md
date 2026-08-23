@@ -32,6 +32,12 @@ loader_version: "PIN_EXACT_TESTED_VERSION"
 pack_revision: "r1"
 ```
 
+> This is a compact **release record**, not the canonical `RuntimeDefinition`
+> schema. The canonical nested shape (with `minecraft.server_type`,
+> `minecraft.loader_version`, `metadata.revision`, `client.distribution`, etc.)
+> lives in [runtimedefinition-schema](../../04-technical-reference/runtimedefinition-schema/index.md)
+> and is what `runtimes/<id>/runtime.yaml` must match.
+
 Pack revision should change when required client dependencies change.
 
 ---

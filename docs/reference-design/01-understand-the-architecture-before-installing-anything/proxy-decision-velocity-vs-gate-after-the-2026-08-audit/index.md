@@ -5,7 +5,7 @@
 As of the audit date:
 
 - Velocity remains actively developed.
-- PaperMC's current getting-started documentation requires **Java 25**.
+- Current Velocity documentation requires **Java 25**.
 - The repository shows a **4.0.0** release in 2026.
 - It has first-class support goals for Paper, Sponge, Fabric and Forge.
 - Its surrounding plugin ecosystem makes TAB, ViaVersion, permissions, social bridges, and custom Java plugins easier to assemble.

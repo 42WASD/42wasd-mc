@@ -7,7 +7,7 @@ Verified against current PaperMC docs/repository.
 Important current facts:
 
 ```text
-Java 25 minimum in current getting-started docs
+Java 25 minimum in current Velocity docs
 4.0.0 release line exists in 2026
 modern forwarding remains recommended for 1.13+
 Paper has native modern forwarding
@@ -86,7 +86,7 @@ Nakama the canonical identity anchor for Discord/Google login; the Minecraft
 UUID/name is a linked runtime binding. Discord is added as a custom OAuth
 provider (not built-in), verified server-side.
 
-Nakama requires a Postgres-wire-compatible database (CockroachDB or another Postgres-compatible server). We use CockroachDB as the production database. Some install examples still mention PostgreSQL for development, but do not make PostgreSQL the production Nakama database in this architecture.
+Nakama requires a Postgres-wire-compatible database (CockroachDB or another Postgres-compatible server such as PostgreSQL). We use CockroachDB as the production pick. PostgreSQL is a supported option but is not this architecture's production database choice.
 
 ---
 

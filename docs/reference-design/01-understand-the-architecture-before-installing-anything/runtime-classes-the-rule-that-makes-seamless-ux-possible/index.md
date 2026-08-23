@@ -2,6 +2,13 @@
 
 Define a small number of supported runtime contracts.
 
+> **Field shapes below are a simplified, reader-friendly summary.** The
+> canonical `RuntimeDefinition` schema uses a nested, flat-top-level snake_case
+> shape and is the single source of truth for `runtimes/<id>/runtime.yaml`. See
+> [runtimedefinition-schema](../../04-technical-reference/runtimedefinition-schema/index.md).
+> The examples here flatten a few of its nested fields (e.g. `kind` ↔
+> `minecraft.server_type`) for quick reading.
+
 ## Runtime A — `vanilla-current`
 
 Example:

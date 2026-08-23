@@ -1,5 +1,9 @@
 # Why several attractive projects are not the foundation
 
+Most projects on this page are **not** the foundation. The one exception is
+**OpenKruiseGame**, which appears here only to contrast with `Shulker` but is
+**selected** — it is clearly marked below.
+
 ## Shulker
 
 Shulker is conceptually very close to this project: a Kubernetes operator for dynamic Minecraft infrastructure.
@@ -18,7 +22,13 @@ The alternative is **not** a generic GitOps tool: it is a **custom World Control
 
 ---
 
-## OpenKruiseGame
+## OpenKruiseGame — SELECTED (not rejected)
+
+> ✅ **Selected as the persistent-world workload.** This is the exception on this
+> page: OKG is *not* a rejected candidate — it is the stateful game-server
+> primitive this design uses (see `install-openkruisegame`,
+> `build-the-world-controller`, `add-idle-sleep`). It is listed here only to
+> contrast with `Shulker` above.
 
 OpenKruiseGame (OKG) is a CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers — a sub-project of OpenKruise.
 
