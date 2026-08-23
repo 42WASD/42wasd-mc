@@ -21,7 +21,8 @@ minecraft
   -> actual game servers
 
 minecraft-system
-  -> proxy, world-controller, social bridge, mc-router
+  -> proxy, world-controller, social bridge, mc-router,
+     CockroachDB, Nakama
 ```
 
 If you already have tenant-specific namespace policy, adapt this rather than bypassing it.

@@ -36,10 +36,9 @@ Do not over-engineer proxy sharding before measuring it.
 server at 20 TPS (smooth) with **maximum MSPT headroom** — including handling a
 **large number of players** — **without breaking mods/plugins**.
 
-> This is the canonical Minecraft-performance reference (originally researched in
-> the platform repo's game-networking phase, relocated here as game-layer
-> knowledge). It is the source of truth for per-game tuning; the platform repo
-> only sets generic policy.
+> This is the canonical Minecraft-performance reference, relocated here as
+> game-layer knowledge. It is the source of truth for per-game tuning; the
+> platform repo (42WASD/ubuntu-server-iac) only sets generic policy.
 
 ## 0. The core model (why "smoother" = lower MSPT, not higher TPS)
 

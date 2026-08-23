@@ -3,7 +3,7 @@
 **Audit date:** 2026-08-19  
 **Purpose:** define a mature, usable, Kubernetes-first architecture for a Minecraft network with dynamic worlds, community maps, parties/invites, world-aware TAB information, random “glitch” routing, modded fantasy runtimes, scale-to-zero, and the smoothest practical client onboarding.
 
-> **Important scope note:** This is a systems-architecture and implementation guide. It deliberately separates **network routing**, **game/world lifecycle**, **social state**, **Minecraft protocol compatibility**, and **client mod/runtime distribution**. No single proxy solves all five problems, and treating them as one problem creates a fragile design.
+> **Important scope note:** This is a systems-architecture and implementation guide. It deliberately separates **network routing**, **game/world lifecycle**, **social state**, **Minecraft protocol compatibility**, and **client mod/runtime distribution**. No single proxy solves all five problems, and treating them as one problem creates a fragile design. The chapter title "seven separate layers" is a finer-grained decomposition of these five problems (entry, proxy, identity, social, game servers, world control, client runtime); the two framings describe the same architecture at different zoom levels.
 
 ---
 

@@ -1,5 +1,10 @@
 # Deploy the Paper lobby
 
+The lobby is an **always-on** world: it never sleeps and is never scaled
+down. It therefore uses a plain `StatefulSet` (the itzg Helm chart is a
+convenient way to author it), not an OpenKruiseGame GameServerSet. `GameServerSet`
+is reserved for sleepable/on-demand worlds; the lobby is a fixed service.
+
 Use `itzg/minecraft-server`.
 
 Conceptual StatefulSet:
@@ -39,7 +44,7 @@ Backend offline mode is acceptable **only because the backend is private behind 
 
 ---
 
-## 22.1 Configure Paper modern forwarding
+## Configure Paper modern forwarding
 
 Current PaperMC guidance:
 
@@ -63,14 +68,14 @@ proxies:
   velocity:
     enabled: true
     online-mode: true
-    secret: "THE_SAME_FORWARDING_SECRET"
+    secret: "THE_SAME_FORWARDING_SECRET"   # mounted from Secret `velocity-forwarding`
 ```
 
 Prefer templating/mounting the secret rather than writing it into Git.
 
 ---
 
-## 22.2 Verify identity
+## Verify identity
 
 Inside lobby:
 

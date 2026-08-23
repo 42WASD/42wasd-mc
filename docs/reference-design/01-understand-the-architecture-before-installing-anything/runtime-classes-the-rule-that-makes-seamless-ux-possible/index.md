@@ -68,7 +68,7 @@ kind: forge
 minecraft_version: "1.20.1"
 client_modpack_required: true
 modpack_id: "fantasy-runtime"
-proxy_compatibility: "velocity + ambassador + proxycompatibleforge"
+proxy_compatibility: "velocity + ambassador + ProxyCompatibleForge"
 community_maps_allowed: true
 ```
 

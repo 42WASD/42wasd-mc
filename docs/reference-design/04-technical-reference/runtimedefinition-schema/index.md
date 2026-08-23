@@ -10,12 +10,12 @@ metadata:
 minecraft:
   version: "1.20.1"
   serverType: FORGE
-  loaderVersion: "PIN_ME"
+  loaderVersion: "47.2.0"   # pin to the exact tested loader
 
 client:
   required: true
   distribution: modrinth-server-project
-  projectId: "PIN_ME"
+  projectId: "your-network-fantasy-runtime"   # Modrinth Server Project slug
 
 proxy:
   kind: velocity

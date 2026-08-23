@@ -15,7 +15,7 @@ It can also use a proxy server name so the final player route still goes to Velo
 
 ---
 
-## 37.1 Why World Controller still remains
+## Why World Controller still remains
 
 New external connection:
 
@@ -45,7 +45,7 @@ logic on scale-down.
 
 ---
 
-## 37.2 Prefer webhook isolation if desired
+## Prefer webhook isolation if desired
 
 `mc-router` supports webhook integration.
 

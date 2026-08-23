@@ -55,7 +55,7 @@ transfer
 
 ---
 
-## 36.1 Never randomly select an incompatible client runtime
+## Never randomly select an incompatible client runtime
 
 Bad:
 

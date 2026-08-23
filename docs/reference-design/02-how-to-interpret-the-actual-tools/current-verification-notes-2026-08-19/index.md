@@ -80,7 +80,7 @@ custom runtime functions
 ```
 
 Nakama natively supports **social-provider authentication** for OAuth-first
-identity: `authenticateGoogle`, `authenticateApple`, and `authenticateCustom`
+identity: `authenticateGoogle` and `authenticateCustom` (a custom OAuth provider for Discord)
 (plus the matching `link*` calls to attach additional identifiers). This makes
 Nakama the canonical identity anchor for Discord/Google login; the Minecraft
 UUID/name is a linked runtime binding. Discord is added as a custom OAuth
@@ -170,15 +170,18 @@ it does NOT provide offline/cracked ACCOUNT authentication
 
 This architecture runs backends in offline mode behind the authenticated proxy (see Phase 5), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
 
-**AstralRinth** (github.com/DIDIRUS4/AstralRinth, mirrored by community forks) is the candidate:
+**AstralRinth** (github.com/SmilerRyan/AstralRinth) is the candidate:
 
 ```text
 fork of the Modrinth App (Theseus core)
 OFFLINE AUTH for cracked + licensed accounts (also elyby)
 no ads, forced telemetry/metrics disabled
 macOS .dmg build (Apple Silicon / Intel) available
-not in maintenance mode (Migurinth's own README confirms)
+active fork (AstralRinth's own README + releases confirm)
 ```
+
+> Note: **Migurinth** is a *different* Modrinth-App fork (in maintenance mode).
+> The design pins AstralRinth specifically, not Migurinth.
 
 It keeps the exact Modrinth App UX (modpack/mod auto-download, server-project onboarding), so players who cannot enter a world with their current client get the same "install requirements and launch directly" flow.
 

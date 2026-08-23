@@ -22,7 +22,7 @@ Do not `SIGKILL` an actively saving world as your normal sleep method.
 
 ---
 
-## 38.1 Separate “empty” from “safe to stop”
+## Separate “empty” from “safe to stop”
 
 A server may be empty but still:
 
@@ -46,7 +46,7 @@ Sleep only when all permit it.
 
 ---
 
-## 38.2 Trigger the scale transition with a maintained scaler
+## Trigger the scale transition with a maintained scaler
 
 The World Controller owns the *safe-to-stop decision* above. It does not need
 to hand-roll the 0↔ scale *trigger* — **KEDA** (CNCF-graduated) can express the

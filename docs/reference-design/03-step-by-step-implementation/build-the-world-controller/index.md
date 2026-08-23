@@ -16,7 +16,7 @@ Correctness matters more.
 
 ---
 
-## 28.1 Minimal API
+## Minimal API
 
 Start with:
 
@@ -35,7 +35,7 @@ Do not begin with 50 endpoints.
 
 ---
 
-## 28.2 `ensure-ready`
+## `ensure-ready`
 
 Pseudo-code:
 
@@ -47,7 +47,7 @@ async def ensure_ready(map_id):
 
     runtime = runtimes.get(map_def.runtime_id)
 
-    gss = k8s.get_gameserverset(map_def.instance_name)
+    gss = k8s.get_gameserverset(map_def.map_id)   # instance_name == map_id
 
     if gss.spec.replicas == 0:
         k8s.scale_gameserverset(gss, 1)
@@ -56,22 +56,32 @@ async def ensure_ready(map_id):
     await wait_for_minecraft_ready(map_def.service_host, 25565)
 
     await proxy_registry.ensure_registered(
-        server_id=map_def.id,
+        server_id=map_def.map_id,
         address=map_def.service_host
     )
 
     return {
         "state": "READY",
-        "server_id": map_def.id,
-        "runtime_id": runtime.id
+        "map_id": map_def.map_id,
+        "runtime_id": runtime.id,
+        "service_host": map_def.service_host,
+        "port": 25565
     }
 ```
 
 This operation must be idempotent.
 
+The 0->1 scale of the GameServerSet is the one transition a maintained scaler
+can own. OpenKruise's "Gameservers Scale" guide shows a KEDA `ScaledObject`
+whose `scaleTargetRef` points directly at the GameServerSet
+(`apiVersion: game.kruise.io/v1alpha1, kind: GameServerSet`) with
+`minReplicaCount: 0`. KEDA provides the 0<->1 edge; the World Controller still
+owns the *decision* to wake (reservations, invites, readiness) and calls the
+GameServerSet `/scale` path directly for product-driven wakes.
+
 ---
 
-## 28.3 Readiness is two-stage
+## Readiness is two-stage
 
 Kubernetes readiness:
 
@@ -99,7 +109,7 @@ one trusted source.
 
 ---
 
-## 28.4 RBAC
+## RBAC
 
 World Controller ServiceAccount should have only what it needs.
 

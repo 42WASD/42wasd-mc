@@ -25,11 +25,11 @@ Do not attempt exact dimensions yet.
 
 ---
 
-## 23.1 Add MiniPlaceholders if needed
+## Add MiniPlaceholders if needed
 
 TAB on Velocity can integrate with MiniPlaceholders.
 
-Later your NetworkBridge can expose values such as:
+Later your NetworkBridge (a later phase) can expose values such as:
 
 ```text
 <network_runtime>
@@ -37,6 +37,9 @@ Later your NetworkBridge can expose values such as:
 <network_dimension>
 <network_party>
 ```
+
+These are a forward contract: TAB renders them once NetworkBridge publishes
+them; no action is needed here.
 
 Acceptance criteria:
 

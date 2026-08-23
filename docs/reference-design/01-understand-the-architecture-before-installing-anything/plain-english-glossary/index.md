@@ -54,4 +54,46 @@ A defined set of Minecraft loader/mod/config dependencies installed before game 
 ## Pending invite
 A durable short-lived record that survives a launcher restart and tells the network where the player intended to go when they reconnect.
 
+## Velocity
+The default modern Minecraft proxy used here. It is the single public entry point that routes players to backend worlds and enforces forwarding identity.
+
+## NetworkBridge
+Your small custom Velocity plugin that binds the Minecraft UUID/name to the Nakama account and triggers World Controller routing (/worlds, /join, /invite).
+
+## Nakama
+An open-source game backend that owns accounts, sessions, friends, parties, invites, presence and chat. Here it is the OAuth-first identity anchor.
+
+## CockroachDB
+The production database Nakama uses for accounts and social state.
+
+## TAB
+A plugin that shows a sidebar/tab list with player info (here: global presence and current world), powered by MiniPlaceholders.
+
+## ViaVersion / ViaBackwards
+Protocol-translation plugins that let clients on other Minecraft versions connect to a newer server (ViaVersion) or let newer clients join older servers (ViaBackwards). They do not install missing mods.
+
+## Ambassador / ProxyCompatibleForge
+Paper's documented way to make Velocity + Forge 1.13–1.20.1 work together (modern forwarding compatible with Forge).
+
+## mc-router
+A hostname-based edge router that can route and optionally wake a sleeping world on the hostname request. It is a trigger, not the lifecycle authority.
+
+## itzg/minecraft-server
+The standard Docker image for running any Minecraft server type/version/modpack. itzg/mc-proxy is its Velocity proxy variant; itzg/mc-monitor probes Minecraft status and exports metrics.
+
+## Modrinth Server Projects
+A Modrinth feature that lets a server publish "the required content to play here", so the launcher can install it and launch directly.
+
+## AstralRinth
+A maintained fork of the Modrinth launcher app that also supports offline/cracked accounts.
+
+## packwiz
+A Git-friendly tool for defining and updating a modpack that server and launcher both consume.
+
+## KEDA
+A Kubernetes event-driven autoscaler that can scale a workload from 0 to 1 (and back). Here it triggers the GameServerSet 0↔1 transition.
+
+## Velero
+A Kubernetes backup/restore tool that snapshots PVCs (including worlds) on a schedule and can restore them elsewhere.
+
 ---

@@ -19,7 +19,7 @@ maintain presence
 
 ---
 
-## 29.1 Never let the plugin directly scale Kubernetes
+## Never let the plugin directly scale Kubernetes
 
 Bad:
 
@@ -39,17 +39,21 @@ Velocity plugin
 
 ---
 
-## 29.2 Dynamic backend registration
+## Dynamic backend registration
 
 When World Controller returns:
 
 ```json
 {
-  "server_id": "backrooms-level-0",
-  "host": "backrooms-level-0.minecraft.svc.cluster.local",
+  "state": "READY",
+  "map_id": "backrooms-level-0",
+  "runtime_id": "backrooms-current",
+  "service_host": "backrooms-level-0.minecraft.svc.cluster.local",
   "port": 25565
 }
 ```
+
+These keys are the canonical `MapInstance` shape from the technical reference.
 
 NetworkBridge can register/update the Velocity backend and then connect the player.
 
@@ -57,8 +61,8 @@ Pseudo-Java:
 
 ```java
 ServerInfo info = new ServerInfo(
-    serverId,
-    new InetSocketAddress(host, port)
+    mapId,
+    new InetSocketAddress(serviceHost, port)
 );
 
 RegisteredServer server =

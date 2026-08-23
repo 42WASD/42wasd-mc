@@ -2,7 +2,8 @@
 
 Create `runtimes/<id>/runtime.yaml`.
 
-Example:
+Example (canonical shape matches the `RuntimeDefinition` schema in the
+technical reference — `04-technical-reference/runtimedefinition-schema`):
 
 ```yaml
 apiVersion: platform.example/v1
@@ -10,32 +11,33 @@ kind: RuntimeDefinition
 metadata:
   id: backrooms-current
 
-spec:
-  minecraft:
-    serverType: PAPER
-    version: "PIN_TESTED_VERSION"
+minecraft:
+  serverType: PAPER
+  version: "PIN_TESTED_VERSION"
 
-  client:
-    modpackRequired: false
-    resourcePackRequired: true
+client:
+  required: false
+  distribution: modrinth-server-project
 
-  routing:
-    viaCompatible: true
-    randomPoolEligible: true
+routing:
+  instantSwitchWithinRuntime: true
+  viaTranslationAllowed: true
 
-  contentPolicy:
-    allowWorldUpload: true
-    allowPluginsFromMap: false
-    allowClientModsFromMap: false
+resources:
+  memory: "2Gi"
+  cpuLimit: "4"
 
-  resources:
-    requests:
-      cpu: "1"
-      memory: "2Gi"
-    limits:
-      cpu: "4"
-      memory: "6Gi"
+startup:
+  timeoutSeconds: 300
+
+idle:
+  sleepAllowed: true
+  timeoutSeconds: 1200
 ```
+
+Content policy (world uploads, plugins-from-map, client mods-from-map) is a
+separate concern enforced by the World Controller and the security boundary,
+not a field on the runtime definition.
 
 This does not have to be a Kubernetes CRD initially.
 

@@ -4,13 +4,14 @@ If you want one compact answer to implement:
 
 ```text
 PUBLIC ENTRY
-  mc-router (optional) -> Velocity 4.0.0 / Java 25
+  itzg/mc-proxy (java25 variant) -> Velocity 4.0.0 / Java 25
+  mc-router (optional) edge wake
 
 VELOCITY
   TAB 6.1.2
   ViaVersion 5.11.0
   ViaBackwards 5.11.0
-  Ambassador for Forge 1.20.1
+  Ambassador + ProxyCompatibleForge for Forge 1.20.1
   custom NetworkBridge
 
 SOCIAL
@@ -21,6 +22,9 @@ DYNAMIC WORLD CONTROL
   custom World Controller
   OpenKruiseGame GameServerSet + PVC
   itzg/minecraft-server
+  itzg/mc-monitor (readiness probe + metrics)
+  KEDA (optional) 0↔1 scale trigger
+  Velero (optional) PVC backup/restore
   mc-router edge wake
   Agones only for ephemeral sessions
 

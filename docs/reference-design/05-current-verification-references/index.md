@@ -98,6 +98,18 @@ The following primary/current sources were checked for this edition. Re-audit th
     https://github.com/jeremylvln/Shulker  
     Architecturally relevant Kubernetes Minecraft operator; re-check maintenance before adoption.
 
+28. **itzg/mc-monitor**  
+    https://github.com/itzg/mc-monitor  
+    Minecraft status/ping probe + Prometheus/Influx metrics exporter used for readiness and per-server metrics.
+
+29. **KEDA ScaledObject specification**  
+    https://keda.sh/docs/reference/scaledobject-spec/  
+    And OpenKruise "Gameservers Scale" guide showing a ScaledObject targeting a GameServerSet (`game.kruise.io/v1alpha1`).
+
+30. **Velero**  
+    https://velero.io/docs/  
+    Scheduled PVC snapshots/restore, off-machine copy, restore-test hooks.
+
 ---
 
 ---

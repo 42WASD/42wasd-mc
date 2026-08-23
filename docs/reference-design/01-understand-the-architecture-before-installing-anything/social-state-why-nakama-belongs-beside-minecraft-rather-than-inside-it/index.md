@@ -40,8 +40,8 @@ Example:
 ```text
 Discord / Google OAuth token
        ↓
-Nakama social-provider authentication (authenticateGoogle / authenticateApple /
-                                        custom OAuth for Discord)
+Nakama social-provider authentication (authenticateGoogle, or a custom OAuth
+                                        provider for Discord)
        ↓
 nakama_user_id  (canonical identity)
        ↓

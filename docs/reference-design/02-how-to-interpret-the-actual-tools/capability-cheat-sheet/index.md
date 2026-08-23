@@ -6,15 +6,19 @@
 | Gate classic | ✅ | custom/API layer | ❌ | ✅ ViaLite path | ❌ | ❌ |
 | TAB | ❌ | display only | ❌ | ❌ | ❌ | ❌ |
 | ViaVersion/Backwards | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Nakama | ❌ MC routing | ✅ | external integration | ❌ | ❌ | metadata only |
+| Nakama | ❌ MC routing | ✅ | ❌ | ❌ | ❌ | metadata only |
 | mc-router | hostname edge routing | ❌ | ✅ limited 0↔1 GameServerSet wake | ❌ | ❌ | ❌ |
 | World Controller | policy decision | integrates | ✅ | compatibility metadata | launcher link selection | coordinates GameServerSet + PVC workload |
 | itzg/minecraft-server | ❌ | ❌ | runs inside K8s | server-specific | server-side pack install | with PVC |
 | Agones | connection allocation | ❌ | ✅ ephemeral/session model | ❌ | ❌ | not the default persistence model |
 | Modrinth Server Projects | ❌ | ❌ | ❌ | selects correct runtime | ✅ | ❌ |
 | packwiz | ❌ | ❌ | ❌ | pack definition | ✅ pre-launch/update workflow | ❌ |
-| itzg/mc-monitor | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ (readiness + metrics) |
-| KEDA | ❌ | ❌ | ✅ scale trigger (0↔1) | ❌ | ❌ | ❌ |
+| OpenKruiseGame GameServerSet | ❌ | ❌ | ✅ stateful game workload, scale-to-zero | ❌ | ❌ | ✅ in-place update + PVC |
+| itzg/mc-proxy | ❌ | ❌ | runs inside K8s | proxy JVM | ❌ | ❌ |
+| CockroachDB | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ (Nakama persistence) |
+| AstralRinth | ❌ | ❌ | ❌ | client runtime | ✅ launcher installs | ❌ |
+| itzg/mc-monitor | ❌ | ❌ | ❌ | ❌ | ❌ | readiness probe + metrics |
+| KEDA | ❌ | ❌ | ✅ 0↔1 scale trigger (decision stays in World Controller) | ❌ | ❌ | ❌ |
 | Velero | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ PVC backup/restore |
 
 The boundaries are deliberate.

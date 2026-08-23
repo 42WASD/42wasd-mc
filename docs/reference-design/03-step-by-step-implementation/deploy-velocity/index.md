@@ -1,8 +1,8 @@
 # Deploy Velocity
 
-## 21.1 Use Java 25
+## Use Java 25
 
-Current PaperMC documentation requires Java 25.
+Current Velocity documentation requires Java 25.
 
 If using `itzg/mc-proxy`, use its Java 25 variant.
 
@@ -41,7 +41,7 @@ spec:
 
 ---
 
-## 21.2 Create forwarding secret
+## Create forwarding secret
 
 Generate a strong random secret:
 
@@ -49,7 +49,8 @@ Generate a strong random secret:
 openssl rand -base64 48
 ```
 
-Store it as a Kubernetes Secret.
+Store it as a Kubernetes Secret named `velocity-forwarding` (the same Secret
+is mounted into every backend and Velocity).
 
 Do not commit it to Git.
 
@@ -62,7 +63,7 @@ forwarding-secret-file = "forwarding.secret"
 
 ---
 
-## 21.3 Configure initial backend
+## Configure initial backend
 
 Start with exactly one backend:
 
@@ -77,7 +78,7 @@ Do not begin with dynamic registration before static connectivity works.
 
 ---
 
-## 21.4 Public exposure
+## Public exposure
 
 Expose Velocity, not backend servers.
 
@@ -95,8 +96,15 @@ Acceptance criteria:
 
 ```text
 [ ] public client reaches Velocity
-[ ] player authenticates in online mode at proxy
+[ ] player authenticates via Nakama OAuth session at proxy (online/cracked
+    clients alike, gated by the Nakama session — see the identity phase)
 [ ] lobby cannot be reached directly from public Internet
 ```
+
+Clarification: the proxy does not run Mojang online-mode for every client.
+Backends run `online-mode=false` and trust Velocity's modern forwarding. For
+offline/cracked accounts, "authentication" means the **Nakama OAuth session**,
+not a Mojang session. A licensed Mojang login is an optional extra; the
+identity anchor is always the Nakama account.
 
 ---

@@ -1,6 +1,6 @@
 # Deploy CockroachDB and Nakama
 
-## 20.1 Why CockroachDB
+## Why CockroachDB
 
 For production Nakama in this design, follow current Nakama documentation and use CockroachDB.
 
@@ -8,7 +8,7 @@ Do not choose PostgreSQL merely because older/community examples are familiar.
 
 ---
 
-## 20.2 Deploy CockroachDB
+## Deploy CockroachDB
 
 Prefer CockroachDB's current supported Helm deployment for Kubernetes.
 
@@ -31,7 +31,7 @@ The social service can be rebuilt; its durable database still needs backups.
 
 ---
 
-## 20.3 Deploy Nakama 3.40.0
+## Deploy Nakama 3.40.0
 
 Pin:
 
@@ -62,7 +62,7 @@ Do not expose its console publicly without authentication/network controls.
 
 ---
 
-## 20.4 Create identity authentication (OAuth-first)
+## Create identity authentication (OAuth-first)
 
 The canonical identity is the **Nakama account created via Discord/Google OAuth**
 (see [Social state: why Nakama belongs beside Minecraft rather than inside it](../../01-understand-the-architecture-before-installing-anything/social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it/index.md)).
@@ -75,8 +75,8 @@ Flow when a player first connects through Velocity:
 ```text
 Discord/Google OAuth (browser or launcher)
    ↓
-Nakama social-provider authentication (authenticateGoogle / authenticateApple
-   or a custom OAuth provider for Discord)
+Nakama social-provider authentication (authenticateGoogle for Google,
+  or a custom OAuth provider for Discord)
    ↓
 Nakama user (canonical identity)
    ↓
@@ -99,16 +99,16 @@ nakama.linkCustom(session, minecraftUuid, player.getUsername());
 
 Notes:
 
-- `authenticateGoogle`/`authenticateApple` are built into Nakama. For Discord,
-  register a **custom OAuth provider** (or use Nakama's custom auth once the
-  token is validated) and call `authenticateCustom`.
+- `authenticateGoogle` is built into Nakama. For Discord, register a **custom
+  OAuth provider** (or use Nakama's custom auth once the token is validated)
+  and call `authenticateCustom`.
 - Store the Nakama session/token server-side, not on the vanilla Minecraft
   client.
 - Never derive the canonical identity from an offline-mode UUID or username.
 
 ---
 
-## 20.5 First test
+## First test
 
 Acceptance criteria:
 
@@ -120,6 +120,12 @@ Acceptance criteria:
 [ ] a player cannot impersonate another player's identity by using their name
 [ ] banned/verified OAuth account is rejected at the edge
 ```
+
+The NetworkBridge-facing criteria are validated **retroactively** once the
+NetworkBridge is built (a later phase). The parts that depend on NetworkBridge
+glue should be re-checked at that point; the DB and Nakama deploy themselves
+are complete once Nakama serves the OAuth identity API and the first test
+account persists.
 
 Do not proceed to parties until this is deterministic.
 

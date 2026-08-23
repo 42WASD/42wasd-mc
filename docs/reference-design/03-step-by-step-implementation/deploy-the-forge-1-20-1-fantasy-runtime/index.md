@@ -18,7 +18,7 @@ ProxyCompatibleForge supplies Velocity modern forwarding support for Forge.
 
 ---
 
-## 25.1 Pin the fantasy runtime
+## Pin the fantasy runtime
 
 Do not use loose ranges.
 
@@ -36,7 +36,7 @@ Pack revision should change when required client dependencies change.
 
 ---
 
-## 25.2 Author the pack
+## Author the pack
 
 Recommended:
 
@@ -54,7 +54,7 @@ Use the **AstralRinth** launcher (offline-capable Modrinth App fork) so players 
 
 ---
 
-## 25.3 Server installation
+## Server installation
 
 Use `itzg/minecraft-server` with the selected modpack installation method.
 
@@ -64,7 +64,7 @@ Do not let the world directory disappear with the Pod.
 
 ---
 
-## 25.4 Test proxy switching
+## Test proxy switching
 
 Test:
 

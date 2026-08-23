@@ -1,6 +1,7 @@
 # Define map metadata
 
-Example:
+Example (canonical shape matches the `MapInstance` naming convention in the
+technical reference — flat top-level keys, snake_case):
 
 ```yaml
 apiVersion: platform.example/v1
@@ -8,33 +9,33 @@ kind: MapDefinition
 
 metadata:
   id: backrooms-level-0
-  displayName: "Backrooms — Level 0"
-  creatorId: "user-123"
+  display_name: "Backrooms — Level 0"
+  creator_id: "user-123"
 
-spec:
-  runtimeId: backrooms-current
+runtime_id: backrooms-current
+enabled: true
 
-  persistence: persistent
+persistence: persistent
 
-  capacity:
-    maxPlayers: 12
+capacity:
+  max_players: 12
 
-  routing:
-    public: true
-    randomEligible: true
-    allowPartyJoin: true
-    weight: 1.0
+routing:
+  public: true
+  random_eligible: true
+  allow_party_join: true
+  weight: 1.0
 
-  tags:
-    - horror
-    - backrooms
-    - community
+tags:
+  - horror
+  - backrooms
+  - community
 
-  world:
-    pvc: backrooms-level-0-world
+world:
+  pvc: backrooms-level-0-world
 
-  idle:
-    sleepAfterSeconds: 600
+idle:
+  sleep_after_seconds: 600
 ```
 
 Separate:
@@ -43,5 +44,8 @@ Separate:
 MapDefinition = what the world is
 MapInstance   = current running state
 ```
+
+The `enabled` field is the source of the World Controller's `map_def.enabled`
+guard; the `world.pvc` value is what maps to the GameServerSet instance name.
 
 ---

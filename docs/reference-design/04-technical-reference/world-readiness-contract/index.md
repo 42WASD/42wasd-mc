@@ -1,16 +1,27 @@
 # World readiness contract
 
-World Controller returns READY only when:
+The World Controller's `ensure-ready` returns READY only when:
 
 ```text
 GameServerSet desired replicas >= 1
 Pod Ready
-Service endpoints exist
 Minecraft status check succeeds
+backend registered with the proxy
+```
+
+A fuller, staging-time contract can additionally require:
+
+```text
+Service endpoints exist
 runtime revision matches expected revision
 server is not draining
 capacity reservation is available
 ```
+
+The first block is what `ensure-ready` currently implements (two-stage:
+Pod Ready, then Minecraft `status/ping`). The second block are the safeguards
+you add once invites, draining, and reservations are in place. Keep the two
+blocks labeled so the implementation and the contract do not drift.
 
 This contract is more useful than a generic `/healthz`.
 
