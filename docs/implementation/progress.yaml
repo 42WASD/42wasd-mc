@@ -1,14 +1,16 @@
 # Implementation progress — 42wasd-mc
 #
-# Source of truth for the status of each build phase under
-# docs/reference-design/build/. Status values:
+# Source of truth for the status of each build phase in the reading-order
+# manifest (docs/reference-design/_sequence.yaml). Status values:
 #   done | in-progress | not-started | blocked | deferred
 #
-# Key by the section slug under build/03-step-by-step-implementation/.
+# Key by the part slug + section slug, e.g.
+#   03-step-by-step-implementation:
+#     deploy-cockroachdb-and-nakama: done
 # You may set a status on a part, a phase, or a nested section; any section
 # without an explicit status inherits its nearest ancestor's.
 
-build:
+03-step-by-step-implementation:
   # Phase 0 — Decide names before deploying
   # Phase 1 — Create repository structure
   # Phase 2 — Create Kubernetes namespaces

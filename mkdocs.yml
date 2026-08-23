@@ -67,77 +67,74 @@ nav:
     - Parties & Friends: guides/player-experience/parties-and-friends.md
 - Reference Design:
   - Overview: reference-design/index.md
-  - Concepts & Design:
-    - Part I — Understand the architecture before installing anything:
-      - Overview: reference-design/background/01-understand-the-architecture-before-installing-anything/index.md
-      - The one-sentence idea: reference-design/background/01-understand-the-architecture-before-installing-anything/00-0-the-one-sentence-idea/index.md
-      - Why the tempting “one tool solves everything” design is wrong: reference-design/background/01-understand-the-architecture-before-installing-anything/01-1-why-the-tempting-one-tool-solves-everything-design-is-wrong/index.md
-      - "The complete mental model: seven separate layers": reference-design/background/01-understand-the-architecture-before-installing-anything/02-2-the-complete-mental-model-seven-separate-layers/index.md
-      - "Runtime classes: the rule that makes seamless UX possible": reference-design/background/01-understand-the-architecture-before-installing-anything/03-3-runtime-classes-the-rule-that-makes-seamless-ux-possible/index.md
-      - "Proxy decision: Velocity vs Gate after the 2026-08 audit": reference-design/background/01-understand-the-architecture-before-installing-anything/04-4-proxy-decision-velocity-vs-gate-after-the-2026-08-audit/index.md
-      - The selected tool stack: reference-design/background/01-understand-the-architecture-before-installing-anything/05-5-the-selected-tool-stack/index.md
-      - Why several attractive projects are not the foundation: reference-design/background/01-understand-the-architecture-before-installing-anything/06-6-why-several-attractive-projects-are-not-the-foundation/index.md
-      - "Social state: why Nakama belongs beside Minecraft rather than inside it": reference-design/background/01-understand-the-architecture-before-installing-anything/07-7-social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it/index.md
-      - Dynamic world lifecycle: reference-design/background/01-understand-the-architecture-before-installing-anything/08-8-dynamic-world-lifecycle/index.md
-      - End-to-end user experiences: reference-design/background/01-understand-the-architecture-before-installing-anything/09-9-end-to-end-user-experiences/index.md
-      - Plain-English glossary: reference-design/background/01-understand-the-architecture-before-installing-anything/10-10-plain-english-glossary/index.md
-    - Part II — How to interpret the actual tools:
-      - Overview: reference-design/background/02-how-to-interpret-the-actual-tools/index.md
-      - Capability cheat sheet: reference-design/background/02-how-to-interpret-the-actual-tools/00-11-capability-cheat-sheet/index.md
-      - Maturity and deployment tiers: reference-design/background/02-how-to-interpret-the-actual-tools/01-12-maturity-and-deployment-tiers/index.md
-      - Current verification notes — 2026-08-19: reference-design/background/02-how-to-interpret-the-actual-tools/02-13-current-verification-notes-2026-08-19/index.md
-      - Failure modes you must design for: reference-design/background/02-how-to-interpret-the-actual-tools/03-14-failure-modes-you-must-design-for/index.md
-      - Observability: reference-design/background/02-how-to-interpret-the-actual-tools/04-15-observability/index.md
-      - Security boundaries: reference-design/background/02-how-to-interpret-the-actual-tools/05-16-security-boundaries/index.md
-  - Build (Implementation Phases):
-    - Part III — Step-by-step implementation:
-      - Overview: reference-design/build/03-step-by-step-implementation/index.md
-      - Phase 0 — Decide names before deploying: reference-design/build/03-step-by-step-implementation/00-17-phase-0-decide-names-before-deploying/index.md
-      - Phase 1 — Create repository structure: reference-design/build/03-step-by-step-implementation/01-18-phase-1-create-repository-structure/index.md
-      - Phase 2 — Create Kubernetes namespaces: reference-design/build/03-step-by-step-implementation/02-19-phase-2-create-kubernetes-namespaces/index.md
-      - Phase 3 — Deploy CockroachDB and Nakama: reference-design/build/03-step-by-step-implementation/03-20-phase-3-deploy-cockroachdb-and-nakama/index.md
-      - Phase 4 — Deploy Velocity: reference-design/build/03-step-by-step-implementation/04-21-phase-4-deploy-velocity/index.md
-      - Phase 5 — Deploy the Paper lobby: reference-design/build/03-step-by-step-implementation/05-22-phase-5-deploy-the-paper-lobby/index.md
-      - Phase 6 — Install TAB: reference-design/build/03-step-by-step-implementation/06-23-phase-6-install-tab/index.md
-      - Phase 7 — Add ViaVersion and ViaBackwards: reference-design/build/03-step-by-step-implementation/07-24-phase-7-add-viaversion-and-viabackwards/index.md
-      - Phase 8 — Deploy the Forge 1.20.1 fantasy runtime: reference-design/build/03-step-by-step-implementation/08-25-phase-8-deploy-the-forge-1-20-1-fantasy-runtime/index.md
-      - Phase 9 — Define the runtime catalog: reference-design/build/03-step-by-step-implementation/09-26-phase-9-define-the-runtime-catalog/index.md
-      - Phase 10 — Define map metadata: reference-design/build/03-step-by-step-implementation/10-27-phase-10-define-map-metadata/index.md
-      - Phase 11 — Build the World Controller: reference-design/build/03-step-by-step-implementation/11-28-phase-11-build-the-world-controller/index.md
-      - Phase 12 — Build NetworkBridge for Velocity: reference-design/build/03-step-by-step-implementation/12-29-phase-12-build-networkbridge-for-velocity/index.md
-      - Phase 13 — Implement friends and parties: reference-design/build/03-step-by-step-implementation/13-30-phase-13-implement-friends-and-parties/index.md
-      - Phase 14 — Implement `/join <friend>`: reference-design/build/03-step-by-step-implementation/14-31-phase-14-implement-join-friend/index.md
-      - Phase 15 — Implement pending cross-runtime invites: reference-design/build/03-step-by-step-implementation/15-32-phase-15-implement-pending-cross-runtime-invites/index.md
-      - Phase 16 — Publish Modrinth Server Projects: reference-design/build/03-step-by-step-implementation/16-33-phase-16-publish-modrinth-server-projects/index.md
-      - Phase 17 — Add packwiz CI: reference-design/build/03-step-by-step-implementation/17-34-phase-17-add-packwiz-ci/index.md
-      - Phase 18 — Add exact world/dimension TAB information: reference-design/build/03-step-by-step-implementation/18-35-phase-18-add-exact-world-dimension-tab-information/index.md
-      - Phase 19 — Implement the glitch/random portal: reference-design/build/03-step-by-step-implementation/19-36-phase-19-implement-the-glitch-random-portal/index.md
-      - Phase 20 — Add mc-router: reference-design/build/03-step-by-step-implementation/20-37-phase-20-add-mc-router/index.md
-      - Phase 21 — Add idle sleep: reference-design/build/03-step-by-step-implementation/21-38-phase-21-add-idle-sleep/index.md
-      - Phase 22 — Add Agones only for session worlds: reference-design/build/03-step-by-step-implementation/22-39-phase-22-add-agones-only-for-session-worlds/index.md
-      - Phase 23 — Add AI proximity chat: reference-design/build/03-step-by-step-implementation/23-40-phase-23-add-ai-proximity-chat/index.md
-      - Phase 24 — Community map upload pipeline: reference-design/build/03-step-by-step-implementation/24-41-phase-24-community-map-upload-pipeline/index.md
-      - Phase 25 — Backups: reference-design/build/03-step-by-step-implementation/25-42-phase-25-backups/index.md
-      - Phase 26 — Monitoring: reference-design/build/03-step-by-step-implementation/26-43-phase-26-monitoring/index.md
-      - Phase 27 — Rollout order: reference-design/build/03-step-by-step-implementation/27-44-phase-27-rollout-order/index.md
-  - Reference Material:
-    - Part IV — Technical reference:
-      - Overview: reference-design/reference/04-technical-reference/index.md
-      - Recommended source-of-truth model: reference-design/reference/04-technical-reference/00-45-recommended-source-of-truth-model/index.md
-      - RuntimeDefinition schema: reference-design/reference/04-technical-reference/01-46-runtimedefinition-schema/index.md
-      - MapInstance schema: reference-design/reference/04-technical-reference/02-47-mapinstance-schema/index.md
-      - Routing state machine: reference-design/reference/04-technical-reference/03-48-routing-state-machine/index.md
-      - Random routing scoring: reference-design/reference/04-technical-reference/04-49-random-routing-scoring/index.md
-      - Invite policy: reference-design/reference/04-technical-reference/05-50-invite-policy/index.md
-      - World readiness contract: reference-design/reference/04-technical-reference/06-51-world-readiness-contract/index.md
-      - Network security checklist: reference-design/reference/04-technical-reference/07-52-network-security-checklist/index.md
-      - Functional acceptance test: reference-design/reference/04-technical-reference/08-53-functional-acceptance-test/index.md
-      - Performance principles: reference-design/reference/04-technical-reference/09-54-performance-principles/index.md
-      - Upgrade policy: reference-design/reference/04-technical-reference/10-55-upgrade-policy/index.md
-      - Why this architecture is intentionally not “fully automatic” on day one: reference-design/reference/04-technical-reference/11-56-why-this-architecture-is-intentionally-not-fully-automatic-on-day-one/index.md
-    - Part V — Current verification references:
-      - Overview: reference-design/reference/05-current-verification-references/index.md
-      - Final architecture recommendation: reference-design/reference/05-current-verification-references/00-57-final-architecture-recommendation/index.md
+  - I — Understand the architecture before installing anything:
+    - Overview: reference-design/01-understand-the-architecture-before-installing-anything/index.md
+    - The one-sentence idea: reference-design/01-understand-the-architecture-before-installing-anything/the-one-sentence-idea/index.md
+    - Why the tempting “one tool solves everything” design is wrong: reference-design/01-understand-the-architecture-before-installing-anything/why-the-tempting-one-tool-solves-everything-design-is-wrong/index.md
+    - "The complete mental model: seven separate layers": reference-design/01-understand-the-architecture-before-installing-anything/the-complete-mental-model-seven-separate-layers/index.md
+    - "Runtime classes: the rule that makes seamless UX possible": reference-design/01-understand-the-architecture-before-installing-anything/runtime-classes-the-rule-that-makes-seamless-ux-possible/index.md
+    - "Proxy decision: Velocity vs Gate after the 2026-08 audit": reference-design/01-understand-the-architecture-before-installing-anything/proxy-decision-velocity-vs-gate-after-the-2026-08-audit/index.md
+    - The selected tool stack: reference-design/01-understand-the-architecture-before-installing-anything/the-selected-tool-stack/index.md
+    - Why several attractive projects are not the foundation: reference-design/01-understand-the-architecture-before-installing-anything/why-several-attractive-projects-are-not-the-foundation/index.md
+    - "Social state: why Nakama belongs beside Minecraft rather than inside it": reference-design/01-understand-the-architecture-before-installing-anything/social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it/index.md
+    - Dynamic world lifecycle: reference-design/01-understand-the-architecture-before-installing-anything/dynamic-world-lifecycle/index.md
+    - End-to-end user experiences: reference-design/01-understand-the-architecture-before-installing-anything/end-to-end-user-experiences/index.md
+    - Plain-English glossary: reference-design/01-understand-the-architecture-before-installing-anything/plain-english-glossary/index.md
+  - II — How to interpret the actual tools:
+    - Overview: reference-design/02-how-to-interpret-the-actual-tools/index.md
+    - Capability cheat sheet: reference-design/02-how-to-interpret-the-actual-tools/capability-cheat-sheet/index.md
+    - Maturity and deployment tiers: reference-design/02-how-to-interpret-the-actual-tools/maturity-and-deployment-tiers/index.md
+    - Current verification notes — 2026-08-19: reference-design/02-how-to-interpret-the-actual-tools/current-verification-notes-2026-08-19/index.md
+    - Failure modes you must design for: reference-design/02-how-to-interpret-the-actual-tools/failure-modes-you-must-design-for/index.md
+    - Observability: reference-design/02-how-to-interpret-the-actual-tools/observability/index.md
+    - Security boundaries: reference-design/02-how-to-interpret-the-actual-tools/security-boundaries/index.md
+  - III — Step-by-step implementation:
+    - Overview: reference-design/03-step-by-step-implementation/index.md
+    - Phase 0 — Decide names before deploying: reference-design/03-step-by-step-implementation/decide-names-before-deploying/index.md
+    - Phase 1 — Create repository structure: reference-design/03-step-by-step-implementation/create-repository-structure/index.md
+    - Phase 2 — Create Kubernetes namespaces: reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md
+    - Phase 3 — Deploy CockroachDB and Nakama: reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md
+    - Phase 4 — Deploy Velocity: reference-design/03-step-by-step-implementation/deploy-velocity/index.md
+    - Phase 5 — Deploy the Paper lobby: reference-design/03-step-by-step-implementation/deploy-the-paper-lobby/index.md
+    - Phase 6 — Install TAB: reference-design/03-step-by-step-implementation/install-tab/index.md
+    - Phase 7 — Add ViaVersion and ViaBackwards: reference-design/03-step-by-step-implementation/add-viaversion-and-viabackwards/index.md
+    - Phase 8 — Deploy the Forge 1.20.1 fantasy runtime: reference-design/03-step-by-step-implementation/deploy-the-forge-1-20-1-fantasy-runtime/index.md
+    - Phase 9 — Define the runtime catalog: reference-design/03-step-by-step-implementation/define-the-runtime-catalog/index.md
+    - Phase 10 — Define map metadata: reference-design/03-step-by-step-implementation/define-map-metadata/index.md
+    - Phase 11 — Build the World Controller: reference-design/03-step-by-step-implementation/build-the-world-controller/index.md
+    - Phase 12 — Build NetworkBridge for Velocity: reference-design/03-step-by-step-implementation/build-networkbridge-for-velocity/index.md
+    - Phase 13 — Implement friends and parties: reference-design/03-step-by-step-implementation/implement-friends-and-parties/index.md
+    - Phase 14 — Implement `/join <friend>`: reference-design/03-step-by-step-implementation/implement-join-friend/index.md
+    - Phase 15 — Implement pending cross-runtime invites: reference-design/03-step-by-step-implementation/implement-pending-cross-runtime-invites/index.md
+    - Phase 16 — Publish Modrinth Server Projects: reference-design/03-step-by-step-implementation/publish-modrinth-server-projects/index.md
+    - Phase 17 — Add packwiz CI: reference-design/03-step-by-step-implementation/add-packwiz-ci/index.md
+    - Phase 18 — Add exact world/dimension TAB information: reference-design/03-step-by-step-implementation/add-exact-world-dimension-tab-information/index.md
+    - Phase 19 — Implement the glitch/random portal: reference-design/03-step-by-step-implementation/implement-the-glitch-random-portal/index.md
+    - Phase 20 — Add mc-router: reference-design/03-step-by-step-implementation/add-mc-router/index.md
+    - Phase 21 — Add idle sleep: reference-design/03-step-by-step-implementation/add-idle-sleep/index.md
+    - Phase 22 — Add Agones only for session worlds: reference-design/03-step-by-step-implementation/add-agones-only-for-session-worlds/index.md
+    - Phase 23 — Add AI proximity chat: reference-design/03-step-by-step-implementation/add-ai-proximity-chat/index.md
+    - Phase 24 — Community map upload pipeline: reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md
+    - Phase 25 — Backups: reference-design/03-step-by-step-implementation/backups/index.md
+    - Phase 26 — Monitoring: reference-design/03-step-by-step-implementation/monitoring/index.md
+    - Phase 27 — Rollout order: reference-design/03-step-by-step-implementation/rollout-order/index.md
+  - IV — Technical reference:
+    - Overview: reference-design/04-technical-reference/index.md
+    - Recommended source-of-truth model: reference-design/04-technical-reference/recommended-source-of-truth-model/index.md
+    - RuntimeDefinition schema: reference-design/04-technical-reference/runtimedefinition-schema/index.md
+    - MapInstance schema: reference-design/04-technical-reference/mapinstance-schema/index.md
+    - Routing state machine: reference-design/04-technical-reference/routing-state-machine/index.md
+    - Random routing scoring: reference-design/04-technical-reference/random-routing-scoring/index.md
+    - Invite policy: reference-design/04-technical-reference/invite-policy/index.md
+    - World readiness contract: reference-design/04-technical-reference/world-readiness-contract/index.md
+    - Network security checklist: reference-design/04-technical-reference/network-security-checklist/index.md
+    - Functional acceptance test: reference-design/04-technical-reference/functional-acceptance-test/index.md
+    - Performance principles: reference-design/04-technical-reference/performance-principles/index.md
+    - Upgrade policy: reference-design/04-technical-reference/upgrade-policy/index.md
+    - Why this architecture is intentionally not “fully automatic” on day one: reference-design/04-technical-reference/why-this-architecture-is-intentionally-not-fully-automatic-on-day-one/index.md
+  - V — Current verification references:
+    - Overview: reference-design/05-current-verification-references/index.md
+    - Final architecture recommendation: reference-design/05-current-verification-references/final-architecture-recommendation/index.md
 - Implementation:
   - Progress: implementation/index.md
 # <<< nav-autogen (generated) <<<

@@ -63,6 +63,6 @@ configuration detail on each component, see the corresponding build phase.
 
 ## Acceptance
 
-Run the [functional acceptance test](../reference-design/reference/04-technical-reference/08-53-functional-acceptance-test/index.md) at the end of each
+Run the [functional acceptance test](../reference-design/04-technical-reference/functional-acceptance-test/index.md) at the end of each
 milestone, and track progress on the
 [Implementation page](../implementation/index.md).

@@ -1,5 +1,5 @@
 ---
-phase: reference-design/build/03-step-by-step-implementation/01-18-phase-1-create-repository-structure
+phase: reference-design/03-step-by-step-implementation/create-repository-structure
 ---
 # Repository structure replication + infra skeleton
 

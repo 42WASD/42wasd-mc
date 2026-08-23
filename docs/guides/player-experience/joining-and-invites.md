@@ -9,7 +9,7 @@ invites.
   lands in the lobby.
 - `/join <server>` moves a player to a named backend.
 - `/join <friend>` joins a friend's backend (see
-  [Phase 14](../../reference-design/build/03-step-by-step-implementation/14-31-phase-14-implement-join-friend/index.md)).
+  [Phase 14](../../reference-design/03-step-by-step-implementation/implement-join-friend/index.md)).
 
 ## Invites
 
@@ -18,9 +18,9 @@ invites.
 - **Runtime compatibility** decides whether a given player *can* join.
 - A vanilla player invited to a Forge map is blocked unless they install the
   required runtime (see
-  [Phase 15 — cross-runtime invites](../../reference-design/build/03-step-by-step-implementation/15-32-phase-15-implement-pending-cross-runtime-invites/index.md)).
+  [Phase 15 — cross-runtime invites](../../reference-design/03-step-by-step-implementation/implement-pending-cross-runtime-invites/index.md)).
 
 ## See also
 
-- [Invite policy (reference)](../../reference-design/reference/04-technical-reference/05-50-invite-policy/index.md)
+- [Invite policy (reference)](../../reference-design/04-technical-reference/invite-policy/index.md)
 - [Parties & Friends](parties-and-friends.md)

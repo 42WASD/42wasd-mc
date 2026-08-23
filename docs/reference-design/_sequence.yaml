@@ -1,0 +1,99 @@
+# Reference design reading order — SINGLE SOURCE OF TRUTH (SSOT)
+#
+# This manifest is the ONLY place the reading order of the reference design is
+# defined. Both docs generators (docs-generate-nav.py and
+# docs-generate-implementation.py) read this file and DERIVE every number from
+# position in this tree:
+#
+#   - Part numeral (I, II, III ...)  <- index of the part in `parts`
+#   - Phase number                   <- global position of a tracked section
+#   - tracked (build) vs untracked   <- the `tracked:` flag below
+#
+# Because numbers are DERIVED from list order and never stored in page files,
+# two phases can never collide. To insert, remove, or reorder a phase, edit
+# THIS file only, then re-run both generators.
+#
+# Rules:
+#   - `parts` is an ordered list. Each entry is a dict: { slug: {tracked, sections} }.
+#   - `slug` = the folder name under docs/reference-design/.
+#   - `sections` = ordered list of direct child folders (slugs) under that part.
+#   - Each section may have an optional `subsections` list for deeper nesting.
+#   - A part is tracked (appears on the Implementation progress page) iff
+#     `tracked: true`. Part 03 is the actionable build phase; the rest are
+#     concepts/reference chapters.
+#   - Slugs must match the actual folder names on disk.
+
+parts:
+  - 01-understand-the-architecture-before-installing-anything:
+      tracked: false
+      sections:
+        - the-one-sentence-idea
+        - why-the-tempting-one-tool-solves-everything-design-is-wrong
+        - the-complete-mental-model-seven-separate-layers
+        - runtime-classes-the-rule-that-makes-seamless-ux-possible
+        - proxy-decision-velocity-vs-gate-after-the-2026-08-audit
+        - the-selected-tool-stack
+        - why-several-attractive-projects-are-not-the-foundation
+        - social-state-why-nakama-belongs-beside-minecraft-rather-than-inside-it
+        - dynamic-world-lifecycle
+        - end-to-end-user-experiences
+        - plain-english-glossary
+  - 02-how-to-interpret-the-actual-tools:
+      tracked: false
+      sections:
+        - capability-cheat-sheet
+        - maturity-and-deployment-tiers
+        - current-verification-notes-2026-08-19
+        - failure-modes-you-must-design-for
+        - observability
+        - security-boundaries
+  - 03-step-by-step-implementation:
+      tracked: true
+      sections:
+        - decide-names-before-deploying
+        - create-repository-structure
+        - create-kubernetes-namespaces
+        - deploy-cockroachdb-and-nakama
+        - deploy-velocity
+        - deploy-the-paper-lobby
+        - install-tab
+        - add-viaversion-and-viabackwards
+        - deploy-the-forge-1-20-1-fantasy-runtime
+        - define-the-runtime-catalog
+        - define-map-metadata
+        - build-the-world-controller
+        - build-networkbridge-for-velocity
+        - implement-friends-and-parties
+        - implement-join-friend
+        - implement-pending-cross-runtime-invites
+        - publish-modrinth-server-projects
+        - add-packwiz-ci
+        - add-exact-world-dimension-tab-information
+        - implement-the-glitch-random-portal
+        - add-mc-router
+        - add-idle-sleep
+        - add-agones-only-for-session-worlds
+        - add-ai-proximity-chat
+        - community-map-upload-pipeline
+        - backups
+        - monitoring
+        - rollout-order
+  - 04-technical-reference:
+      tracked: false
+      sections:
+        - recommended-source-of-truth-model
+        - runtimedefinition-schema
+        - mapinstance-schema
+        - routing-state-machine
+        - random-routing-scoring
+        - invite-policy
+        - world-readiness-contract
+        - network-security-checklist
+        - functional-acceptance-test
+        - performance-principles
+        - upgrade-policy
+        - why-this-architecture-is-intentionally-not-fully-automatic-on-day-one
+  - 05-current-verification-references:
+      tracked: false
+      sections:
+        - final-architecture-recommendation

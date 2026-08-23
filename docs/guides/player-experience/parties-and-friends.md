@@ -22,5 +22,5 @@ Configure the Nakama-powered social layer.
 
 ## See also
 
-- [Phase 13 — friends and parties](../../reference-design/build/03-step-by-step-implementation/13-30-phase-13-implement-friends-and-parties/index.md)
-- [Invite policy (reference)](../../reference-design/reference/04-technical-reference/05-50-invite-policy/index.md)
+- [Phase 13 — friends and parties](../../reference-design/03-step-by-step-implementation/implement-friends-and-parties/index.md)
+- [Invite policy (reference)](../../reference-design/04-technical-reference/invite-policy/index.md)

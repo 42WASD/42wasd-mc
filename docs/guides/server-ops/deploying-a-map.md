@@ -1,7 +1,7 @@
 # Deploying a Map
 
 How to bring a new map onto the network. The full pipeline is defined in
-[Phase 24 — Community map upload pipeline](../../reference-design/build/03-step-by-step-implementation/24-41-phase-24-community-map-upload-pipeline/index.md).
+[Phase 24 — Community map upload pipeline](../../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md).
 
 ## Steps
 
@@ -11,13 +11,13 @@ How to bring a new map onto the network. The full pipeline is defined in
    (`vanilla-current`, `fantasy-1.20.1-forge`, etc.).
 3. **Register map metadata** — add a map definition with its `runtimeId` to the
    World Controller (see
-   [Phase 10 — map metadata](../../reference-design/build/03-step-by-step-implementation/10-27-phase-10-define-map-metadata/index.md)).
+   [Phase 10 — map metadata](../../reference-design/03-step-by-step-implementation/define-map-metadata/index.md)).
 4. **Deploy the backend** — for a static map, a StatefulSet; for a dynamic map,
    a scale-to-zero StatefulSet with a PVC.
 5. **Point routing** — the proxy / controller now resolves the map to its
    backend.
 6. **Validate** — run the
-   [functional acceptance test](../../reference-design/reference/04-technical-reference/08-53-functional-acceptance-test/index.md).
+   [functional acceptance test](../../reference-design/04-technical-reference/functional-acceptance-test/index.md).
 
 ## Validation checklist
 
@@ -30,5 +30,5 @@ How to bring a new map onto the network. The full pipeline is defined in
 
 ## See also
 
-- [Dynamic world lifecycle](../../reference-design/background/01-understand-the-architecture-before-installing-anything/08-8-dynamic-world-lifecycle/index.md)
+- [Dynamic world lifecycle](../../reference-design/01-understand-the-architecture-before-installing-anything/dynamic-world-lifecycle/index.md)
 - [Runtime classes](../architecture/runtime-classes.md)

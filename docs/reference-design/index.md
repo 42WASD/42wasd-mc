@@ -11,8 +11,8 @@
 
 ## Platform Map
 
-- [I — Understand the architecture before installing anything](background/01-understand-the-architecture-before-installing-anything/index.md)
-- [II — How to interpret the actual tools](background/02-how-to-interpret-the-actual-tools/index.md)
-- [III — Step-by-step implementation](build/03-step-by-step-implementation/index.md)
-- [IV — Technical reference](reference/04-technical-reference/index.md)
-- [V — Current verification references](reference/05-current-verification-references/index.md)
+- [I — Understand the architecture before installing anything](01-understand-the-architecture-before-installing-anything/index.md)
+- [II — How to interpret the actual tools](02-how-to-interpret-the-actual-tools/index.md)
+- [III — Step-by-step implementation](03-step-by-step-implementation/index.md)
+- [IV — Technical reference](04-technical-reference/index.md)
+- [V — Current verification references](05-current-verification-references/index.md)

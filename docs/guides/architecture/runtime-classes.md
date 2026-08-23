@@ -25,5 +25,5 @@ map. The core rule of this architecture:
 
 ## See also
 
-- [Runtime classes (concept)](../../reference-design/background/01-understand-the-architecture-before-installing-anything/03-3-runtime-classes-the-rule-that-makes-seamless-ux-possible/index.md)
-- [RuntimeDefinition schema](../../reference-design/reference/04-technical-reference/01-46-runtimedefinition-schema/index.md)
+- [Runtime classes (concept)](../../reference-design/01-understand-the-architecture-before-installing-anything/runtime-classes-the-rule-that-makes-seamless-ux-possible/index.md)
+- [RuntimeDefinition schema](../../reference-design/04-technical-reference/runtimedefinition-schema/index.md)

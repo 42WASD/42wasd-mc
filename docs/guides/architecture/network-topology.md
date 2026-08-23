@@ -24,5 +24,5 @@ Player
 
 ## See also
 
-- [Dynamic world lifecycle](../../reference-design/background/01-understand-the-architecture-before-installing-anything/08-8-dynamic-world-lifecycle/index.md)
-- [World Controller](../../reference-design/build/03-step-by-step-implementation/11-28-phase-11-build-the-world-controller/index.md)
+- [Dynamic world lifecycle](../../reference-design/01-understand-the-architecture-before-installing-anything/dynamic-world-lifecycle/index.md)
+- [World Controller](../../reference-design/03-step-by-step-implementation/build-the-world-controller/index.md)
