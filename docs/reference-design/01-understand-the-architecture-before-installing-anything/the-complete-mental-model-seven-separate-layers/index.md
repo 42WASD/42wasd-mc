@@ -101,7 +101,7 @@ Use:
 ```text
 Paper for vanilla-compatible modes
 Forge for fantasy-1.20.1
-persistent StatefulSet + PVC for durable worlds
+persistent OpenKruiseGame GameServerSet + PVC for durable worlds
 Agones only for session-style disposable/warm-pool instances
 ```
 

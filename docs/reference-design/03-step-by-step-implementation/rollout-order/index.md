@@ -11,7 +11,7 @@ Use this exact order:
 6. friends + parties
 7. one static second backend + /join
 8. World Controller
-9. one persistent StatefulSet scale-to-zero map
+9. one persistent GameServerSet scale-to-zero map
 10. portal -> wake -> transfer
 11. exact map presence + TAB
 12. random compatible map

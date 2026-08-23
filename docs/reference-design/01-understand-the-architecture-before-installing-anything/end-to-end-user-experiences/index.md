@@ -32,7 +32,7 @@ Steve accepts
     ↓
 World Controller sees replicas=0
     ↓
-scale StatefulSet 0 -> 1
+scale GameServerSet 0 -> 1
     ↓
 wait for K8s Ready
     ↓

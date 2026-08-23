@@ -114,6 +114,22 @@ uv run --project projects python3 scripts/docs/docs-generate-implementation.py
 pushd projects && uv run mkdocs build --strict -f ../mkdocs.yml
 ```
 
+### Documentation: OpenKruiseGame (OKG) adoption
+
+Replaced the hand-rolled `StatefulSet + PVC` persistent-world primitive with an
+**OpenKruiseGame `GameServerSet + PVC`** workload across the live
+reference-design pages (`docs/reference-design/`), per the 2026-08 online audit
+(Shulker dormant at v0.13.0 / 2025-04-05; OKG actively maintained,
+CNCF-incubated). The pages are manually maintained (the splitter
+`docs/docs-split-minecraft.py` is a one-time scaffold and is NOT wired to the
+committed tree), so edits were applied directly to the pages.
+
+```bash
+# Full verification pipeline (validate -> tests -> strict build)
+bash scripts/docs/verify.sh
+# => VERIFY OK
+```
+
 ## Verified
 
 - `uv run mkdocs build --strict -f ../mkdocs.yml` passes with no warnings.

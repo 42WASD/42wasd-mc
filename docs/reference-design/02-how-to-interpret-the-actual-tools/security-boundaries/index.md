@@ -25,7 +25,7 @@ World Controller:
 ```text
 get/list/watch pods
 get/list/watch services
-get/list/watch/patch StatefulSets
+get/list/watch/patch GameServerSets (game.kruise.io)
 optional create/delete only in map namespace if design requires it
 ```
 

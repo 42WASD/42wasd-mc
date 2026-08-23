@@ -132,7 +132,7 @@ TAB on Velocity
 
 ## Problem 5 — Scale-to-zero and portal switching are two different traffic paths
 
-`mc-router` can see a new incoming connection to a hostname and can wake a Kubernetes StatefulSet before forwarding the connection.
+`mc-router` can see a new incoming connection to a hostname and can wake a Kubernetes GameServerSet before forwarding the connection.
 
 But consider an already-connected player:
 

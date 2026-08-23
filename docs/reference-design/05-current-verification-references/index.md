@@ -72,7 +72,7 @@ The following primary/current sources were checked for this edition. Re-audit th
 
 20. **itzg/mc-router**  
     https://github.com/itzg/mc-router  
-    Kubernetes/Docker discovery, hostname routing, StatefulSet auto-scale and webhook behavior.
+    Kubernetes/Docker discovery, hostname routing, GameServerSet auto-scale and webhook behavior.
 
 21. **Agones Fleet**  
     https://agones.dev/site/docs/reference/fleet/

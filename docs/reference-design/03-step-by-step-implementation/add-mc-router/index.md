@@ -9,7 +9,7 @@ survival.example.com
 map-123.example.com
 ```
 
-`mc-router` can discover annotated Kubernetes services and can scale a StatefulSet from 0 to 1.
+`mc-router` can discover annotated Kubernetes services and can scale a GameServerSet from 0 to 1.
 
 It can also use a proxy server name so the final player route still goes to Velocity after the backend is awakened.
 

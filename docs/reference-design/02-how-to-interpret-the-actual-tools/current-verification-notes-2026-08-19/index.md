@@ -116,7 +116,7 @@ Current repository documentation verifies:
 hostname-based routing
 Kubernetes discovery
 Docker discovery
-StatefulSet scale 0↔1
+GameServerSet scale 0↔1
 webhook integration
 metrics
 optional proxyServerName routing through Velocity/Bungee after waking backend

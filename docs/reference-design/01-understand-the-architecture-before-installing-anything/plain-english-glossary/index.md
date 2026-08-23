@@ -18,8 +18,14 @@ A running or sleeping concrete backend created from a map definition.
 ## World Controller
 Your small control-plane service that turns player routing requests into safe Kubernetes lifecycle operations.
 
-## StatefulSet
-A Kubernetes workload type with stable identity that fits persistent server instances and PVC-backed worlds.
+## OpenKruiseGame (OKG)
+A CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers (a sub-project of OpenKruise).
+
+## GameServerSet
+The OKG workload with stable per-server identity; supports in-place update, per-server `opsState` protection, PVC-backed worlds (VolumeClaimTemplates), and scale-to-zero.
+
+## GameServer
+The per-server OKG resource; represents a single game-server instance and its lifecycle/O&M state.
 
 ## PVC
 PersistentVolumeClaim. The persistent disk claim holding a world even while its server Pod is scaled to zero.

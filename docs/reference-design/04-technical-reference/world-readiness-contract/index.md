@@ -3,7 +3,7 @@
 World Controller returns READY only when:
 
 ```text
-StatefulSet desired replicas >= 1
+GameServerSet desired replicas >= 1
 Pod Ready
 Service endpoints exist
 Minecraft status check succeeds

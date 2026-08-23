@@ -16,10 +16,11 @@ MineColonies colony world
 Use:
 
 ```text
-StatefulSet
+OpenKruiseGame GameServerSet
 + stable Service
-+ PVC
++ PVC (via VolumeClaimTemplates)
 + replicas 0 or 1
++ podUpdatePolicy: InPlaceIfPossible
 ```
 
 Lifecycle:

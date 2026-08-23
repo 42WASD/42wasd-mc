@@ -19,7 +19,7 @@ SOCIAL
 
 DYNAMIC WORLD CONTROL
   custom World Controller
-  Kubernetes StatefulSet + PVC
+  OpenKruiseGame GameServerSet + PVC
   itzg/minecraft-server
   mc-router edge wake
   Agones only for ephemeral sessions

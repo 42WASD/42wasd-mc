@@ -7,8 +7,8 @@
 | TAB | ❌ | display only | ❌ | ❌ | ❌ | ❌ |
 | ViaVersion/Backwards | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
 | Nakama | ❌ MC routing | ✅ | external integration | ❌ | ❌ | metadata only |
-| mc-router | hostname edge routing | ❌ | ✅ limited 0↔1 StatefulSet wake | ❌ | ❌ | ❌ |
-| World Controller | policy decision | integrates | ✅ | compatibility metadata | launcher link selection | coordinates PVC workload |
+| mc-router | hostname edge routing | ❌ | ✅ limited 0↔1 GameServerSet wake | ❌ | ❌ | ❌ |
+| World Controller | policy decision | integrates | ✅ | compatibility metadata | launcher link selection | coordinates GameServerSet + PVC workload |
 | itzg/minecraft-server | ❌ | ❌ | runs inside K8s | server-specific | server-side pack install | with PVC |
 | Agones | connection allocation | ❌ | ✅ ephemeral/session model | ❌ | ❌ | not the default persistence model |
 | Modrinth Server Projects | ❌ | ❌ | ❌ | selects correct runtime | ✅ | ❌ |

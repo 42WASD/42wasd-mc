@@ -47,12 +47,12 @@ async def ensure_ready(map_id):
 
     runtime = runtimes.get(map_def.runtime_id)
 
-    sts = k8s.get_statefulset(map_def.instance_name)
+    gss = k8s.get_gameserverset(map_def.instance_name)
 
-    if sts.spec.replicas == 0:
-        k8s.scale_statefulset(sts, 1)
+    if gss.spec.replicas == 0:
+        k8s.scale_gameserverset(gss, 1)
 
-    await wait_for_pod_ready(sts)
+    await wait_for_pod_ready(gss)
     await wait_for_minecraft_ready(map_def.service_host, 25565)
 
     await proxy_registry.ensure_registered(
@@ -101,8 +101,8 @@ Example intent:
 
 ```yaml
 rules:
-  - apiGroups: ["apps"]
-    resources: ["statefulsets", "statefulsets/scale"]
+  - apiGroups: ["game.kruise.io"]
+    resources: ["gameserversets", "gameservers"]
     verbs: ["get", "list", "watch", "patch", "update"]
 
   - apiGroups: [""]

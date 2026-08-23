@@ -15,7 +15,7 @@ request graceful save/stop
     ↓
 wait process exit
     ↓
-scale StatefulSet to 0
+scale GameServerSet to 0
 ```
 
 Do not `SIGKILL` an actively saving world as your normal sleep method.

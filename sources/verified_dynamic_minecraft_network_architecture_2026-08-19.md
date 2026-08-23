@@ -38,7 +38,7 @@ The mental model is:
           ▼                              ▼                              ▼
  ┌────────────────┐             ┌────────────────┐             ┌────────────────┐
  │ Lobby / Paper  │             │ Vanilla / Map  │             │ Fantasy Forge  │
- │ always ready   │             │ StatefulSets   │             │ 1.20.1 runtime │
+ │ always ready   │             │ GameServerSets  │             │ 1.20.1 runtime │
  └────────────────┘             └────────────────┘             └────────────────┘
 
 Velocity plugins / services
@@ -50,7 +50,7 @@ Velocity plugins / services
              │
              ├───────────────► World Controller ─────► Kubernetes API
              │                         │
-             │                         ├── wake / sleep StatefulSets
+             │                         ├── wake / sleep GameServerSets
              │                         ├── wait for readiness
              │                         ├── register/unregister routes
              │                         └── random-map selection
@@ -332,7 +332,7 @@ Use:
 ```text
 Paper for vanilla-compatible modes
 Forge for fantasy-1.20.1
-persistent StatefulSet + PVC for durable worlds
+persistent OpenKruiseGame GameServerSet + PVC for durable worlds
 Agones only for session-style disposable/warm-pool instances
 ```
 
@@ -601,7 +601,8 @@ Therefore the runtime-class rule remains required under Gate too.
 | Minecraft containers | **itzg/minecraft-server 2026.8.0 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |
 | Edge hostname routing / external wake | **itzg/mc-router** | K8s discovery; StatefulSet scale 0↔1; webhook; metrics |
-| Persistent world orchestration | **Custom World Controller + StatefulSet + PVC** | Exact fit for persistent maps, portals, invites, readiness and policy |
+| World orchestration (logic) | **Custom World Controller** | Exact fit for persistent maps, portals, invites, readiness and policy; Kubernetes-scale and routing decisions |
+| Persistent world workload | **OpenKruiseGame `GameServerSet` + PVC** | CNCF-incubated game-server workload; in-place update, per-world ops protection, scale-to-zero |
 | Ephemeral session maps | **Agones, optional** | Mature Kubernetes game-server Fleet/Allocation model |
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
 | Pack source/CI | **packwiz, optional** | Git-friendly modpack definition and launcher/server update workflow |
@@ -615,7 +616,7 @@ Therefore the runtime-class rule remains required under Gate too.
 
 Shulker is conceptually very close to this project: a Kubernetes operator for dynamic Minecraft infrastructure.
 
-However, its public release cadence is materially less current than the components selected above.
+However, its public release cadence is materially less current than the components selected above. As of the 2026-08 audit, its latest release is **v0.13.0 (2025-04-05)** — still pre-1.0 (`0.x`) and with no release in over a year. Its operator pins `itzg/minecraft-server`/`itzg/mc-proxy` **`java21`** images, while this project targets the **Java 25 / 2026.8.x** line.
 
 Decision:
 
@@ -624,6 +625,28 @@ Learn from Shulker's architecture.
 Do not make the first production version depend on it.
 Re-evaluate if active maintenance resumes strongly.
 ```
+
+The alternative is **not** a generic GitOps tool: it is a **custom World Controller** (which owns the product semantics: portals, invites, readiness, policy) driving an **OpenKruiseGame `GameServerSet`** workload (which owns the stateful game-server primitive). This keeps the foundation actively maintained without outsourcing bespoke behavior.
+
+---
+
+## OpenKruiseGame
+
+OpenKruiseGame (OKG) is a CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers — a sub-project of OpenKruise.
+
+It is selected as the **persistent-world workload** here, but it is **not** a "Minecraft-branded" operator: it does not implement portal routing, invites, world-readiness contracts, or routing policy. Those stay in the custom World Controller.
+
+What it provides:
+
+```text
+GameServerSet workload (stable per-server identity)
+in-place update: image/config without recreating Pod or detaching PVC
+per-world opsState protection from autoscaling/update
+PVC-backed persistent worlds (VolumeClaimTemplates)
+scale-to-zero
+```
+
+It is chosen over Shulker because it is actively maintained, Apache-2.0, and gives a permissive stateful workload primitive the World Controller drives — without adopting Shulker's dormant pre-1.0 API.
 
 ---
 
@@ -803,10 +826,11 @@ MineColonies colony world
 Use:
 
 ```text
-StatefulSet
+OpenKruiseGame GameServerSet
 + stable Service
-+ PVC
++ PVC (via VolumeClaimTemplates)
 + replicas 0 or 1
++ podUpdatePolicy: InPlaceIfPossible
 ```
 
 Lifecycle:
@@ -888,7 +912,7 @@ Steve accepts
     ↓
 World Controller sees replicas=0
     ↓
-scale StatefulSet 0 -> 1
+scale GameServerSet 0 -> 1
     ↓
 wait for K8s Ready
     ↓
@@ -1000,8 +1024,11 @@ A running or sleeping concrete backend created from a map definition.
 ## World Controller
 Your small control-plane service that turns player routing requests into safe Kubernetes lifecycle operations.
 
-## StatefulSet
-A Kubernetes workload type with stable identity that fits persistent server instances and PVC-backed worlds.
+## OpenKruiseGame (OKG)
+A CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers. It provides a `GameServerSet` workload with stable per-server identity, in-place updates (image/config without recreating the Pod or detaching PVCs), per-server ops protection, and PVC-backed persistence.
+
+## GameServerSet
+OpenKruiseGame's game-server workload — the replacement for a hand-rolled `StatefulSet` here. It fits persistent server instances and PVC-backed worlds, supports scale-to-zero, and lets the World Controller mark individual worlds with an ops state so autoscaling/updates never kill an active player session.
 
 ## PVC
 PersistentVolumeClaim. The persistent disk claim holding a world even while its server Pod is scaled to zero.
@@ -1065,7 +1092,7 @@ Velocity
 TAB
 ViaVersion + ViaBackwards
 itzg/minecraft-server
-StatefulSet + PVC
+GameServerSet + PVC
 World Controller
 ```
 
@@ -1526,7 +1553,7 @@ World Controller:
 ```text
 get/list/watch pods
 get/list/watch services
-get/list/watch/patch StatefulSets
+get/list/watch/patch GameServerSets
 optional create/delete only in map namespace if design requires it
 ```
 
@@ -2278,12 +2305,12 @@ async def ensure_ready(map_id):
 
     runtime = runtimes.get(map_def.runtime_id)
 
-    sts = k8s.get_statefulset(map_def.instance_name)
+    gss = k8s.get_gameserverset(map_def.instance_name)
 
-    if sts.spec.replicas == 0:
-        k8s.scale_statefulset(sts, 1)
+    if gss.spec.replicas == 0:
+        k8s.scale_gameserverset(gss, 1)
 
-    await wait_for_pod_ready(sts)
+    await wait_for_pod_ready(gss)
     await wait_for_minecraft_ready(map_def.service_host, 25565)
 
     await proxy_registry.ensure_registered(
@@ -2332,8 +2359,8 @@ Example intent:
 
 ```yaml
 rules:
-  - apiGroups: ["apps"]
-    resources: ["statefulsets", "statefulsets/scale"]
+  - apiGroups: ["game.kruise.io"]
+    resources: ["gameserversets", "gameservers"]
     verbs: ["get", "list", "watch", "patch", "update"]
 
   - apiGroups: [""]
@@ -3029,7 +3056,7 @@ Use this exact order:
 6. friends + parties
 7. one static second backend + /join
 8. World Controller
-9. one persistent StatefulSet scale-to-zero map
+9. one persistent GameServerSet scale-to-zero map
 10. portal -> wake -> transfer
 11. exact map presence + TAB
 12. random compatible map
@@ -3063,7 +3090,7 @@ Kubernetes:
   pods
   services
   PVCs
-  StatefulSet replicas
+  GameServerSet replicas
 
 Nakama:
   user/social state
@@ -3252,7 +3279,7 @@ This prevents chasing a friend across servers while startup is in progress.
 World Controller returns READY only when:
 
 ```text
-StatefulSet desired replicas >= 1
+GameServerSet desired replicas >= 1
 Pod Ready
 Service endpoints exist
 Minecraft status check succeeds
@@ -3555,7 +3582,7 @@ SOCIAL
 
 DYNAMIC WORLD CONTROL
   custom World Controller
-  Kubernetes StatefulSet + PVC
+  OpenKruiseGame GameServerSet + PVC
   itzg/minecraft-server
   mc-router edge wake
   Agones only for ephemeral sessions

@@ -4,7 +4,7 @@
 
 Shulker is conceptually very close to this project: a Kubernetes operator for dynamic Minecraft infrastructure.
 
-However, its public release cadence is materially less current than the components selected above.
+However, its public release cadence is materially less current than the components selected above. As of the 2026-08 audit, its latest release is **v0.13.0 (2025-04-05)** — still pre-1.0 (`0.x`) and with no release in over a year. Its operator pins `itzg/minecraft-server`/`itzg/mc-proxy` **`java21`** images, while this project targets the **Java 25 / 2026.8.x** line.
 
 Decision:
 
@@ -13,6 +13,28 @@ Learn from Shulker's architecture.
 Do not make the first production version depend on it.
 Re-evaluate if active maintenance resumes strongly.
 ```
+
+The alternative is **not** a generic GitOps tool: it is a **custom World Controller** (which owns the product semantics: portals, invites, readiness, policy) driving an **OpenKruiseGame `GameServerSet`** workload (which owns the stateful game-server primitive). This keeps the foundation actively maintained without outsourcing bespoke behavior.
+
+---
+
+## OpenKruiseGame
+
+OpenKruiseGame (OKG) is a CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers — a sub-project of OpenKruise.
+
+It is selected as the **persistent-world workload** here, but it is **not** a "Minecraft-branded" operator: it does not implement portal routing, invites, world-readiness contracts, or routing policy. Those stay in the custom World Controller.
+
+What it provides:
+
+```text
+GameServerSet workload (stable per-server identity)
+in-place update: image/config without recreating Pod or detaching PVC
+per-server opsState protection from autoscaling/update
+PVC-backed persistent worlds (VolumeClaimTemplates)
+scale-to-zero
+```
+
+It is chosen over Shulker because it is actively maintained, Apache-2.0, and gives a permissive stateful workload primitive the World Controller drives — without adopting Shulker's dormant pre-1.0 API.
 
 ---
 

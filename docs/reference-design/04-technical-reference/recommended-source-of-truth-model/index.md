@@ -13,7 +13,7 @@ Kubernetes:
   pods
   services
   PVCs
-  StatefulSet replicas
+  GameServerSet replicas
 
 Nakama:
   user/social state

@@ -11,8 +11,9 @@
 | Nakama production DB | **CockroachDB** | Current Nakama server config documentation treats CockroachDB as required/supported production database |
 | Minecraft containers | **itzg/minecraft-server 2026.8.1 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |
-| Edge hostname routing / external wake | **itzg/mc-router** | K8s discovery; StatefulSet scale 0↔1; webhook; metrics |
-| Persistent world orchestration | **Custom World Controller + StatefulSet + PVC** | Exact fit for persistent maps, portals, invites, readiness and policy |
+| Edge hostname routing / external wake | **itzg/mc-router** | K8s discovery; GameServerSet scale 0↔1; webhook; metrics |
+| Persistent world orchestration | **Custom World Controller** | Exact fit for persistent maps, portals, invites, readiness and policy |
+| Persistent world workload | **OpenKruiseGame `GameServerSet` + PVC** | CNCF-incubated game-server workload; in-place update, per-world ops protection, scale-to-zero |
 | Ephemeral session maps | **Agones, optional** | Mature Kubernetes game-server Fleet/Allocation model |
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
 | Player client (launcher) | **AstralRinth** | Actively maintained 2026 fork of the Modrinth App; adds offline/cracked account auth; no ads, no telemetry |

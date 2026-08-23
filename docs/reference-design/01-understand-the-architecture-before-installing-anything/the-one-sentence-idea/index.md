@@ -27,7 +27,7 @@ The mental model is:
           ▼                              ▼                              ▼
  ┌────────────────┐             ┌────────────────┐             ┌────────────────┐
  │ Lobby / Paper  │             │ Vanilla / Map  │             │ Fantasy Forge  │
- │ always ready   │             │ StatefulSets   │             │ 1.20.1 runtime │
+ │ always ready   │             │ GameServerSets │             │ 1.20.1 runtime │
  └────────────────┘             └────────────────┘             └────────────────┘
 
 Velocity plugins / services
@@ -39,7 +39,7 @@ Velocity plugins / services
              │
              ├───────────────► World Controller ─────► Kubernetes API
              │                         │
-             │                         ├── wake / sleep StatefulSets
+             │                         ├── wake / sleep GameServerSets
              │                         ├── wait for readiness
              │                         ├── register/unregister routes
              │                         └── random-map selection

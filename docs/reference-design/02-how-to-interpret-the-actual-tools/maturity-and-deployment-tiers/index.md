@@ -9,7 +9,7 @@ Velocity
 TAB
 ViaVersion + ViaBackwards
 itzg/minecraft-server
-StatefulSet + PVC
+OpenKruiseGame GameServerSet + PVC
 World Controller
 ```
 
