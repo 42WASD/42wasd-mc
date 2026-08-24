@@ -9,3 +9,4 @@ resources:
   - velocity
   - nakama
   - cockroachdb
+  - monitoring

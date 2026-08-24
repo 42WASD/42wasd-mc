@@ -1,0 +1,24 @@
+# Prometheus ServiceMonitor for Minecraft server metrics (mc-monitor).
+#
+# mc-monitor runs embedded in each Minecraft server image and exports metrics
+# on a `metrics` port. This ServiceMonitor tells Prometheus (installed in the
+# `monitoring` namespace by the kube-prometheus-stack) to scrape those
+# endpoints in the games namespace.
+#
+# The concrete per-map scrape selectors are finalized in the `monitoring`
+# phase; this establishes the endpoint + RBAC now.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minecraft-servers
+  namespace: prd-games-42wasd-admin
+  labels:
+    app.kubernetes.io/part-of: minecraft
+    release: prometheus   # kube-prometheus-stack selects ServiceMonitors by this label
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: minecraft
+  endpoints:
+    - port: metrics
+      interval: 30s
