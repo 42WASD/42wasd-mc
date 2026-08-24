@@ -114,9 +114,31 @@ def load_runbook() -> dict[str, str]:
 RUNBOOK = load_runbook()
 
 
+def _flatten(mapping: dict, prefix: str = "") -> dict:
+    """Recursively flatten nested status dicts into slash-paths.
+
+    progress.yaml stores status hierarchically (part -> phase -> section) to
+    mirror the manifest tree, e.g.:
+
+        03-step-by-step-implementation:
+          deploy-cockroachdb-and-nakama: done
+
+    `status_of` looks status up by slash-joined path, so the nested dict must
+    be flattened into { "03-.../deploy-cockroachdb-and-nakama": "done" }.
+    """
+    flat = {}
+    for key, val in mapping.items():
+        path = f"{prefix}/{key}" if prefix else key
+        if isinstance(val, dict):
+            flat.update(_flatten(val, path))
+        else:
+            flat[path] = val
+    return flat
+
+
 def load_progress() -> dict:
     if PROGRESS.exists():
-        return yaml.safe_load(PROGRESS.read_text()) or {}
+        return _flatten(yaml.safe_load(PROGRESS.read_text()) or {})
     return {}
 
 

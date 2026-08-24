@@ -9,3 +9,7 @@ __pycache__/
 # MkDocs Local Build Artifacts
 site/
 .cache/
+
+# Minecraft world data (large binaries; managed outside Git)
+world-data/
+world-data-export-*.tar.gz

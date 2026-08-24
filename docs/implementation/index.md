@@ -20,26 +20,25 @@ section of the Reference Design.
 
 ## Overall progress
 
-**0 / 31** phases/sections complete (**0%**).
+**1 / 31** phases/sections complete (**3%**).
 
-<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:0.0%"></div></div><div class="progress-pct">0%</div></div>
+<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:3.2%"></div></div><div class="progress-pct">3%</div></div>
 
 | Status | Count |
 |--------|-------|
-| ✅ done | 0 |
+| ✅ done | 1 |
 | 🔶 in-progress | 0 |
-| ⬜ not-started | 31 |
+| ⬜ not-started | 30 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
 ## Progress by part
 
-### 0% — Part III — Step-by-step implementation
+### 3% — Part III — Step-by-step implementation
 
-<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:0.0%"></div></div><div class="progress-pct" style="font-size:.85em;">0%</div><div class="tip-box"><strong>Done (0)</strong>
-—
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (31)</strong>
+<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:3.0%"></div></div><div class="progress-pct" style="font-size:.85em;">3%</div><div class="tip-box"><strong>Done (1)</strong>
 • Decide names before deploying
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (30)</strong>
 • Create repository structure
 • Create Kubernetes namespaces
 • Install OpenKruiseGame
@@ -71,7 +70,7 @@ section of the Reference Design.
 • Monitoring
 • Rollout order</div></div>
 
-- ⬜ `not-started` — [Phase 0 — Decide names before deploying](../reference-design/03-step-by-step-implementation/decide-names-before-deploying/index.md)
+- ✅ `done` — [Phase 0 — Decide names before deploying](../reference-design/03-step-by-step-implementation/decide-names-before-deploying/index.md)
 - ⬜ `not-started` — [Phase 1 — Create repository structure](../reference-design/03-step-by-step-implementation/create-repository-structure/index.md)
 - ⬜ `not-started` — [Phase 2 — Create Kubernetes namespaces](../reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md)
 - ⬜ `not-started` — [Phase 3 — Install OpenKruiseGame](../reference-design/03-step-by-step-implementation/install-openkruisegame/index.md)
