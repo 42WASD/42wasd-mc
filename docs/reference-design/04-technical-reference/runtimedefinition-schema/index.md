@@ -17,6 +17,7 @@ spec:
     version: "1.20.1"
     server_type: FORGE
     loader_version: "47.2.0"   # pin to the exact tested loader
+    java: 21                   # per-runtime tested Java; see performance-principles
 
   client:
     required: true
@@ -30,7 +31,16 @@ spec:
 
   routing:
     instant_switch_within_runtime: true
-    via_translation_allowed: false
+
+  protocol_compatibility:
+    # Protocol translation is NOT "every version works"; each client/backend
+    # pair must be explicitly tested. VERIFIED = tested end-to-end.
+    - client: "1.21.11"
+      status: VERIFIED
+    - client: "26.1"
+      status: VERIFIED
+    - client: "26.2"
+      status: TEST_REQUIRED
 
   resources:
     memory: "12Gi"
@@ -43,6 +53,11 @@ spec:
     sleep_allowed: true
     timeout_seconds: 1200
 ```
+
+> `protocol_compatibility` replaces a single coarse `viaCompatible: true`
+> boolean. ViaVersion/ViaBackwards can translate the login yet still have
+> pair-specific behavioral quirks, so every supported client version is listed
+> with a test status rather than assumed to "just work."
 
 > Note: `modern_forwarding` is a **network-wide** setting (Velocity serves all
 > backends behind one secret). It must therefore be **the same across every

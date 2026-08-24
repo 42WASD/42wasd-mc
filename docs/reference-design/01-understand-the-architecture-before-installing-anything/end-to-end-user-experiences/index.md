@@ -125,9 +125,11 @@ discover mods, loader versions, or server addresses.
 
 > **No re-login on the restart:** the launcher restart that installs the
 > fantasy runtime drops Steve's TCP connection, but his Nakama session persists
-> (session + refresh token, see `social-state` 7.1.2). On reconnect, NetworkBridge
-> restores the Nakama session from the refresh token, so Steve is **not**
-> prompted for Discord/Google again — the pending invite is resolved and he is
-> transferred without re-gating.
+> (session + refresh token, see `social-state` 7.1.2). On reconnect the launcher
+> refreshes its Nakama session, the Auth Service mints a fresh one-time join
+> ticket, and the ticket (delivered via the join hostname) is what NetworkBridge
+> consumes — Steve is **not** prompted for Discord/Google again; the pending
+> invite is resolved and he is transferred without re-gating. NetworkBridge
+> never sees the refresh token; it only validates/consumes the single-use ticket.
 
 ---

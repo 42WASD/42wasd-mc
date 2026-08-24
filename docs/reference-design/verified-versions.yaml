@@ -6,6 +6,11 @@
 #
 # The generators do NOT read this file; it is documentation, kept in sync
 # manually. CI does not fail on a stale value — keep it accurate by hand.
+#
+# Design principle:
+#   documentation  ->  refers to this file
+#   this file      ->  exact tested release / tag combo
+#   production manifest ->  exact image digest
 
 audit_date: "2026-08-24"
 
@@ -40,12 +45,18 @@ components:
     status: SELECTED
 
   minecraft_server_image:
-    version: "2026.8.1"
+    version: "2026.8.2"   # released 2026-08-23
     status: SELECTED
 
   mc_proxy_image:
+    version: "2026.8.2"
     variant: "java25"
-    status: SELECTED
+    status: SELECTED  # pin to tested tag + eventual digest in production manifests
+
+  object_store:
+    name: "seaweedfs"
+    version: "4.41"   # released 2026-08-06
+    status: SELECTED  # replaces MinIO (repo archived 2026-04-25)
 
   agones:
     version: null

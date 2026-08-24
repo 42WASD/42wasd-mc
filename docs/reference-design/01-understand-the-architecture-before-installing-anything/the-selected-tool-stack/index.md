@@ -18,7 +18,7 @@
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
 | Player client (launcher) | **AstralRinth** | Modrinth-based launcher fork (Microsoft, Ely.by, external OAuth Device Authorization, offline-account support for local/testing) pinned in `42WASD/AstralRinth` (our own tracked fork) |
 | Pack source/CI | **packwiz, optional** | Git-friendly modpack definition and launcher/server update workflow |
-| Minecraft readiness probe & metrics | **itzg/mc-monitor** | Maintained status/ping probe (`status` subcommand); exports online count, latency, MOTD to Prometheus/Influx. **Readiness/reachability, not TPS/GC metrics** (those come from backend/NetworkBridge telemetry + spark) |
+| Minecraft readiness probe & metrics | **itzg/mc-monitor** | Maintained status/ping probe (`status` subcommand); exports online count and response latency to Prometheus/Influx. **Readiness/reachability, not TPS/GC metrics** (those come from backend/NetworkBridge telemetry + spark) |
 | Scale trigger (idle / player-count) | **KEDA, optional** | CNCF-graduated; `ScaledObject` → HPA. **Pooled-capacity replica owner only** — NOT attached to World-Controller-owned named-world GameServerSets |
 | World/DB backup & restore | **Velero** | Apache-2.0, CNCF-governed; resource backup + supported volume backup/snapshot (CSI/data-mover/object-store) with hooks. Restore drills/integrity = our runbook/CI, not an automatic Velero feature |
 | Dynamic infra source of truth | **Git + Kubernetes manifests** | Auditable, deterministic runtime/map definitions |

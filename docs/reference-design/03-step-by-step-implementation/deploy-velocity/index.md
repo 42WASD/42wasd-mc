@@ -57,9 +57,16 @@ Do not commit it to Git.
 Velocity:
 
 ```toml
+online-mode = false
+
 player-info-forwarding-mode = "modern"
 forwarding-secret-file = "forwarding.secret"
 ```
+
+`online-mode = false` is deliberate: 42WASD authenticates players itself (via
+the Nakama account layer) rather than delegating to Mojang. Set it to `true`
+**only** if you later require every player to have a licensed Microsoft/Mojang
+account before reaching the network.
 
 ---
 

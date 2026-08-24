@@ -2,11 +2,16 @@
 
 ## Why CockroachDB
 
-Nakama requires a Postgres-wire-compatible database server. Current formal
-Nakama docs describe **CockroachDB as the officially supported and optimized
-production target**; PostgreSQL compatibility exists for development only.
-This design therefore standardizes **production on CockroachDB** for its
-distributed, auto-healing behavior on Kubernetes.
+Nakama is built around **PostgreSQL-wire-compatible** database semantics, and
+PostgreSQL examples do exist in official Nakama material. That said, current
+formal Nakama installation documentation continues to identify **CockroachDB
+as the officially supported and optimized production target**, and describes
+PostgreSQL support as unofficial/development-focused.
+
+**42WASD standardizes production Nakama on CockroachDB** for its distributed,
+auto-healing behavior on Kubernetes. Do **not** claim "PostgreSQL is
+unsupported" (it works in dev) and do **not** claim "PostgreSQL is fully
+equivalent" (it is not the production-optimized target).
 
 ---
 
@@ -90,7 +95,7 @@ NetworkBridge links the incoming Minecraft UUID/name to that Nakama account
 gate routes the now-authenticated player to the lobby/world
 ```
 
-Pseudo-flow (server-side, in NetworkBridge):
+Pseudo-flow (server-side, in NetworkBridge / Auth Service):
 
 ```java
 // OAuth token obtained from Discord/Google (not the offline MC UUID).
@@ -98,10 +103,6 @@ String oauthToken = getDiscordOrGoogleToken();   // verified by Nakama
 
 NakamaSession session =
     nakama.authenticateGoogle(oauthToken, true, "google");
-
-// Link the incoming offline Minecraft identity to this verified account.
-String minecraftUuid = player.getUniqueId().toString();
-nakama.linkCustom(session, minecraftUuid, player.getUsername());
 ```
 
 Notes:
@@ -113,6 +114,23 @@ Notes:
 - Store the Nakama session/token in the **launcher's private storage**, not on
   the vanilla Minecraft client.
 - Never derive the canonical identity from an offline-mode UUID or username.
+- **Do not link the raw offline Minecraft UUID as a Nakama authentication
+  identity.** Offline UUIDs can be spoofed, so they must never be a way to
+  select a credential-bearing Nakama account. The verified external identity
+  (Discord/Google/Microsoft) is the only authentication mechanism; the
+  Minecraft UUID/name is **profile/presence metadata** mapped onto the Nakama
+  user, not an auth identity:
+
+  ```text
+  Google/Discord/Microsoft OAuth
+        ↓ (verify)
+  Nakama User ID  ← the authentication identity
+        ├── friends / parties / invites / account
+        └── Minecraft identity mapping
+              current_name
+              observed_uuid
+              launcher_account
+  ```
 
 ---
 

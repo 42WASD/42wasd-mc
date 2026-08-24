@@ -46,15 +46,13 @@ PVC-backed persistent worlds (VolumeClaimTemplates)
 scale-to-zero
 ```
 
-It is chosen over Shulker because it is actively maintained, Apache-2.0, and gives a permissive stateful workload primitive the World Controller drives — without adopting Shulker's dormant pre-1.0 API.
+It is chosen over Shulker because it is actively maintained, Apache-2.0, and gives a permissive stateful workload primitive the World Controller drives — without adopting Shulker's pre-1.0 API. (Calling Shulker "dormant" is an **architecture judgment based on release activity** — no release since v0.13.0 in 2025-04 — not a claim that the project is dead or abandoned.)
 
 ---
 
 ## CloudNet
 
-CloudNet is a serious Minecraft-native cloud system and is actively moving in 2026.
-
-However, its 4.0 line is still in **release-candidate** status during this audit.
+CloudNet is a serious Minecraft-native cloud system and is actively developing its **4.0 release-candidate series** (RC17, 2026-08-09).
 
 It is a good alternative when you want:
 

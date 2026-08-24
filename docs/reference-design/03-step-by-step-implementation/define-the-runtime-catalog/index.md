@@ -6,7 +6,7 @@ Example (canonical shape matches the `RuntimeDefinition` schema in the
 technical reference — `04-technical-reference/runtimedefinition-schema`):
 
 ```yaml
-apiVersion: platform.example/v1
+apiVersion: platform.42wasd.dev/v1alpha1
 kind: RuntimeDefinition
 metadata:
   id: backrooms-current
@@ -14,6 +14,7 @@ metadata:
 minecraft:
   server_type: PAPER
   version: "PIN_TESTED_VERSION"
+  java: 21
 
 client:
   required: false
@@ -26,7 +27,12 @@ proxy:
 
 routing:
   instant_switch_within_runtime: true
-  via_translation_allowed: true
+
+protocol_compatibility:
+  - client: "1.21.11"
+    status: VERIFIED
+  - client: "26.1"
+    status: VERIFIED
 
 resources:
   memory: "2Gi"

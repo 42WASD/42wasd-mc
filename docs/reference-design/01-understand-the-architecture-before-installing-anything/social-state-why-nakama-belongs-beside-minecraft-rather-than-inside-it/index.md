@@ -210,6 +210,50 @@ The offline UUID/name is **never** enough to claim a session. It only identifies
 proves *who* the player is, and the join ticket is the short-lived proof
 Velocity accepts on that connection.
 
+### Join-ticket transport (how the ticket reaches Velocity)
+
+Minecraft's login protocol has **no** generic `nakamaJoinTicket=...` field that
+a launcher can populate for an unmodified client, so the ticket travels in the
+**hostname**. Velocity already sees the requested server address at the proxy
+layer, so this is vanilla-compatible:
+
+```text
+Steve accepts Ahmad's invite
+        ↓
+AstralRinth has an authenticated Nakama session
+        ↓
+Auth Service  POST /join-tickets
+        ↓
+random, high-entropy, single-use nonce:  g6J9Vt2....
+        ↓
+launcher starts Minecraft against:  g6J9Vt2.join.play.42wasd.com
+        ↓
+DNS wildcard:  *.join.play.42wasd.com   →   Velocity
+        ↓
+NetworkBridge reads the requested hostname, consumes the leading ticket
+        ↓
+ticket → Nakama user = Steve
+        ↓
+pending invite = Ahmad / fantasy-kingdom
+        ↓
+World Controller.ensureReady()
+        ↓
+Velocity transfer to the runtime
+```
+
+The ticket is:
+
+- high-entropy, single-use
+- short expiry (~30–120 s)
+- audience = Velocity
+- bound to the expected Nakama user
+- atomically consumed (never replayable)
+- **never** reused as the Nakama refresh token
+
+The join ticket is a *proof of who is presenting*, not a substitute for the
+launcher-held Nakama session. A ticket alone cannot mint another ticket; only
+the authenticated launcher session can.
+
 Distinguish the four credentials:
 
 ```text
@@ -239,17 +283,23 @@ player can end it or sign in as someone else. NetworkBridge should expose a
 ```text
 /logout
    ↓
-NetworkBridge tells Nakama to revoke/expire the session (revoke the refresh token)
+Auth Service / Nakama revokes the session (revoke the refresh token)
    ↓
 player is dropped back to the gate stage
+   ↓
+launcher clears its local credentials
    ↓
 on next join, the gate prompts for Discord/Google sign-in again
 ```
 
-- **`/logout`** revokes the Nakama session/refresh token **both server-side and
-  in the launcher's private storage**, so the next join cannot silently reuse
-  it. The player must complete the OAuth flow again (no valid session → no
-  fresh join ticket can be minted).
+- **`/logout`** revokes the Nakama session/refresh token **server-side**, and the
+  **launcher clears its local stored credentials** so the next join cannot
+  silently reuse them. Note the separation of responsibility: the server cannot
+  reach inside AstralRinth's private storage to delete the token — it revokes the
+  session in Nakama; the launcher clears its local copy (either directly, or when
+  it observes a token-refresh/revocation failure on next launch). The player must
+  complete the OAuth flow again (no valid session → no fresh join ticket can be
+  minted).
 - **Switch account** = logout, then re-auth as a different Discord/Google
   account. The new Nakama account becomes the canonical identity; the offline
   Minecraft UUID/name is re-linked to it. This is how a shared machine or a

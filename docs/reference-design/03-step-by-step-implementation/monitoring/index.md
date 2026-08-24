@@ -35,10 +35,15 @@ memory
 disk
 ```
 
-The per-server status metrics (`online`, `latency`, `MOTD`) and the map
+The per-server status metrics (`online` count, response latency) and the map
 `status/ping` readiness probe come from the same maintained agent —
 **itzg/mc-monitor** — exported to Prometheus, so the readiness and the metrics
 are one trusted source.
+
+> **mc-monitor scope:** it reports Minecraft *reachability* — status response,
+> ping/response latency, online/max-count observation. It does **not** export
+> TPS, MSPT, or tick/GC health; those come from backend/NetworkBridge telemetry
+> plus spark profiling. It also does **not** export MOTD.
 
 Alert on:
 

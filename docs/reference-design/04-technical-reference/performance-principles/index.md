@@ -136,10 +136,17 @@ no OOM-kill under the target load
 Current Paper/Velocity distinction (re-verify against current Paper docs):
 
 ```text
+Velocity 4.x           -> Java 25
 Paper 1.20 … 1.21.11   -> Java 21
 Paper 26.1+            -> Java 25
-Velocity 4.x           -> Java 25
+Forge 1.20.1           -> runtime-specific tested Java version
 ```
+
+Do **not** globally impose Java 25 on every Minecraft backend merely because
+Velocity 4.x needs it. Java is a **per-runtime** property: it lives in the
+`RuntimeDefinition` (each runtime family pins its own tested Java), so a mixed
+fleet (Paper 1.21.x on Java 21, Paper 26.1+ on Java 25, Forge on its tested
+JVM) is valid and expected.
 
 ---
 

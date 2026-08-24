@@ -33,6 +33,8 @@ status:
       status: "True"
     - type: MinecraftReachable
       status: "True"
+    - type: RuntimeRevisionMatched
+      status: "True"
     - type: AcceptingPlayers
       status: "True"
   observedGeneration: 12
@@ -53,8 +55,13 @@ status:
   `GameServerSet` name + ordinal). It may point at a single instance for a
   single-instance map, or an Agones `GameServer` in general.
 - **`status.conditions`** carries structured readiness state
-  (`KubernetesReady`, `MinecraftReachable`, `AcceptingPlayers`) and is the
-  place to add future checks rather than inventing more phase values.
+  (`KubernetesReady`, `MinecraftReachable`, `RuntimeRevisionMatched`,
+  `AcceptingPlayers`) and is the place to add future checks rather than
+  inventing more phase values. Prefer **conditions** over an ever-expanding
+  phase enum (`STARTING_MINECRAFT`, `STARTING_NETWORK`, `STARTING_RUNTIME`,
+  `WAITING_PLUGIN`, ...). Keep the high-level `status.phase` state machine
+  (`ASLEEP`/`STARTING`/`READY`/`STOPPING`/`ERROR`) and use conditions to tell
+  operators *why* an instance is not yet joinable.
 - **No home-grown integer revision.** Instead of a custom
   `revision: 14` concurrency token, rely on Kubernetes' built-in
   `metadata.resourceVersion` / `metadata.generation` + `status.observedGeneration`
@@ -64,6 +71,32 @@ status:
   [runtimedefinition-schema](../runtimedefinition-schema/index.md)).
 
 ## Source-of-truth notes
+
+Ownership is split so there is exactly **one writer per resource**, the same
+principle as replica ownership:
+
+```text
+GIT / ARGO CD
+  RuntimeDefinition.spec
+  MapDefinition.spec
+  platform deployments / static configuration
+
+WORLD CONTROLLER
+  MapInstance (create/update/destroy)
+  MapInstance.spec
+  dynamic GameServerSet creation
+  reservations / routing state
+
+KUBERNETES / OPENKRUISEGAME
+  Pod status
+  GameServer status
+  GameServerSet status
+  PVC status
+```
+
+Do **not** put live `MapInstance` resources under GitOps reconciliation: the
+World Controller owns them dynamically, so Argo CD would otherwise compete as a
+second writer and recreate the multiple-writer problem.
 
 - The World Controller creates/updates/destroys `MapInstance` and owns its
   `status`.

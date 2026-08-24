@@ -81,6 +81,31 @@ to idle-sleep.
 > capacity the World Controller does not own (see
 > [recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md)).
 
+> **PVC-retention caveat.** If you rely on `persistentVolumeClaimRetentionPolicy`,
+> its behavior depends on the corresponding OpenKruise StatefulSet auto-delete
+> PVC capability/feature gate described by the API — so it is not a universal
+> guarantee. For Minecraft worlds, default **conservatively**: world deletion
+> must never be an *incidental consequence* of workload cleanup.
+
+World data must outlive the workload that runs it:
+
+```text
+delete server Pod        ≠  delete world
+scale GameServerSet 1→0  ≠  delete world
+delete MapInstance       ≠  automatically delete world
+delete MapDefinition     ≠  automatically delete world
+```
+
+Make world destruction an **explicit, confirmed operation**, not a side effect:
+
+```text
+DELETE WORLD DATA
+   ↓  (confirmation / policy gate)
+snapshot / backup
+   ↓
+PVC deletion
+```
+
 > **LLM-director content changes are a runtime revision, not a hot-swap.**
 > If a director wants to add new mods/entities, that changes the required
 > client runtime. Per the runtime-class rule, this must be versioned as a new
