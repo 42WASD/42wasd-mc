@@ -84,3 +84,78 @@ kubectl -n prd-games-42wasd-admin rollout status deployment/paper-lobby
   Java 25 crash window on Java 21.
 - Reached by velocity via `paper-lobby.prd-games-42wasd-admin.svc.cluster.local:25565`
   (`LOBBY-OPEN`; see the Phase 6 runbook).
+
+---
+
+# Phase — Import the missing multi-world data into the lobby PVC
+
+## Symptom
+
+The spawn system was not working. On every join Multiverse logged
+`Failed to teleport player <name> on join: Failure{reason=NULL_LOCATION}`,
+LobbyGames loaded **0 arenas**, and DecentHolograms couldn't resolve a
+`spawn` world.
+
+## Root cause — worlds missing from the PVC
+
+The lobby PVC (`paper-lobby-data`, 10Gi) only contained the vanilla worlds
+`world`, `world_nether`, `world_the_end`. The rest of the network's
+**multi-world setup** — `spawn`, `creative_plots`, `Arcade`, `hub` — was
+never copied into the PVC (the source had previously lived on a separate host
+at `/home/jyao-42admin/42wasd-mc/world-data/`, a large server-data dir
+gitignored by the repo). Multiverse-Core is configured (`join-destination:
+spawn`) to send every joining player to the `spawn` world, so with that world
+missing every spawn-related plugin failed:
+
+```text
+[Multiverse-Core] Failed to autoload world spawn: WORLD_FOLDER_INVALID
+[Multiverse-Core] Failed to autoload world creative_plots: WORLD_FOLDER_INVALID
+[Multiverse-Core] Failed to autoload world Arcade: WORLD_FOLDER_INVALID
+[LobbyGames] Loaded 0 arenas!
+[DecentHolograms] Cannot retrieve World from value spawn!
+[20:06:39] [Multiverse-Core] Failed to teleport player jya0 on join: NULL_LOCATION
+```
+
+## Fix — rsync the missing worlds from the source host into the PVC
+
+The authoritative full data dir is `/home/jyao-42admin/42wasd-mc/world-data/`
+(gitignored; large binaries managed outside Git). The PVC is a host
+`nvme-fast` LVM volume mounted at
+`/var/lib/kubelet/pods/<pod-uuid>/volumes/kubernetes.io~csi/pvc-<id>/mount`.
+
+Commands run (on alpha, via sudo):
+
+```bash
+# Locate the PVC host mount (matches pvc-c64d03bc-... = paper-lobby-data)
+mount | grep pvc-c64d03bc
+
+# Copy the 4 missing worlds and set ownership to the pod's UID (1000)
+PVC=/var/lib/kubelet/pods/<pod-uuid>/volumes/kubernetes.io~csi/pvc-c64d03bc.../mount
+SRC=/home/jyao-42admin/42wasd-mc/world-data
+for d in spawn creative_plots Arcade hub; do
+  rsync -a "$SRC/$d/" "$PVC/$d/"
+done
+chown -R 1000:1000 "$PVC/spawn" "$PVC/creative_plots" "$PVC/Arcade" "$PVC/hub"
+
+# Restart the lobby so Multiverse loads the new worlds
+kubectl -n prd-games-42wasd-admin rollout restart deployment/paper-lobby
+kubectl -n prd-games-42wasd-admin rollout status deployment/paper-lobby
+```
+
+## Verified / observed
+
+- `spawn` (129M), `creative_plots` (47M), `Arcade` (44M), `hub` (228K) now
+  present in the PVC.
+- Worlds autoload cleanly: `[WorldGuard] Loaded configuration for world 'spawn'`
+  / `'creative_plots'`; `Prepared spawn area`.
+- **`[LobbyGames] Loaded 7 arenas!`** (was 0).
+- **`[DecentHolograms] Loaded 5 holograms!`**.
+- No more `WORLD_FOLDER_INVALID`, `NULL_LOCATION`, or `Failed to teleport` in
+  the logs.
+
+## Note on the login plugin
+
+The user originally asked to remove a login plugin (AuthMe) from the lobby PVC
+— the `/login`/`/register` password plugin — but after the investigation chose
+to **not remove** it and instead fix the spawn/world issue. AuthMe
+(`AuthMe-5.7.0.jar`) and VerifyMC (email whitelist plugin) remain installed.
