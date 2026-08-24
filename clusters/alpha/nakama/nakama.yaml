@@ -1,6 +1,6 @@
 # Nakama — social, identity, and game server. Lives beside Minecraft, not inside it.
 # Deployed to the games namespace (prd-games-42wasd-admin on alpha-games-prd).
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nakama
@@ -17,9 +17,36 @@ spec:
       labels:
         app: nakama
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: nakama-migrate
+          image: registry.heroiclabs.com/heroiclabs/nakama:3.40.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+
+          env:
+            - name: "NAKAMA_DB_ADDRESS"
+              value: "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
+          command: ["/nakama/nakama", "migrate", "up"]
+          volumeMounts:
+            - name: crdb-client-certs
+              mountPath: /certs
+              readOnly: true
       containers:
         - name: nakama
-          image: registry.heroiclabs.com/heroiclabs/nakama:3.21.0
+          image: registry.heroiclabs.com/heroiclabs/nakama:3.40.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           ports:
             - containerPort: 7349
               name: api
@@ -28,16 +55,20 @@ spec:
             - containerPort: 7351
               name: rpc
           env:
-            - name: "NAKAMA_DB_DATABASE"
-              value: "nakama"
             - name: "NAKAMA_DB_ADDRESS"
-              value: "cockroachdb-public:26257"
+              value: "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
           volumeMounts:
             - name: data
               mountPath: /nakama/data
+            - name: crdb-client-certs
+              mountPath: /certs
+              readOnly: true
       volumes:
         - name: data
           emptyDir: {}
+        - name: crdb-client-certs
+          secret:
+            secretName: cockroachdb-client-secret
 ---
 apiVersion: v1
 kind: Service
