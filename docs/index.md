@@ -6,18 +6,15 @@ runtimes, scale-to-zero, and smooth client onboarding.
 
 ## How to use this site
 
-This documentation mirrors a production-grade reference structure. Explore by
-top tab:
-
-1. **[Setup](setup/getting-started.md)** — get oriented and up to speed.
-2. **[Guides](guides/architecture/index.md)** — architecture, server ops, and player experience.
-3. **[Reference Design](reference-design/index.md)** — the full technical design, in five parts:
-   - **I. Understand the architecture**,
-   - **II. How to interpret the tools**,
-   - **III. Step-by-step implementation**,
-   - **IV. Technical reference**, and
-   - **V. Current verification references**.
-4. **[Implementation](implementation/index.md)** — a live progress tracker for the phased build.
+- **[Setup](setup/getting-started.md)** — get oriented and up to speed.
+- **[Guides](guides/architecture/index.md)** — architecture, server ops, and player experience.
+- **[Reference Design](reference-design/index.md)** — the full technical design, in five parts:
+  - **I. Understand the architecture**,
+  - **II. How to interpret the tools**,
+  - **III. Step-by-step implementation**,
+  - **IV. Technical reference**, and
+  - **V. Current verification references**.
+- **[Implementation](implementation/index.md)** — a live progress tracker for the phased build.
 
 ## The core rule
 
