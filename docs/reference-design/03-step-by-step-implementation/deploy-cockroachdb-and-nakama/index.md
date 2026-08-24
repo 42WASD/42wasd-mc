@@ -67,6 +67,29 @@ nakama.minecraft-system.svc.cluster.local
 
 Do not expose its console publicly without authentication/network controls.
 
+### Configure the database with `--database.address` (not an env var)
+
+Nakama reads its database connection from the **`--database.address` CLI flag**
+(or a YAML config file). It does **not** read a `NAKAMA_DB_ADDRESS`
+environment variable — such a var is silently ignored and Nakama falls back to
+its default `root@localhost:26257`, which fails to reach CockroachDB in-cluster
+(`connection refused`). Pass the DSN through the container `args`, for both the
+`nakama-migrate` initContainer and the main `nakama` container:
+
+```yaml
+command: ["/nakama/nakama"]
+args:
+  - "migrate"
+  - "up"
+  - "--database.address"
+  - "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
+```
+
+The main `nakama` container uses the same `--database.address` in its `args`
+(without the `migrate up` subcommand). Mount the CockroachDB client
+certificates (`ca.crt`, `tls.crt`, `tls.key`) into the pod so `verify-full`
+TLS works.
+
 ---
 
 ## Create identity authentication (OAuth-first)

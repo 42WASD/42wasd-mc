@@ -86,3 +86,80 @@ helm install cockroachdb cockroachdb/cockroachdb --version 21.0.4 \
   - `infra/kubernetes/platform/networkpolicies/00-allow-kube-apiserver.yaml`
   - `docs/.../default-deny-networkpolicy/index.md` (documents the entity rule)
   - `docs/.../configure-rke2-s-bundled-cilium/index.md`
+
+## Post-audit corrections (2026-08-24)
+
+A phase 0-5 audit against the live cluster found and fixed **two** additional
+Nakama blockers that this runbook did not originally capture.
+
+### Correction 1 — Nakama ignores the `NAKAMA_DB_ADDRESS` env var
+
+- **Symptom:** `nakama-migrate` initContainer crash-looped with
+  `failed to connect to user=root database=nakama: 127.0.0.1:26257: connection
+  refused`.
+- **Root cause (proven):** Nakama does **not** read the `NAKAMA_DB_ADDRESS`
+  environment variable. The database is configured exclusively via the
+  `--database.address` CLI flag (or a YAML config file). The env var is
+  silently ignored, so Nakama fell back to its default `root@localhost:26257`
+  and could never reach CockroachDB.
+- **Fix:** pass the DSN through the command `args` in
+  `clusters/alpha/nakama/nakama.yaml`, for **both** the `nakama-migrate`
+  initContainer and the main `nakama` container:
+
+  ```yaml
+  # initContainer
+  command: ["/nakama/nakama"]
+  args:
+    - "migrate"
+    - "up"
+    - "--database.address"
+    - "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
+  ```
+
+  The main container uses the same `--database.address` in its `args`.
+
+### Correction 2 — `allow-games-egress` ipBlock dropped pod-to-pod traffic
+
+- **Symptom:** even with the correct DSN flag, the migrate init container hung
+  (SYN dropped), CockroachDB reported `0/0` client connections, and the pod
+  stayed in `Init:0/1` for ~2 minutes then failed.
+- **Root cause (proven):** `clusters/alpha/networkpolicy.yaml` defined
+  `allow-games-egress` with `egress.to[].ipBlock.cidr: 0.0.0.0/0`. Cilium
+  `ipBlock`/CIDR selectors **do not match intra-cluster pod IPs by default**
+  (`--policy-cidr-match-mode` excludes `pods`). So `default-deny` silently
+  dropped Nakama → CockroachDB (both pods on the same node). This is the same
+  Cilium CIDR limitation already documented for node addressing in
+  `05-gitops-bootstrap/default-deny-networkpolicy`, applied here to pod IPs.
+- **Fix:** replaced the blanket `ipBlock` with explicit label-based egress
+  rules in `clusters/alpha/networkpolicy.yaml`:
+
+  ```yaml
+  egress:
+    # Nakama -> CockroachDB
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cockroachdb
+      ports:
+        - protocol: TCP
+          port: 26257
+    # Velocity -> Paper lobby
+    - to:
+        - podSelector:
+            matchLabels:
+              app: paper-lobby
+      ports:
+        - protocol: TCP
+          port: 25565
+  ```
+
+  DNS is already granted by the platform `allow-cluster-dns`, and the
+  kube-apiserver by the cluster-wide `allow-to-kube-apiserver` CCNP, so neither
+  is duplicated here.
+
+### Verified after corrections
+
+- Nakama `2/2` Ready and `Available`; logs show `"Startup done"`, gRPC API on
+  7349, HTTP gateway 7350, console 7351 — it connected to CockroachDB and ran
+  the schema migration successfully.
+- `kubectl get deploy nakama -n prd-games-42wasd-admin` → `2/2`.

@@ -32,10 +32,14 @@ spec:
             capabilities:
               drop: ["ALL"]
 
-          env:
-            - name: "NAKAMA_DB_ADDRESS"
-              value: "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
-          command: ["/nakama/nakama", "migrate", "up"]
+          # NOTE: Nakama does NOT read NAKAMA_DB_ADDRESS from the environment.
+          # The database must be configured via the --database.address CLI flag.
+          command: ["/nakama/nakama"]
+          args:
+            - "migrate"
+            - "up"
+            - "--database.address"
+            - "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
           volumeMounts:
             - name: crdb-client-certs
               mountPath: /certs
@@ -54,9 +58,10 @@ spec:
               name: console
             - containerPort: 7351
               name: rpc
-          env:
-            - name: "NAKAMA_DB_ADDRESS"
-              value: "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
+          command: ["/nakama/nakama"]
+          args:
+            - "--database.address"
+            - "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
           volumeMounts:
             - name: data
               mountPath: /nakama/data

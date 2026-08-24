@@ -20,30 +20,30 @@ section of the Reference Design.
 
 ## Overall progress
 
-**5 / 31** phases/sections complete (**16%**).
+**6 / 31** phases/sections complete (**19%**).
 
-<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:16.1%"></div></div><div class="progress-pct">16%</div></div>
+<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:19.4%"></div></div><div class="progress-pct">19%</div></div>
 
 | Status | Count |
 |--------|-------|
-| ✅ done | 5 |
-| 🔶 in-progress | 1 |
+| ✅ done | 6 |
+| 🔶 in-progress | 0 |
 | ⬜ not-started | 25 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
 ## Progress by part
 
-### 16% — Part III — Step-by-step implementation
+### 19% — Part III — Step-by-step implementation
 
-<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:16.0%"></div></div><div class="progress-pct" style="font-size:.85em;">16%</div><div class="tip-box"><strong>Done (5)</strong>
+<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:19.0%"></div></div><div class="progress-pct" style="font-size:.85em;">19%</div><div class="tip-box"><strong>Done (6)</strong>
 • Decide names before deploying
 • Create repository structure
 • Create Kubernetes namespaces
 • Install OpenKruiseGame
 • Install KEDA and the observability stack
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (26)</strong>
 • Deploy CockroachDB and Nakama
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (25)</strong>
 • Deploy Velocity
 • Deploy the Paper lobby
 • Install TAB
@@ -331,6 +331,38 @@ kubectl delete gameserverset smoke-gss -n default
 - Marked phase 3 `done` in `progress.yaml` and regenerated
   `docs/implementation/index.md`.
 
+## Post-audit correction (2026-08-24) — kruise-daemon socket path on RKE2
+
+A phase 0-5 audit found `kruise-daemon` was CrashLoopBackOff-ing on the live
+alpha cluster, even though the helm release reported `deployed`.
+
+### The blocker
+
+- **Symptom:** `kubectl get pods -n kruise-system -l app=kruise-daemon` showed
+  `0/1 CrashLoopBackOff` (~21 restarts). The daemon log repeated:
+  `Failed to new daemon: failed to new runtime factory: not found container
+  runtime sock`.
+- **Root cause (proven):** RKE2 runs containerd with a **non-standard socket
+  path** — `/run/k3s/containerd/containerd.sock`. The OpenKruise `kruise`
+  chart defaults `daemon.socketLocation` to `/var/run`, so the
+  kruise-daemon looked for the runtime socket in the wrong place and never
+  found it. This is the documented K3s/RKE2 case in the OpenKruise install
+  docs: "Usually K3s has a different runtime path from the default `/var/run`.
+  You have to set `daemon.socketLocation` to the real runtime socket path."
+- **Fix:** reinstall the `kruise` release with the RKE2 socket location
+  (`/run/k3s`, where the default socket file name `containerd.sock` lives):
+
+  ```bash
+  helm upgrade kruise openkruise/kruise -n kruise-system \
+    --reuse-values --set daemon.socketLocation=/run/k3s
+  ```
+
+### Verified after correction
+
+- `kubectl get ds kruise-daemon -n kruise-system` → `1/1` READY (was `0/1`).
+- Daemon pod `kruise-daemon-*` → `1/1 Running`; the runtime-socket volume now
+  uses `hostPath: /run/k3s`.
+
 ## Outcome
 
 OKG is installed and its scale primitive is proven. Next: Phase 4 — Install
@@ -416,10 +448,10 @@ Phase 5 — Deploy CockroachDB and Nakama.
 
 </details>
 
-- 🔶 `in-progress` — [Phase 5 — Deploy CockroachDB and Nakama](../reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md)
+- ✅ `done` — [Phase 5 — Deploy CockroachDB and Nakama](../reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md)
 
 <details markdown="1" class="runbook">
-<summary>🔶 📜 Build log — Deploy CockroachDB and Nakama</summary>
+<summary>✅ 📜 Build log — Deploy CockroachDB and Nakama</summary>
 
 # Runbook — Phase 5: Deploy CockroachDB and Nakama
 
@@ -505,6 +537,83 @@ helm install cockroachdb cockroachdb/cockroachdb --version 21.0.4 \
   - `infra/kubernetes/platform/networkpolicies/00-allow-kube-apiserver.yaml`
   - `docs/.../default-deny-networkpolicy/index.md` (documents the entity rule)
   - `docs/.../configure-rke2-s-bundled-cilium/index.md`
+
+## Post-audit corrections (2026-08-24)
+
+A phase 0-5 audit against the live cluster found and fixed **two** additional
+Nakama blockers that this runbook did not originally capture.
+
+### Correction 1 — Nakama ignores the `NAKAMA_DB_ADDRESS` env var
+
+- **Symptom:** `nakama-migrate` initContainer crash-looped with
+  `failed to connect to user=root database=nakama: 127.0.0.1:26257: connection
+  refused`.
+- **Root cause (proven):** Nakama does **not** read the `NAKAMA_DB_ADDRESS`
+  environment variable. The database is configured exclusively via the
+  `--database.address` CLI flag (or a YAML config file). The env var is
+  silently ignored, so Nakama fell back to its default `root@localhost:26257`
+  and could never reach CockroachDB.
+- **Fix:** pass the DSN through the command `args` in
+  `clusters/alpha/nakama/nakama.yaml`, for **both** the `nakama-migrate`
+  initContainer and the main `nakama` container:
+
+  ```yaml
+  # initContainer
+  command: ["/nakama/nakama"]
+  args:
+    - "migrate"
+    - "up"
+    - "--database.address"
+    - "root@cockroachdb-public:26257/nakama?sslmode=verify-full&sslrootcert=/certs/ca.crt&sslcert=/certs/tls.crt&sslkey=/certs/tls.key"
+  ```
+
+  The main container uses the same `--database.address` in its `args`.
+
+### Correction 2 — `allow-games-egress` ipBlock dropped pod-to-pod traffic
+
+- **Symptom:** even with the correct DSN flag, the migrate init container hung
+  (SYN dropped), CockroachDB reported `0/0` client connections, and the pod
+  stayed in `Init:0/1` for ~2 minutes then failed.
+- **Root cause (proven):** `clusters/alpha/networkpolicy.yaml` defined
+  `allow-games-egress` with `egress.to[].ipBlock.cidr: 0.0.0.0/0`. Cilium
+  `ipBlock`/CIDR selectors **do not match intra-cluster pod IPs by default**
+  (`--policy-cidr-match-mode` excludes `pods`). So `default-deny` silently
+  dropped Nakama → CockroachDB (both pods on the same node). This is the same
+  Cilium CIDR limitation already documented for node addressing in
+  `05-gitops-bootstrap/default-deny-networkpolicy`, applied here to pod IPs.
+- **Fix:** replaced the blanket `ipBlock` with explicit label-based egress
+  rules in `clusters/alpha/networkpolicy.yaml`:
+
+  ```yaml
+  egress:
+    # Nakama -> CockroachDB
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cockroachdb
+      ports:
+        - protocol: TCP
+          port: 26257
+    # Velocity -> Paper lobby
+    - to:
+        - podSelector:
+            matchLabels:
+              app: paper-lobby
+      ports:
+        - protocol: TCP
+          port: 25565
+  ```
+
+  DNS is already granted by the platform `allow-cluster-dns`, and the
+  kube-apiserver by the cluster-wide `allow-to-kube-apiserver` CCNP, so neither
+  is duplicated here.
+
+### Verified after corrections
+
+- Nakama `2/2` Ready and `Available`; logs show `"Startup done"`, gRPC API on
+  7349, HTTP gateway 7350, console 7351 — it connected to CockroachDB and ran
+  the schema migration successfully.
+- `kubectl get deploy nakama -n prd-games-42wasd-admin` → `2/2`.
 
 </details>
 

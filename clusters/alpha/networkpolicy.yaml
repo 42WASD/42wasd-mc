@@ -5,15 +5,21 @@
 # `CiliumClusterwideNetworkPolicy` named `allow-to-kube-apiserver`.
 #
 # Reaching the kube-apiserver (ClusterIP 10.43.0.1:443) is handled by that
-# platform CCNP using the Cilium `kube-apiserver` entity — NOT by an ipBlock
-# rule here. ipBlock CIDR selectors ignore node addressing, so the self-hosted
-# apiserver's backend (the host node IP) is never matched; the entity rule is
-# the only reliable way to allow it. DNS is already granted by the platform
-# `allow-cluster-dns` policy.
+# platform CCNP using the Cilium `kube-apiserver` entity. DNS is granted by the
+# platform `allow-cluster-dns` policy. Neither is done here.
 #
-# What THIS policy must still provide: egress from games workloads to other
-# destinations (Nakama -> CockroachDB :26257, velocity -> lobby, outbound APIs).
-# The platform default-deny otherwise blocks it.
+# IMPORTANT — ipBlock is NOT usable for intra-cluster flows in Cilium:
+#   By default, Cilium `ipBlock` / CIDR selectors do NOT match pod or node IPs.
+#   So an `ipBlock: 0.0.0.0/0` allow-egress rule silently drops pod-to-pod
+#   traffic (Nakama -> CockroachDB), and it never matches the self-hosted
+#   apiserver. See the iac reference design
+#   `05-gitops-bootstrap/default-deny-networkpolicy`. Always express in-cluster
+#   flows with pod/label selectors, not CIDRs.
+#
+# This policy therefore grants ONLY the actual in-cluster egress flows the
+# games workloads need, via label selectors:
+#   - Nakama  -> CockroachDB   :26257 (PostgreSQL wire protocol over TLS)
+#   - Velocity -> Paper lobby  :25565
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -24,9 +30,19 @@ spec:
   policyTypes:
     - Egress
   egress:
+    # Nakama -> CockroachDB
     - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-    # NOTE: this ipBlock does NOT cover the kube-apiserver (node addressing is
-    # excluded by Cilium CIDR matching). The apiserver path is granted by the
-    # platform CCNP `allow-to-kube-apiserver` (kube-apiserver entity).
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: cockroachdb
+      ports:
+        - protocol: TCP
+          port: 26257
+    # Velocity -> Paper lobby
+    - to:
+        - podSelector:
+            matchLabels:
+              app: paper-lobby
+      ports:
+        - protocol: TCP
+          port: 25565

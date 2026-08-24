@@ -87,6 +87,38 @@ kubectl delete gameserverset smoke-gss -n default
 - Marked phase 3 `done` in `progress.yaml` and regenerated
   `docs/implementation/index.md`.
 
+## Post-audit correction (2026-08-24) — kruise-daemon socket path on RKE2
+
+A phase 0-5 audit found `kruise-daemon` was CrashLoopBackOff-ing on the live
+alpha cluster, even though the helm release reported `deployed`.
+
+### The blocker
+
+- **Symptom:** `kubectl get pods -n kruise-system -l app=kruise-daemon` showed
+  `0/1 CrashLoopBackOff` (~21 restarts). The daemon log repeated:
+  `Failed to new daemon: failed to new runtime factory: not found container
+  runtime sock`.
+- **Root cause (proven):** RKE2 runs containerd with a **non-standard socket
+  path** — `/run/k3s/containerd/containerd.sock`. The OpenKruise `kruise`
+  chart defaults `daemon.socketLocation` to `/var/run`, so the
+  kruise-daemon looked for the runtime socket in the wrong place and never
+  found it. This is the documented K3s/RKE2 case in the OpenKruise install
+  docs: "Usually K3s has a different runtime path from the default `/var/run`.
+  You have to set `daemon.socketLocation` to the real runtime socket path."
+- **Fix:** reinstall the `kruise` release with the RKE2 socket location
+  (`/run/k3s`, where the default socket file name `containerd.sock` lives):
+
+  ```bash
+  helm upgrade kruise openkruise/kruise -n kruise-system \
+    --reuse-values --set daemon.socketLocation=/run/k3s
+  ```
+
+### Verified after correction
+
+- `kubectl get ds kruise-daemon -n kruise-system` → `1/1` READY (was `0/1`).
+- Daemon pod `kruise-daemon-*` → `1/1 Running`; the runtime-socket volume now
+  uses `hostPath: /run/k3s`.
+
 ## Outcome
 
 OKG is installed and its scale primitive is proven. Next: Phase 4 — Install

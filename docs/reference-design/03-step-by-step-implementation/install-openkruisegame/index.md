@@ -77,6 +77,45 @@ proceeding — this is the exact primitive the World Controller later drives
 
 ---
 
+## RKE2/K3s: kruise-daemon runtime socket path
+
+OpenKruise ships a **kruise-daemon** DaemonSet that must talk to the container
+runtime socket. Its default `daemon.socketLocation` is `/var/run`, which is
+correct for standard containerd/docker but **wrong on RKE2 and K3s**: RKE2
+runs containerd with its socket at a non-standard path,
+`/run/k3s/containerd/containerd.sock`. If `daemon.socketLocation` is left at
+the default, kruise-daemon CrashLoopBackOffs with:
+
+```text
+Failed to new daemon: failed to new runtime factory: not found container runtime sock
+```
+
+This is the documented K3s/RKE2 special case in the OpenKruise install docs:
+> "Usually K3s has a different runtime path from the default `/var/run`. You
+> have to set `daemon.socketLocation` to the real runtime socket path on your
+> K3s node."
+
+Fix by installing `kruise` with the RKE2 socket location (the default socket
+file name `containerd.sock` is appended inside `/run/k3s`):
+
+```bash
+helm install kruise openkruise/kruise \
+  --set daemon.socketLocation=/run/k3s
+```
+
+To correct an already-deployed release, upgrade in place:
+
+```bash
+helm upgrade kruise openkruise/kruise -n kruise-system \
+  --reuse-values --set daemon.socketLocation=/run/k3s
+```
+
+> **Acceptance check:** `kubectl get ds -n kruise-system kruise-daemon` shows
+> `1/1` READY, and the daemon pod is `Running` (not CrashLoopBackOff). The
+> daemon's runtime-socket volume must point at `hostPath: /run/k3s`.
+
+---
+
 ## Relationship to the World Controller
 
 The World Controller talks to OKG through the Kubernetes API with a narrow
