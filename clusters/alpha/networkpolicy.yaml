@@ -1,0 +1,32 @@
+# Games namespace egress policy.
+#
+# The platform layer (ArgoCD `platform-networkpolicies`) applies a `default-deny`
+# NetworkPolicy (ingress + egress) to this namespace, plus a cluster-wide
+# `CiliumClusterwideNetworkPolicy` named `allow-to-kube-apiserver`.
+#
+# Reaching the kube-apiserver (ClusterIP 10.43.0.1:443) is handled by that
+# platform CCNP using the Cilium `kube-apiserver` entity — NOT by an ipBlock
+# rule here. ipBlock CIDR selectors ignore node addressing, so the self-hosted
+# apiserver's backend (the host node IP) is never matched; the entity rule is
+# the only reliable way to allow it. DNS is already granted by the platform
+# `allow-cluster-dns` policy.
+#
+# What THIS policy must still provide: egress from games workloads to other
+# destinations (Nakama -> CockroachDB :26257, velocity -> lobby, outbound APIs).
+# The platform default-deny otherwise blocks it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-games-egress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+    # NOTE: this ipBlock does NOT cover the kube-apiserver (node addressing is
+    # excluded by Cilium CIDR matching). The apiserver path is granted by the
+    # platform CCNP `allow-to-kube-apiserver` (kube-apiserver entity).

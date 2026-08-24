@@ -1,5 +1,16 @@
 # Agent Instructions
 
+## RESEARCH ONLINE WHEN STUCK — MANDATORY
+
+- If you cannot find the correct solution, design, or configuration from the
+  repo/context alone (or after 2-3 failed attempts), **STOP guessing and search
+  the authoritative source online immediately** (official docs, GitHub issues,
+  the software's own documentation) before continuing.
+- This is a hard rule, not a last resort. Do not thrash or repeatedly try
+  variations of the same guess. When unsure of the *right design*, look up the
+  vendor's documented best practice first, then apply it.
+- Record what you learned from the research in the runbook / session memory.
+
 ## Repository Layout & File Placement (Overarching Rule)
 
 - **Whenever creating or adding any new file, always stop and consider whether

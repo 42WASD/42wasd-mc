@@ -5,6 +5,7 @@ kind: Kustomization
 namespace: prd-games-42wasd-admin
 resources:
   - namespace.yaml
+  - networkpolicy.yaml
   - lobby
   - velocity
   - nakama
