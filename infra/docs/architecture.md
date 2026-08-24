@@ -34,8 +34,8 @@ cluster.
 Argo CD is bootstrapped by the platform repo and points at the game workloads
 here:
 
-- `kubernetes/platform` — shared game components (proxy, lobby).
-- `kubernetes/tenants` — game backends (Nakama, CockroachDB).
+- `clusters/alpha` — game components (namespace, proxy/lobby, Nakama,
+  CockroachDB), aggregated by kustomize.
 
 ## Secrets
 

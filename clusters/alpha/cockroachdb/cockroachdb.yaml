@@ -1,10 +1,10 @@
-# CockroachDB cluster for Nakama metadata.
+# CockroachDB — Nakama's backing store.
 # Requires the cockroachdb-operator CRD (see bootstrap). 3 nodes for HA.
 apiVersion: crdb.cockroachlabs.com/v1alpha1
 kind: CrdbCluster
 metadata:
   name: cockroachdb
-  namespace: game-backends
+  namespace: prd-games-42wasd-admin
 spec:
   dataStore:
     pvc:

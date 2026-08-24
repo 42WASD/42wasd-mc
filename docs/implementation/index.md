@@ -20,26 +20,26 @@ section of the Reference Design.
 
 ## Overall progress
 
-**1 / 31** phases/sections complete (**3%**).
+**2 / 31** phases/sections complete (**6%**).
 
-<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:3.2%"></div></div><div class="progress-pct">3%</div></div>
+<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:6.5%"></div></div><div class="progress-pct">6%</div></div>
 
 | Status | Count |
 |--------|-------|
-| ✅ done | 1 |
+| ✅ done | 2 |
 | 🔶 in-progress | 0 |
-| ⬜ not-started | 30 |
+| ⬜ not-started | 29 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
 ## Progress by part
 
-### 3% — Part III — Step-by-step implementation
+### 6% — Part III — Step-by-step implementation
 
-<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:3.0%"></div></div><div class="progress-pct" style="font-size:.85em;">3%</div><div class="tip-box"><strong>Done (1)</strong>
+<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:6.0%"></div></div><div class="progress-pct" style="font-size:.85em;">6%</div><div class="tip-box"><strong>Done (2)</strong>
 • Decide names before deploying
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (30)</strong>
 • Create repository structure
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (29)</strong>
 • Create Kubernetes namespaces
 • Install OpenKruiseGame
 • Install KEDA and the observability stack
@@ -125,7 +125,60 @@ repository structure, then Phase 2 — create the namespaces (aligning the
 
 </details>
 
-- ⬜ `not-started` — [Phase 1 — Create repository structure](../reference-design/03-step-by-step-implementation/create-repository-structure/index.md)
+- ✅ `done` — [Phase 1 — Create repository structure](../reference-design/03-step-by-step-implementation/create-repository-structure/index.md)
+
+<details markdown="1" class="runbook">
+<summary>✅ 📜 Build log — Create repository structure</summary>
+
+# Runbook — Phase 1: Create repository structure
+
+## What was done
+
+Established the top-level repository structure that matches the reference
+design exactly, and migrated the stale in-place Kubernetes manifests into it.
+
+- Created top-level directories: `clusters/`, `runtimes/`, `maps/`,
+  `services/`, each with a `README.md` explaining its role.
+- Created `clusters/alpha/` (alpha-games-prd) with the component layout
+  (`velocity/`, `lobby/`, `nakama/`, `cockroachdb/`, `mc-router/`,
+  `monitoring/`) per the Phase 1 reference-design doc.
+- Migrated the old `infra/kubernetes/{platform,tenants}` manifests into
+  `clusters/alpha/<component>/` and reconciled every namespace reference from
+  the stale `platform`/`proxy`/`game-backends` values to the real games
+  namespace `prd-games-42wasd-admin`.
+- Removed the now-redundant `infra/kubernetes/` tree; `infra/` now holds only
+  host-level IaC docs (`docs/architecture.md`, `.gitignore`, `README.md`).
+- Updated root `README.md`, `infra/README.md`, and `infra/docs/architecture.md`
+  to describe the new layout.
+- Added kustomize bases for each component and an aggregate overlay at
+  `clusters/alpha/kustomization.yaml`.
+
+## Commands run
+
+```bash
+# Create the top-level structure
+mkdir -p clusters/alpha/{velocity,lobby,nakama,cockroachdb,mc-router,monitoring}
+mkdir -p runtimes maps services
+
+# Remove the migrated, stale in-place k8s tree
+rm -rf infra/kubernetes
+
+# Validate the alpha overlay renders cleanly and targets the right namespace
+kubectl kustomize clusters/alpha >/dev/null
+kubectl kustomize clusters/alpha | grep -E "kind:|name: prd-games|namespace:"
+```
+
+## Verified / observed
+
+- `kubectl kustomize clusters/alpha` builds cleanly.
+- All rendered resources target namespace `prd-games-42wasd-admin`.
+- No remaining references to the old `platform`/`proxy`/`game-backends`
+  namespaces in the migrated manifests.
+- Marked phase 1 `done` in `progress.yaml` and regenerated
+  `docs/implementation/index.md`.
+
+</details>
+
 - ⬜ `not-started` — [Phase 2 — Create Kubernetes namespaces](../reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md)
 - ⬜ `not-started` — [Phase 3 — Install OpenKruiseGame](../reference-design/03-step-by-step-implementation/install-openkruisegame/index.md)
 - ⬜ `not-started` — [Phase 4 — Install KEDA and the observability stack](../reference-design/03-step-by-step-implementation/install-keda-and-observability/index.md)

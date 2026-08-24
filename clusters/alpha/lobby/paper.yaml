@@ -1,8 +1,10 @@
+# Paper lobby — the network's home world / spawn.
+# This is the first runtime (runtime-id: lobby-1) behind the Velocity proxy.
 apiVersion: v1
 kind: Service
 metadata:
   name: paper-lobby
-  namespace: platform
+  namespace: prd-games-42wasd-admin
   labels:
     app: paper-lobby
 spec:
@@ -18,7 +20,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: paper-lobby
-  namespace: platform
+  namespace: prd-games-42wasd-admin
   labels:
     app: paper-lobby
 spec:
@@ -58,15 +60,3 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: paper-lobby-data
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: paper-lobby-data
-  namespace: platform
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
