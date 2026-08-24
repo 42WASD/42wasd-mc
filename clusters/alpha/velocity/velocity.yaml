@@ -14,10 +14,6 @@ spec:
     app: velocity
   ports:
     - name: minecraft
-      port: 25577
-      targetPort: 25577
-      protocol: TCP
-    - name: query
       port: 25565
       targetPort: 25565
       protocol: TCP
@@ -39,17 +35,48 @@ spec:
       labels:
         app: velocity
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: velocity
-          image: ghcr.io/papermc/velocity:3.3.0-SNAPSHOT-219
+          # Reference design (deploy-velocity): Java 25 image for Velocity.
+          # The former ghcr.io/papermc/velocity:3.3.0-SNAPSHOT-219 tag did not
+          # resolve (ImagePullBackOff); itzg/mc-proxy:java25 is the documented
+          # Velocity image and is actively published.
+          image: itzg/mc-proxy:java25
+          env:
+            - name: TYPE
+              value: VELOCITY
+            - name: MEMORY
+              value: 1G
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          securityContext:
+            # Compliant with the namespace PodSecurity "restricted" profile.
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           ports:
-            - containerPort: 25577
+            - containerPort: 25565
               name: minecraft
           volumeMounts:
+            # itzg/mc-proxy syncs /config into the /server workdir at startup.
             - name: config
-              mountPath: /run/velocity/config
+              mountPath: /config
             - name: data
-              mountPath: /data
+              mountPath: /server
           readinessProbe:
             tcpSocket:
               port: minecraft
@@ -70,7 +97,7 @@ metadata:
 data:
   velocity.toml: |
     [server]
-    bind = "0.0.0.0:25577"
+    bind = "0.0.0.0:25565"
     motd = "&bWelcome to the Minecraft network"
     compression-level = 1
     online-mode = false

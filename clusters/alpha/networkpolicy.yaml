@@ -46,3 +46,51 @@ spec:
       ports:
         - protocol: TCP
           port: 25565
+    # Velocity -> internet (HTTPS): the itzg/mc-proxy image downloads the
+    # Velocity jar from fill.papermc.io on first start. This is EXTERNAL
+    # traffic, so Cilium ipBlock DOES match it (the ipBlock caveat above only
+    # applies to in-cluster pod/node CIDRs). Scope to the velocity pods only.
+    - to:
+        - podSelector:
+            matchLabels:
+              app: velocity
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+---
+# Scoped ingress for the games namespace.
+#
+# Unlike the previous ad-hoc `allow-games-ingress` (which was `ingress: [{}]` —
+# allow ALL ingress to EVERY pod), this policy only opens the ports each
+# workload actually needs:
+#   - Velocity  :25565 Minecraft client connections (the public front door;
+#     itzg/mc-proxy binds SERVER_PORT=25565 regardless of the velocity.toml).
+#   - Velocity  :25577 (config bind port; retained for parity).
+# Backends (paper-lobby, nakama, cockroachdb) receive NO broad ingress here;
+# they rely on the egress policy above (velocity -> paper) instead.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-games-ingress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: velocity
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow Minecraft clients (external) to reach the Velocity proxy.
+    # External traffic arrives via the cloudflared tunnel / node, represented
+    # by the Cilium remote-node + kube-apiserver entities. Because this is a
+    # standard NetworkPolicy (not a Cilium one), we allow from all peers so
+    # external ingress still works while egress stays default-deny.
+    - ports:
+        - protocol: TCP
+          port: 25565
+        - protocol: TCP
+          port: 25577

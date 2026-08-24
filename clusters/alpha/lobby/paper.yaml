@@ -1,6 +1,21 @@
 # Paper lobby — the network's home world / spawn.
 # This is the first runtime (runtime-id: lobby-1) behind the Velocity proxy.
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: paper-lobby-data
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: paper-lobby
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nvme-fast
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: paper-lobby
@@ -33,9 +48,19 @@ spec:
       labels:
         app: paper-lobby
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: paper
-          image: itzg/minecraft-server:java21-multiarch
+          # Java 25 crashes Paper's bundled Spark profiler (async-profiler
+          # native lib) with SIGSEGV ~37s after boot (lucko/spark#565). Use the
+          # same release tag on Java 21, which Spark supports.
+          image: itzg/minecraft-server:2026.8.2-java21
           env:
             - name: EULA
               value: "TRUE"
@@ -45,6 +70,27 @@ spec:
               value: "1.21"
             - name: ONLINE_MODE
               value: "FALSE"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            # Compliant with the namespace PodSecurity "restricted" profile.
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - containerPort: 25565
               name: minecraft
