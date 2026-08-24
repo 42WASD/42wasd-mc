@@ -1,3 +1,7 @@
+---
+phase: 03-step-by-step-implementation/decide-names-before-deploying
+---
+
 # Runbook — Phase 0: Decide names before deploying
 
 ## What was done
