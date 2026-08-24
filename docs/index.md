@@ -29,8 +29,8 @@ every invite into dependency troubleshooting.
 The hosting platform — the RKE2 cluster, hosts (`alpha`), GitOps (Argo CD), and
 host-level IaC — is owned by
 [42WASD/ubuntu-server-iac](https://github.com/42WASD/ubuntu-server-iac). This
-repo's `infra/` carries only the Minecraft **game-layer** workloads (proxy,
-lobby, Nakama, CockroachDB) that run on that platform. See
+repo carries only the Minecraft **game-layer** workloads (proxy, lobby, Nakama,
+CockroachDB) that run on that platform, in `clusters/`. See
 [Reference Design](reference-design/index.md) for the phased plan that builds
 toward this.
 

@@ -18,10 +18,11 @@ design exactly, and migrated the stale in-place Kubernetes manifests into it.
   `clusters/alpha/<component>/` and reconciled every namespace reference from
   the stale `platform`/`proxy`/`game-backends` values to the real games
   namespace `prd-games-42wasd-admin`.
-- Removed the now-redundant `infra/kubernetes/` tree; `infra/` now holds only
-  host-level IaC docs (`docs/architecture.md`, `.gitignore`, `README.md`).
-- Updated root `README.md`, `infra/README.md`, and `infra/docs/architecture.md`
-  to describe the new layout.
+- Removed the `infra/` directory entirely (it is not part of the reference
+  design's target structure). Its secret/kubeconfig ignore rules were folded
+  into the root `.gitignore`; the operator architecture notes were already
+  covered by `docs/reference-design/` and `docs/guides/`.
+- Updated root `README.md` and `docs/index.md` to describe the new layout.
 - Added kustomize bases for each component and an aggregate overlay at
   `clusters/alpha/kustomization.yaml`.
 
@@ -32,8 +33,8 @@ design exactly, and migrated the stale in-place Kubernetes manifests into it.
 mkdir -p clusters/alpha/{velocity,lobby,nakama,cockroachdb,mc-router,monitoring}
 mkdir -p runtimes maps services
 
-# Remove the migrated, stale in-place k8s tree
-rm -rf infra/kubernetes
+# Remove the stale infra/ tree (fully migrated + folded ignore rules)
+rm -rf infra
 
 # Validate the alpha overlay renders cleanly and targets the right namespace
 kubectl kustomize clusters/alpha >/dev/null

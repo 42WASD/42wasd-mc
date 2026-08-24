@@ -13,3 +13,17 @@ site/
 # Minecraft world data (large binaries; managed outside Git)
 world-data/
 world-data-export-*.tar.gz
+
+# Secrets — never commit keys, certs, or generated secrets
+*.key
+*.pem
+*.p12
+*.pfx
+.env
+.env.*
+!*.example
+secrets.generated/
+
+# kubeconfig
+kubeconfig
+*.kubeconfig

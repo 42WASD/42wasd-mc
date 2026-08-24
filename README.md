@@ -12,12 +12,16 @@ runtimes/    # reusable server bytecode stacks (image + side)
 maps/        # world data definitions & logical IDs
 services/    # custom platform services (world-controller, network-bridge)
 docs/        # reference design & implementation runbooks
-infra/       # IaC for the underlying hosts (see infra/README.md)
 ```
+
+The host platform (RKE2 cluster, hosts, GitOps via Argo CD, host-level IaC) is
+owned by [`42WASD/ubuntu-server-iac`](https://github.com/42WASD/ubuntu-server-iac);
+this repo carries only the Minecraft **game-layer** workloads.
 
 ## Structure decision (Phase 1)
 
 Top-level directories match the reference design exactly. Kubernetes
 manifests that previously lived under `infra/kubernetes/{platform,tenants}`
 were migrated into `clusters/alpha/` and reconciled to the real games
-namespace (`prd-games-42wasd-admin`). See the Phase 1 runbook.
+namespace (`prd-games-42wasd-admin`). The former `infra/` directory was then
+removed. See the Phase 1 runbook.
