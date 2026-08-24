@@ -40,6 +40,13 @@ metadata:
     app: paper-lobby
 spec:
   replicas: 1
+  # RWO PVC on a single node: RollingUpdate can never progress because the new
+  # pod can't mount the volume until the old pod (holding it) is deleted, and
+  # the old pod isn't deleted until the new one is Ready -> deadlock. Use
+  # Recreate so the old pod is removed first, then the new one mounts the freed
+  # volume. Correct pattern for single-replica, RWO-backed stateful workloads.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: paper-lobby
@@ -67,20 +74,31 @@ spec:
             - name: TYPE
               value: "PAPER"
             - name: VERSION
-              value: "1.21"
+              value: "1.21.10"
             - name: ONLINE_MODE
               value: "FALSE"
             - name: PUID
               value: "1000"
             - name: PGID
               value: "1000"
+            # itzg/minecraft-server does NOT read k8s resources.limits.memory.
+            # Without this it defaults to 1G heap (-Xms/-Xmx 1G), which starves
+            # 55 plugins + the 4.8G world (FAWE "high memory" spam). Match the
+            # 4Gi pod limit below.
+            - name: MEMORY
+              value: "4G"
           resources:
             requests:
               cpu: 500m
               memory: 2Gi
             limits:
               cpu: "2"
-              memory: 4Gi
+              # JVM heap is 4G (MEMORY) but heap is only part of process memory:
+              # metaspace + thread stacks + native + GC overhead. With 55 plugins
+              # + 4.8G world loading, heap 4G + overhead exceeded the old 4Gi
+              # limit -> OOMKilled. Give 2x heap for safe headroom. Node has
+              # ~72Gi allocatable so this is cheap.
+              memory: 8Gi
           securityContext:
             # Compliant with the namespace PodSecurity "restricted" profile.
             allowPrivilegeEscalation: false

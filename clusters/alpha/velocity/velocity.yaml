@@ -1,7 +1,10 @@
 # Velocity proxy — front door of the Minecraft network.
 # Deployed to the games namespace (prd-games-42wasd-admin on alpha-games-prd).
 #
-# Phase 6 will complete this (forwarding secret, Java 25 image, config).
+# Public game edge: the UAE relay VPS DNATs public :25565 -> 10.200.0.2:30079
+# (range 30000-30199 passthrough), so velocity must be exposed as a NodePort in
+# that range. Reuses nodePort 30079 (formerly the dev minecraft-demo); the dev
+# tenant was scaled to zero so this port is free for the prd lobby path.
 apiVersion: v1
 kind: Service
 metadata:
@@ -10,12 +13,14 @@ metadata:
   labels:
     app: velocity
 spec:
+  type: NodePort
   selector:
     app: velocity
   ports:
     - name: minecraft
       port: 25565
       targetPort: 25565
+      nodePort: 30079
       protocol: TCP
 ---
 apiVersion: apps/v1
@@ -58,6 +63,15 @@ spec:
               value: "1000"
             - name: PGID
               value: "1000"
+            # Do NOT download the image's default velocity.toml template. That
+            # default ships a [forced-hosts] section with example entries
+            # (factions.example.com/minigames.example.com) referencing example
+            # servers. When a custom configmap provides [servers] but not those
+            # forced-host targets, Velocity 4.x rejects the config as invalid
+            # and crashes. We provide a complete velocity.toml via the
+            # velocity-config configmap instead.
+            - name: SKIP_DOWNLOAD_DEFAULTS
+              value: "true"
           securityContext:
             # Compliant with the namespace PodSecurity "restricted" profile.
             allowPrivilegeEscalation: false
@@ -95,11 +109,56 @@ metadata:
   name: velocity-config
   namespace: prd-games-42wasd-admin
 data:
+  # Complete, valid Velocity 4.x configuration. This REPLACES the image default
+  # (SKIP_DOWNLOAD_DEFAULTS=true) so the example [forced-hosts] entries that
+  # crash a barebones config are never loaded. Velocity requires a full config,
+  # not a fragment.
   velocity.toml: |
-    [server]
+    config-version = "2.7"
     bind = "0.0.0.0:25565"
-    motd = "&bWelcome to the Minecraft network"
-    compression-level = 1
+    motd = "&bWelcome to the 42WASD Minecraft network"
+    show-max-players = 500
     online-mode = false
-    [proxy]
-    # TODO: fill forwarded hosts / online-mode per phase build
+    force-key-authentication = true
+    prevent-client-proxy-connections = false
+    player-info-forwarding-mode = "none"
+    forwarding-secret-file = "forwarding.secret"
+    announce-forge = false
+    kick-existing-players = false
+    ping-passthrough = "disabled"
+    enable-player-address-logging = true
+
+    [servers]
+    # The paper-lobby is the network's home world / spawn. Address is the
+    # Kubernetes DNS name of the paper-lobby Service in this namespace.
+    # `try` lists backends in priority order for initial connection.
+    lobby = "paper-lobby.prd-games-42wasd-admin.svc.cluster.local:25565"
+    try = [
+        "lobby"
+    ]
+
+    [forced-hosts]
+    # No forced hosts yet. Example hosts from the default template are removed
+    # so Velocity does not reject configs referencing undefined servers.
+
+    [advanced]
+    compression-threshold = 256
+    compression-level = -1
+    login-ratelimit = 3000
+    connection-timeout = 5000
+    read-timeout = 30000
+    haproxy-protocol = false
+    tcp-fast-open = false
+    bungee-plugin-message-channel = true
+    show-ping-requests = false
+    failover-on-unexpected-server-disconnect = true
+    announce-proxy-commands = true
+    log-command-executions = false
+    log-player-connections = true
+    accepts-transfers = false
+
+    [query]
+    enabled = false
+    port = 25577
+    map = "Velocity"
+    show-plugins = false

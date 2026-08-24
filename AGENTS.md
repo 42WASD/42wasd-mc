@@ -3,13 +3,37 @@
 ## RESEARCH ONLINE WHEN STUCK — MANDATORY
 
 - If you cannot find the correct solution, design, or configuration from the
-  repo/context alone (or after 2-3 failed attempts), **STOP guessing and search
+  repository/context alone (or after 2-3 failed attempts), **STOP guessing and search
   the authoritative source online immediately** (official docs, GitHub issues,
   the software's own documentation) before continuing.
 - This is a hard rule, not a last resort. Do not thrash or repeatedly try
   variations of the same guess. When unsure of the *right design*, look up the
   vendor's documented best practice first, then apply it.
 - Record what you learned from the research in the runbook / session memory.
+
+### Config/format errors: search the authoritative source BEFORE hand-editing
+
+- If a generated or template-driven config (e.g. a TOML/YAML consumed by a
+  container image) is rejected as **invalid**, or a workload crashes with a
+  config/parse error, **do not blindly keep tweaking the fragment you think is
+  wrong.** First find the **authoritative default/schema** the tool actually
+  loads:
+  1. Inspect the running container's real config file (the exact file the
+     process reads, not just the one you mounted) — `kubectl exec ... cat <path>`
+     / the image's `templates/` dir in its GitHub source.
+  2. If it came from a default-configs repo (e.g. itzg images pull from
+     `Shonz1/minecraft-default-configs`), fetch that **default template** and
+     diff your snippet against it. The image may append/merge sections you
+     didn't provide (e.g. `[forced-hosts]`) that reference servers you never
+     defined — a partial override is often the bug.
+  3. Many configs must be **complete**, not partial. Provide the whole file
+     (including empty-but-valid sections) rather than a fragment.
+  4. Confirm **which copy the process actually loads** and whether the mounted
+     file reliably overwrites the image's downloaded default (e.g.
+     `SYNC_SKIP_NEWER_IN_DESTINATION`/`--skip-existing` can silently keep the
+     old default).
+- This applies to Velocity/BungeeCord/Paper/forks and any template-driven
+  config, not just Minecraft.
 
 ## Repository Layout & File Placement (Overarching Rule)
 

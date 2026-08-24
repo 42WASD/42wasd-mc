@@ -70,8 +70,6 @@ spec:
 #   - Velocity  :25565 Minecraft client connections (the public front door;
 #     itzg/mc-proxy binds SERVER_PORT=25565 regardless of the velocity.toml).
 #   - Velocity  :25577 (config bind port; retained for parity).
-# Backends (paper-lobby, nakama, cockroachdb) receive NO broad ingress here;
-# they rely on the egress policy above (velocity -> paper) instead.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -94,3 +92,31 @@ spec:
           port: 25565
         - protocol: TCP
           port: 25577
+---
+# Backend ingress: allow the Velocity proxy to connect to the Paper lobby.
+#
+# The namespace is default-deny (ingress + egress). The `allow-games-egress`
+# policy lets velocity initiate egress to paper-lobby, but the DESTINATION pod
+# must ALSO allow ingress — otherwise default-deny drops the connection at the
+# lobby. Kubernetes NetworkPolicies are one-way: an egress allow on the source
+# alone is NOT sufficient; the backend needs a matching ingress allow from the
+# proxy. Velocity must reach paper-lobby :25565 to forward players to it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-proxy-to-paper-lobby
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: paper-lobby
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: velocity
+      ports:
+        - protocol: TCP
+          port: 25565
