@@ -9,11 +9,11 @@ runtimes, scale-to-zero, and smooth client onboarding.
 - **[Setup](setup/getting-started.md)** — get oriented and up to speed.
 - **[Guides](guides/architecture/index.md)** — architecture, server ops, and player experience.
 - **[Reference Design](reference-design/index.md)** — the full technical design, in five parts:
-  - **I. Understand the architecture**,
-  - **II. How to interpret the tools**,
-  - **III. Step-by-step implementation**,
-  - **IV. Technical reference**, and
-  - **V. Current verification references**.
+  - **[I. Understand the architecture](reference-design/01-understand-the-architecture-before-installing-anything/index.md)**
+  - **[II. How to interpret the tools](reference-design/02-how-to-interpret-the-actual-tools/index.md)**
+  - **[III. Step-by-step implementation](reference-design/03-step-by-step-implementation/index.md)**
+  - **[IV. Technical reference](reference-design/04-technical-reference/index.md)**
+  - **[V. Current verification references](reference-design/05-current-verification-references/index.md)**
 - **[Implementation](implementation/index.md)** — a live progress tracker for the phased build.
 
 ## The core rule
