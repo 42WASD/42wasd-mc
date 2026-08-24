@@ -2,11 +2,11 @@
 
 ## Why CockroachDB
 
-Nakama requires a Postgres-wire-compatible database server. Nakama's current
-docs list PostgreSQL and CockroachDB as supported production options; this
-design picks CockroachDB for its distributed, auto-healing behavior on
-Kubernetes. PostgreSQL is not "wrong" — it is simply not this design's
-production choice.
+Nakama requires a Postgres-wire-compatible database server. Current formal
+Nakama docs describe **CockroachDB as the officially supported and optimized
+production target**; PostgreSQL compatibility exists for development only.
+This design therefore standardizes **production on CockroachDB** for its
+distributed, auto-healing behavior on Kubernetes.
 
 ---
 
@@ -79,8 +79,9 @@ player joins network -> lands on the gate/login stage (not a world)
    ↓
 Discord/Google OAuth completed at the gate (browser or in-game prompt)
    ↓
-Nakama social-provider authentication (authenticateGoogle for Google,
-  or a custom OAuth provider for Discord)
+Nakama social-provider authentication (authenticateGoogle for Google;
+  for Discord our auth layer / runtime hook validates the token and maps the
+  verified user ID into Nakama Custom Authentication)
    ↓
 Nakama user (canonical identity)
    ↓
@@ -105,11 +106,12 @@ nakama.linkCustom(session, minecraftUuid, player.getUsername());
 
 Notes:
 
-- `authenticateGoogle` is built into Nakama. For Discord, register a **custom
-  OAuth provider** (or use Nakama's custom auth once the token is validated)
-  and call `authenticateCustom`.
-- Store the Nakama session/token server-side, not on the vanilla Minecraft
-  client.
+- `authenticateGoogle` is built into Nakama. **Discord is not built-in**: our
+  auth layer / Nakama `beforeAuthenticateCustom` hook validates the Discord
+  token and maps its verified user ID into Nakama Custom Authentication
+  (`authenticateCustom`).
+- Store the Nakama session/token in the **launcher's private storage**, not on
+  the vanilla Minecraft client.
 - Never derive the canonical identity from an offline-mode UUID or username.
 
 ---

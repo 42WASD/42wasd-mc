@@ -46,19 +46,40 @@ Sleep only when all permit it.
 
 ---
 
-## Trigger the scale transition with a maintained scaler
+## The World Controller is the sole replica owner for named worlds
 
-The World Controller owns the *safe-to-stop decision* above. It does not need
-to hand-roll the 0↔ scale *trigger* — **KEDA** (CNCF-graduated) can express the
-idle / player-count scaler as a `ScaledObject` that drives the GameServerSet
-through the `/scale` subresource. This separates:
+For a **named persistent world**, the World Controller owns the 0↔1 replica
+transition **itself** — via the GameServerSet `/scale` subresource — driven by
+the idle/player-count/reservation signals above. It does **not** delegate that
+world's replicas to KEDA.
 
 ```text
-KEDA                 -> decides WHEN to scale (idle timer / player count)
-World Controller     -> decides whether it is SAFE to stop (reservations,
-                       draining, maintenance) and drives graceful save
+KEDA / ScaledObject      -> POOLED capacity only (worlds WC does NOT own)
+World Controller         -> named persistent world replicas (0/1) + safe-to-stop
 ```
 
-KEDA is the trigger; the World Controller stays the authority on product
-semantics. Use KEDA only where the 0↔ transition is event/condition driven;
-keep the reservation/save gating in the World Controller.
+So for the named-world sleep path the trigger *is* the World Controller (idle
+timer + safe-to-stop checks), and the scale-out on demand is the World
+Controller (on join/invite/portal). KEDA is only used where the 0↔ transition
+applies to pooled capacity. Never attach a `ScaledObject` to a
+World-Controller-owned `GameServerSet` (see the
+[recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md)
+replica-owner rule).
+
+---
+
+## What the World Controller needs to observe
+
+For each named world the World Controller needs the same signals it already
+tracks:
+
+```text
+player_count
+reservation_count
+draining
+maintenance_lock
+```
+
+and must gate sleep (replicas → 0) on all of them, and gate wake (replicas → 1)
+on an explicit join/invite/portal request. The graceful save/shutdown steps
+(quiesce → save → confirm exit → scale 0) live entirely in the World Controller.

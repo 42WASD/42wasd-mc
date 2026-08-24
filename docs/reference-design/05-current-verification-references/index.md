@@ -2,6 +2,31 @@
 
 The following primary/current sources were checked for this edition. Re-audit them before major upgrades because Minecraft and its ecosystem change quickly.
 
+## Audit table (re-audit mechanically)
+
+| Component | Current status | Architecture status | Verified claim | Last checked |
+|---|---|---|---|---|
+| Velocity | active | SELECTED | Java 25 / Forge rules | 2026-08-24 |
+| Gate | active | ALTERNATIVE | ViaLite + mod relay | 2026-08-24 |
+| OKG | v1.1.0 | SELECTED | GameServerSet / game workload | 2026-08-24 |
+| TAB | 6.1.2 | SELECTED | Velocity / MiniPlaceholders | 2026-08-24 |
+| ViaVersion | 5.11.0 | SELECTED | protocol translation | 2026-08-24 |
+| ViaBackwards | 5.11.0 | SELECTED | protocol translation | 2026-08-24 |
+| Nakama | 3.40.0 | SELECTED | social/auth/session | 2026-08-24 |
+| CockroachDB | current | SELECTED | Nakama production DB (officially supported) | 2026-08-24 |
+| Modrinth Server Projects | active | SELECTED | install + direct launch | 2026-08-24 |
+| AstralRinth | active fork | SELECTED / TEST | launcher basics verified; Server Projects parity TEST_REQUIRED | 2026-08-24 |
+| Shulker | v0.13.0 / 2025 | REJECTED | maintenance concern | 2026-08-24 |
+| CloudNet | 4.0 RC | ALTERNATIVE | Minecraft-native cloud; pre-release | 2026-08-24 |
+| itzg/mc-monitor | current | SELECTED | status/ping readiness + metrics (not TPS/GC) | 2026-08-24 |
+| itzg/mc-proxy | java25 | SELECTED | Velocity container (Java 25) | 2026-08-24 |
+| Velero | current | SELECTED | resource+volume backup; restore drills = our process | 2026-08-24 |
+
+> Current pinned versions and audit date are also centralized in
+> [verified-versions.yaml](../verified-versions.yaml).
+
+## Primary sources
+
 1. **PaperMC — Velocity Getting Started**  
    https://docs.papermc.io/velocity/getting-started/  
    Current documentation states Java 25 is required.
@@ -109,7 +134,7 @@ The following primary/current sources were checked for this edition. Re-audit th
 
 30. **Velero**  
     https://velero.io/docs/  
-    Scheduled PVC snapshots/restore, off-machine copy, restore-test hooks.
+    Kubernetes resource backup + supported volume snapshot/backup (CSI / data mover / object store) with hooks. Restore drills and integrity checks are **our** runbook/CI process, not an automatic Velero feature.
 
 ---
 

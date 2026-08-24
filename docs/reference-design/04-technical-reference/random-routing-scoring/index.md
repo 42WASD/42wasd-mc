@@ -17,30 +17,40 @@ The scoring code reads these fields. Their source is noted where they live in
 | `weight`         | float   | MapDefinition  | relative promotion among eligible maps (community/manual boost)|
 | `free_slots`     | int     | derived        | `max_players - players - reservations` (see below)             |
 | `freshness`      | derived | derived        | how recently updated/maintained; decays over age               |
-| `health`         | derived | operational    | TPS/latency/ping success (mc-monitor) — prefer healthy only    |
-| `capacity`       | derived | operational    | how many free slots vs a threshold — prefer underused          |
+| `reachability`   | derived | mc-monitor     | protocol reachability (status/ping success + latency)          |
+| `tick_health`    | derived | backend telemetry | TPS/MSPT/tick health from backend plugin/bridge (+ spark)  |
+| `capacity`       | derived | WC reservation | how many free slots vs a threshold — prefer underused (authoritative World Controller reservation state) |
 | `novelty`        | derived | per-player     | how long since this player last visited — prefer not-recent    |
 
 `free_slots` is always **derived**, never stored: `max_players - players -
 reservations`. Keep it in sync with `reservations` (see reservations semantics
 below) so a reservation doesn't over-admit a party that then can't fit.
 
-### Factor bounds and the health gate
+> **Source split.** mc-monitor contributes *reachability* (can the server be
+> pinged, how fast) — it does **not** measure TPS/MSPT. `tick_health` comes from
+> backend telemetry (NetworkBridge/plugin exporting tick health) plus spark for
+> profiling. `capacity` comes from the authoritative World Controller
+> reservation state, not from a probe.
+
+### Factor bounds and the reachability gate
 
 Each factor is a value in **[0, 1]** (0 excludes, 1 neutral/no penalty) and the
 final score is their product times the base `weight`. A factor at 0 forces the
 score to 0.
 
-**`health_factor` is a hard gate, not just a down-weight:** any map whose
-readiness/ping is failing (`health_factor == 0`) is **excluded**, regardless of
-how high its other scores are. The remaining factors only *rank* among the
-gated-eligible set. This keeps an unhealthy map from ever being selected just
-because it is new, promoted, or underused. Concretely:
+**`reachability_factor` is a hard gate, not just a down-weight:** any map whose
+reachability/ping is failing (`reachability_factor == 0`) is **excluded**,
+regardless of how high its other scores are. The remaining factors only *rank*
+among the gated-eligible set. This keeps an unreachable map from ever being
+selected just because it is new, promoted, or underused. Concretely:
 
 ```text
-health_factor = 0          -> excluded (gate), regardless of weight/freshness/novelty
-health_factor in (0, 1]    -> down-weights relative to other healthy maps
+reachability_factor = 0      -> excluded (gate), regardless of weight/freshness/novelty
+reachability_factor in (0,1] -> down-weights relative to other healthy maps
 ```
+
+`tick_health_factor` (backend telemetry) and `capacity_factor` (World Controller
+reservation state) further rank, but they are not the reachability gate.
 
 Because the factors are bounded to [0,1], no factor can be negative or >1, so
 the weighted-random selection always sees a well-formed probability mass.
@@ -55,16 +65,17 @@ eligible = [
     and m.routing.public           # only maps exposed to the portal
     and m.random_eligible
     and m.free_slots >= party_size
-    and m.health_factor > 0        # hard gate
+    and m.reachability_factor > 0  # hard gate (mc-monitor)
 ]
 
 for m in eligible:
     score = (
         m.weight
-        * freshness_factor(m)      # in [0,1]
-        * m.health_factor          # in (0,1]; 0 already gated out
-        * capacity_factor(m)       # in [0,1]
-        * novelty_factor(player, m) # in [0,1]
+        * freshness_factor(m)          # in [0,1]
+        * m.reachability_factor        # in (0,1]; 0 already gated out
+        * m.tick_health_factor(m)      # in [0,1] (backend telemetry)
+        * capacity_factor(m)           # in [0,1] (WC reservation state)
+        * novelty_factor(player, m)    # in [0,1]
     )
 
 selected = weighted_random(eligible, score)
@@ -73,14 +84,15 @@ selected = weighted_random(eligible, score)
 This lets you prefer:
 
 ```text
-healthy
-underused
+reachable
+tick-healthy
+underused (authoritative capacity)
 new
 not recently visited
 community-promoted
 ```
 
-without violating compatibility and without ever selecting an unhealthy map.
+without violating compatibility and without ever selecting an unreachable map.
 
 ---
 

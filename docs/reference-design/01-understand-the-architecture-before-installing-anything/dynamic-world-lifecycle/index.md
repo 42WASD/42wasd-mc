@@ -23,6 +23,15 @@ OpenKruiseGame GameServerSet
 + podUpdatePolicy: InPlaceIfPossible
 ```
 
+> **What `InPlaceIfPossible` actually means.** OpenKruise can perform a
+> *supported in-place update* only where the changed pod fields are eligible
+> (e.g. image or some env/annotations that do not require a new pod). For
+> changes that are not in-place-eligible, it **falls back to recreating the
+> Pod**. So "update without recreating the Pod" is not a universal guarantee —
+> it is a best-effort for eligible changes. The world/PVC lifecycle must be
+> designed to remain safe under **both** paths (in-place and recreate), e.g.
+> by keeping world data on the PVC and never in the Pod's ephemeral layer.
+
 Lifecycle (Axis-2 operational states; matches `mapinstance-schema`):
 
 ```text
@@ -65,6 +74,12 @@ is a deliberate cost trade-off — the world consumes a node + JVM + PVC IO
 24/7 — so it should be reserved for worlds where background simulation is a
 product requirement, not a default. All other persistent worlds still default
 to idle-sleep.
+
+> **Replica-owner note:** for a *named persistent world* the World Controller
+> is the **sole replica owner** — attach **no** KEDA `ScaledObject` to its
+> `GameServerSet`, even for idle sleep. KEDA owns replicas only for *pooled*
+> capacity the World Controller does not own (see
+> [recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md)).
 
 > **LLM-director content changes are a runtime revision, not a hot-swap.**
 > If a director wants to add new mods/entities, that changes the required

@@ -30,7 +30,7 @@ The alternative is **not** a generic GitOps tool: it is a **custom World Control
 > `build-the-world-controller`, `add-idle-sleep`). It is listed here only to
 > contrast with `Shulker` above.
 
-OpenKruiseGame (OKG) is a CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers — a sub-project of OpenKruise.
+OpenKruiseGame (OKG) is an open-source game-server workload project — a sub-project of OpenKruise, which is a CNCF project. It is actively maintained and specialized for stateful game servers.
 
 It is selected as the **persistent-world workload** here, but it is **not** a "Minecraft-branded" operator: it does not implement portal routing, invites, world-readiness contracts, or routing policy. Those stay in the custom World Controller.
 
@@ -38,7 +38,9 @@ What it provides:
 
 ```text
 GameServerSet workload (stable per-server identity)
-in-place update: image/config without recreating Pod or detaching PVC
+in-place update: only for supported/eligible pod-field changes (unsupported
+   changes fall back to pod recreation, so the world/PVC lifecycle must stay
+   safe under both paths)
 per-server opsState protection from autoscaling/update
 PVC-backed persistent worlds (VolumeClaimTemplates)
 scale-to-zero

@@ -130,7 +130,11 @@ TAB on Velocity   (reads presence from Nakama)
 
 ## Problem 5 — Scale-to-zero and portal switching are two different traffic paths
 
-`mc-router` can see a new incoming connection to a hostname and can wake a Kubernetes GameServerSet before forwarding the connection.
+`mc-router` can see a new incoming connection to a hostname and can initiate a
+wake-up. Its native Kubernetes scale-to-zero support targets **StatefulSets**;
+for this architecture's OpenKruiseGame `GameServerSet`, a wake is performed
+through **mc-router's webhook → World Controller** path, which then scales the
+GameServerSet.
 
 But consider an already-connected player:
 

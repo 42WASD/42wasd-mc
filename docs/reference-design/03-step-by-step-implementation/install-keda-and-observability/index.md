@@ -42,10 +42,13 @@ values decide *when* 0↔1 happens — that is KEDA's "when", which stays
 separate from the World Controller's "safe to stop" decision (see
 `add-idle-sleep`).
 
-The OpenKruiseGame "Gameservers Scale" guide documents a `ScaledObject` whose
-`scaleTargetRef` points **directly at the GameServerSet**
-(`apiVersion: game.kruise.io/v1alpha1`, `kind: GameServerSet`). That is the
-pattern this design uses, so install KEDA before any scale-to-zero map exists.
+> **Replica-owner rule.** KEDA may scale a workload that *it* owns. In this
+> design that means **pooled capacity** (warm session fleets). A **named
+> persistent world** is **not** a KEDA target: the World Controller is the sole
+> replica owner for its `GameServerSet`, so it does **not** get a
+> `ScaledObject` — even for idle sleep. Do not point a KEDA `ScaledObject` at a
+> World-Controller-owned GameServerSet. Only pooled GameServerSets the World
+> Controller does not own get KEDA autoscaling.
 
 ---
 

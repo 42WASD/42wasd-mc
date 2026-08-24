@@ -1,0 +1,64 @@
+# Verified component versions — SINGLE SOURCE OF TRUTH
+#
+# This file centralizes every pinned/verified version for the reference design.
+# Pages should say "see verified-versions.yaml" instead of hard-coding a version
+# in ten places. Re-audit before major upgrades; bump `audit_date` each pass.
+#
+# The generators do NOT read this file; it is documentation, kept in sync
+# manually. CI does not fail on a stale value — keep it accurate by hand.
+
+audit_date: "2026-08-24"
+
+components:
+  velocity:
+    version: "4.0.0"
+    java: 25
+    status: SELECTED
+
+  gate:
+    version: null
+    status: ALTERNATIVE
+
+  tab:
+    version: "6.1.2"
+    status: SELECTED
+
+  viaversion:
+    version: "5.11.0"
+    status: SELECTED
+
+  viabackwards:
+    version: "5.11.0"
+    status: SELECTED
+
+  nakama:
+    version: "3.40.0"
+    status: SELECTED
+
+  openkruisegame:
+    version: "1.1.0"
+    status: SELECTED
+
+  minecraft_server_image:
+    version: "2026.8.1"
+    status: SELECTED
+
+  mc_proxy_image:
+    variant: "java25"
+    status: SELECTED
+
+  agones:
+    version: null
+    status: OPTIONAL  # ephemeral sessions only
+
+  cloudnet:
+    version: "4.0.0-RC17"
+    status: ALTERNATIVE  # pre-release (RC); not K8s-first
+
+  shulker:
+    version: "0.13.0"
+    status: REJECTED  # maintenance-risk (last release 2025-04-05)
+
+  modrinth_server_projects:
+    version: null
+    status: SELECTED  # AstralRinth parity = TEST_REQUIRED

@@ -80,13 +80,35 @@ custom runtime functions
 ```
 
 Nakama natively supports **social-provider authentication** for OAuth-first
-identity: `authenticateGoogle` and `authenticateCustom` (a custom OAuth provider for Discord)
-(plus the matching `link*` calls to attach additional identifiers). This makes
-Nakama the canonical identity anchor for Discord/Google login; the Minecraft
-UUID/name is a linked runtime binding. Discord is added as a custom OAuth
-provider (not built-in), verified server-side.
+identity. Google is a built-in provider (`authenticateGoogle`). **Discord has
+no native `authenticateDiscord` endpoint** — the documented third-party
+pattern is to validate the external identity in a Nakama runtime hook
+(`beforeAuthenticateCustom`) and map the verified external user ID into Nakama
+**Custom Authentication**:
 
-Nakama requires a Postgres-wire-compatible database (CockroachDB or another Postgres-compatible server such as PostgreSQL). We use CockroachDB as the production pick. PostgreSQL is a supported option but is not this architecture's production database choice.
+```text
+Discord OAuth
+    ↓
+our auth service / Nakama beforeAuthenticateCustom hook validates the token
+    ↓
+obtain stable Discord user ID
+    ↓
+Nakama AuthenticateCustom
+    ↓
+Nakama account
+```
+
+So the correct description is: *"Discord OAuth is validated by our
+authentication layer / Nakama runtime hook, then its verified Discord user ID
+is mapped into Nakama Custom Authentication"* — not "a custom OAuth provider
+for Discord" (there is no Discord provider to plug in). The Minecraft UUID/name
+is a linked runtime binding, verified server-side.
+
+Nakama requires a Postgres-wire-compatible database. Current formal Nakama docs
+describe **CockroachDB as the officially supported and optimized production
+target**; PostgreSQL compatibility exists and is useful for development, but it
+is not the documented production recommendation. **We standardize production
+on CockroachDB** (this architecture's only production DB choice).
 
 ---
 
@@ -125,6 +147,26 @@ optional proxyServerName routing through Velocity/Bungee after waking backend
 That makes it a useful edge component.
 
 It does not replace the World Controller for in-session portal transfers.
+
+---
+
+## itzg/mc-monitor
+
+Current repository documentation verifies:
+
+```text
+Minecraft protocol status/ping probe ("status" subcommand)
+ping/response latency
+online count / max players observation
+Prometheus + Influx metrics exporter
+```
+
+**Scope: readiness & reachability, not performance.** mc-monitor reports
+whether a Minecraft server answers a status/ping and how fast, plus online
+count. It does **not** measure TPS, MSPT, or tick health. Those come from
+backend/NetworkBridge telemetry (a plugin exporting tick health) plus spark for
+profiling/diagnostics. Keep the two sources separate: mc-monitor for
+readiness/reachability, backend telemetry + spark for performance.
 
 ---
 
@@ -168,35 +210,51 @@ Modrinth App "offline mode" = play already-installed mods without internet
 it does NOT provide offline/cracked ACCOUNT authentication
 ```
 
-This architecture runs backends in offline mode behind the authenticated proxy (see Phase 6), and therefore needs a client that supports offline/cracked accounts. The official Modrinth App cannot do that.
+This architecture runs backends in offline mode behind the authenticated proxy (see Phase 6), and therefore needs a client that can launch an offline-mode runtime.
 
 **AstralRinth** (github.com/42WASD/AstralRinth) is the candidate:
 
 ```text
-fork of the Modrinth App (Theseus core)
-OFFLINE AUTH for cracked + licensed accounts (also elyby)
+Modrinth-based launcher fork (Theseus core)
+supports Microsoft, Ely.by, external OAuth Device Authorization, and offline
+accounts for local/testing play
 no ads, forced telemetry/metrics disabled
 macOS .dmg build (Apple Silicon / Intel) available
-active fork (AstralRinth's own README + releases confirm)
+actively maintained (AstralRinth's own README + releases confirm)
 ```
+
+AstralRinth's own README describes it as a Modrinth-based launcher with
+Microsoft, Ely.by, and external OAuth Device Authorization support, plus
+offline accounts for local/testing use, and explicitly encourages players to
+own a legitimate Minecraft license. Use that neutral framing — do not describe
+it as a "pirate/cracked launcher."
 
 > Note: **Migurinth** is a *different* Modrinth-App fork (in maintenance mode).
 > The design pins AstralRinth specifically, not Migurinth.
 
-It keeps the exact Modrinth App UX (modpack/mod auto-download, server-project onboarding), so players who cannot enter a world with their current client get the same "install requirements and launch directly" flow.
+Because AstralRinth is Modrinth-based, Modrinth **Server Project** compatibility
+is a *desired capability* — but exact parity must be covered by a launcher
+**acceptance test**:
 
-> **License / ToS caveat:** AstralRinth is a *cracked/pirate-account launcher* —
-> it supports offline authorization without a Mojang/Microsoft license and is
-> primarily aimed at unlicensed (offline/cracked) play. This is a real
-> Minecraft-Terms-of-Service / legal risk and must be recorded as a deliberate
-> decision, not treated as neutral. This design's identity model is **Nakama
-> OAuth-first** (Discord/Google at the in-game auth gate, see
-> `social-state` 7.1.0): every player — cracked *or* licensed — still
-> authenticates to a verified Nakama account before leaving the gate. AstralRinth
-> is therefore only the *client that can launch an offline-mode runtime*; it is
-> **not** the identity authority and does not grant access by itself. Keep this
-> division explicit so the offline-launcher choice and the OAuth-first identity
-> anchor do not appear to conflict.
+```text
+VERIFICATION STATUS: TEST_REQUIRED
+```
+
+Modrinth itself supports the intended flow (a Server Project defines required
+pack compatibility; the Modrinth App installs the content and can launch
+directly into the server), and we verified that. We did **not** verify that
+AstralRinth implements every Server Project workflow identically.
+
+> **License / ToS note.** AstralRinth's offline-account support means it can
+> launch an offline-mode runtime without a Mojang/Microsoft license. That is a
+> Minecraft-Terms-of-Service consideration to record as a deliberate decision.
+> This design's identity model is **Nakama OAuth-first** (Discord/Google at the
+> in-game auth gate, see `social-state` 7.1.0): every player — cracked *or*
+> licensed — still authenticates to a verified Nakama account before leaving
+> the gate. AstralRinth is therefore only the *client that can launch an
+> offline-mode runtime*; it is **not** the identity authority and does not grant
+> access by itself. Keep this division explicit so the offline-launcher choice
+> and the OAuth-first identity anchor do not appear to conflict.
 
 Caveat to record in the design:
 

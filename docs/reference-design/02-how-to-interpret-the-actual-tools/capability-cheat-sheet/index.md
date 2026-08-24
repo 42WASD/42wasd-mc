@@ -17,9 +17,15 @@
 | itzg/mc-proxy | ❌ | ❌ | runs inside K8s | proxy JVM | ❌ | ❌ |
 | CockroachDB | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ (Nakama persistence) |
 | AstralRinth | ❌ | ❌ | ❌ | client runtime | ✅ launcher installs | ❌ |
-| itzg/mc-monitor | ❌ | ❌ | ❌ | ❌ | ❌ | readiness probe + metrics |
-| KEDA | ❌ | ❌ | ✅ 0↔1 scale trigger (decision stays in World Controller) | ❌ | ❌ | ❌ |
-| Velero | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ PVC backup/restore |
+| itzg/mc-monitor | ❌ | ❌ | ❌ | ❌ | ❌ | readiness/reachability probe (status/ping, online count, latency) — not TPS/GC |
+| KEDA | ❌ | ❌ | ✅ pooled-capacity 0↔1 scale owner only | ❌ | ❌ | ❌ |
+| Velero | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ PVC backup/restore (restore drills are our runbook/CI) |
+
+> **Replica-owner note:** the World Controller is the **sole replica owner** for
+> named persistent worlds (their `GameServerSet` gets **no** KEDA
+> `ScaledObject`). KEDA owns replicas only for **pooled** capacity the World
+> Controller does not own. See
+> [recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md).
 
 The boundaries are deliberate.
 

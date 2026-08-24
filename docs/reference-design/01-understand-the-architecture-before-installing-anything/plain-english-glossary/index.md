@@ -1,5 +1,10 @@
 # Plain-English glossary
 
+> **Versions live elsewhere.** This glossary defines *what each term means*;
+> it deliberately does **not** carry component version numbers. Current verified
+> versions and audit date are centralized in
+> [verified-versions.yaml](../../verified-versions.yaml).
+
 ## Proxy
 A server that players connect to first and that can route one player connection among multiple Minecraft backend servers.
 
@@ -24,7 +29,14 @@ Your small control-plane service that reads map definitions, decides *which* ins
 So: World Controller = reads map definition + decides + orchestrates lifecycle + policy for traffic. OKG = runs/sleeps the actual server pod. Velocity/mc-router = carry the traffic.
 
 ## OpenKruiseGame (OKG)
-A CNCF-incubated, actively maintained Kubernetes workload specialized for stateful game servers (a sub-project of OpenKruise).
+An open-source game-server workload project — a sub-project of **OpenKruise**,
+which is a CNCF project. It runs stateful game servers on Kubernetes.
+
+## Replica owner
+The single controller permitted to mutate the **desired replica count** of a
+workload. For a named persistent world that is the World Controller (0↔1); for
+pooled capacity it is KEDA/autoscaler. Never two writers on one workload's
+replicas.
 
 ## GameServerSet
 The OKG workload with stable per-server identity; supports in-place update, per-server `opsState` protection, PVC-backed worlds (VolumeClaimTemplates), and scale-to-zero.
@@ -158,14 +170,21 @@ The standard Docker image for running any Minecraft server type/version/modpack.
 A Modrinth feature that lets a server publish "the required content to play here", so the launcher can install it and launch directly.
 
 ## AstralRinth
-A fork of the Modrinth launcher app that also supports offline/cracked accounts. This design tracks the fork under our own GitHub org (`42WASD/AstralRinth`) so we pin a known-good build rather than a floating upstream.
+A 42WASD-tracked Modrinth-based launcher fork with Microsoft, Ely.by, external
+OAuth Device Authorization, and offline-account support (for local/testing
+play). Role here: provide a controllable launcher surface for runtime
+installation, account/session handoff, and one-click reconnect.
 
-> **"Join" installs-or-finds-or-updates, then launches.** Because AstralRinth
-> is a Modrinth App fork, it manages *instances* (per-runtime installs) and
-> reuses them: it does **not** re-create a runtime every time.
+> **Modrinth Server Project parity = TEST_REQUIRED.** Because AstralRinth is
+> Modrinth-based, Server Project compatibility is a *desired capability* — but
+> exact parity is **not assumed** and must be covered by a launcher acceptance
+> test before relying on it.
+>
+> **"Join" installs-or-finds-or-updates, then launches.** As a Modrinth App
+> fork it manages *instances* (per-runtime installs) and reuses them: it does
+> **not** re-create a runtime every time.
 > - If the required runtime is **already installed**, it launches it directly.
-> - If installed but **out of date**, it updates it in place (Modrinth App
->   keeps installed mods/packs up to date per instance).
+> - If installed but **out of date**, it updates it in place.
 > - If **not installed**, it installs it (Minecraft version + loader + mods)
 >   and launches.
 >
@@ -197,6 +216,10 @@ A Git-friendly tool for defining and updating a modpack that server and launcher
 A Kubernetes event-driven autoscaler that can scale a workload from 0 to 1 (and back). Here it triggers the GameServerSet 0↔1 transition.
 
 ## Velero
-A Kubernetes backup/restore tool that snapshots PVCs (including worlds) on a schedule and can restore them elsewhere.
+A Kubernetes backup/restore tool. It backs up cluster resources and supports
+volume snapshot/backup flows (via CSI snapshot / data mover / object store) on
+a schedule with hooks. Whether a restore is correct/durable is verified by
+**our** restore drills and integrity checks — that is a runbook/CI process, not
+an automatic Velero feature.
 
 ---

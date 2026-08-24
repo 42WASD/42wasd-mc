@@ -77,13 +77,12 @@ direct-join path.
 
 This operation must be idempotent.
 
-The 0->1 scale of the GameServerSet is the one transition a maintained scaler
-can own. OpenKruise's "Gameservers Scale" guide shows a KEDA `ScaledObject`
-whose `scaleTargetRef` points directly at the GameServerSet
-(`apiVersion: game.kruise.io/v1alpha1, kind: GameServerSet`) with
-`minReplicaCount: 0`. KEDA provides the 0<->1 edge; the World Controller still
-owns the *decision* to wake (reservations, invites, readiness) and calls the
-GameServerSet `/scale` path directly for product-driven wakes.
+The 0↔1 scale of a *named* GameServerSet is owned by the World Controller
+**itself** (the `/scale` subresource), not by KEDA — KEDA owns replicas only for
+pooled capacity the World Controller does not own (see the replica-owner rule in
+[recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md)).
+This keeps a single writer per workload so Argo CD / GitOps and KEDA can never
+fight the World Controller over `spec.replicas`.
 
 ---
 
@@ -109,9 +108,10 @@ Set per-runtime startup timeout.
 
 The Minecraft `status/ping` probe is provided by a maintained agent —
 **itzg/mc-monitor** (`status` subcommand) — rather than hand-rolled ping code.
-`mc-monitor` doubles as the Prometheus/Influx metrics exporter, so the
-readiness probe and the per-map perf metrics (TPS, latency, player count) share
-one trusted source.
+mc-monitor also exports the same status (online count, latency) as Prometheus.
+Note it reports **reachability**, not TPS/MSPT — tick-health metrics come from
+backend/NetworkBridge telemetry + spark (see
+[world-readiness-contract](../../04-technical-reference/world-readiness-contract/index.md)).
 
 ---
 

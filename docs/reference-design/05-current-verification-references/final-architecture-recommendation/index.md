@@ -19,19 +19,19 @@ SOCIAL
   CockroachDB
 
 DYNAMIC WORLD CONTROL
-  custom World Controller
+  custom World Controller (sole replica owner for named persistent worlds)
   OpenKruiseGame GameServerSet + PVC
   itzg/minecraft-server
-  itzg/mc-monitor (readiness probe + metrics)
-  KEDA (optional) 0↔1 scale trigger
-  Velero (optional) PVC backup/restore
-  mc-router edge wake
+  itzg/mc-monitor (readiness/reachability probe; TPS/GC from backend telemetry + spark)
+  KEDA (optional) pooled-only scale owner — NOT on named worlds
+  Velero (optional) PVC backup/restore (restore drills = our runbook/CI)
+  mc-router edge wake (webhook -> World Controller for GameServerSet)
   Agones only for ephemeral sessions
 
 CLIENT RUNTIMES
   runtime classes
   Modrinth Server Projects
-  AstralRinth (offline-capable Modrinth fork launcher)
+  AstralRinth (Modrinth-based launcher fork: Microsoft, Ely.by, OAuth Device, offline for local/testing)
   packwiz as optional Git/CI source
 ```
 

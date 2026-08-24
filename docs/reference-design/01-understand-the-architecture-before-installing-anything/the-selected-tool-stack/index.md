@@ -8,19 +8,19 @@
 | Protocol translation | **ViaVersion 5.11.0 + ViaBackwards 5.11.0** | Current Jul 2026 release line; mature protocol bridge |
 | Forge 1.20.1 proxy compatibility | **Ambassador + ProxyCompatibleForge** | PaperMC's documented path for Velocity + Forge 1.13–1.20.1 and modern forwarding |
 | Social/meta backend | **Nakama 3.40.0** | Mature open-source game backend; friends, parties, presence, chat, matchmaking primitives. Also the **OAuth-first identity anchor** (Discord/Google social login), with the Minecraft UUID linked as a runtime binding |
-| Nakama production DB | **CockroachDB** | Nakama requires a Postgres-wire-compatible DB; CockroachDB is our production pick (PostgreSQL is also supported) |
+| Nakama production DB | **CockroachDB** | Nakama requires a Postgres-wire-compatible DB; current formal Nakama docs describe CockroachDB as the officially supported/optimized production target. PostgreSQL compatibility exists (dev-only) but we standardize production on CockroachDB |
 | Minecraft containers | **itzg/minecraft-server 2026.8.1 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |
 | Edge hostname routing / external wake | **itzg/mc-router** | K8s service discovery; edge wake via webhook (native 0↔1 auto-scale is StatefulSet-only); metrics |
 | Persistent world orchestration | **Custom World Controller** | Exact fit for persistent maps, portals, invites, readiness and policy |
-| Persistent world workload | **OpenKruiseGame `GameServerSet` + PVC** | CNCF-incubated game-server workload; in-place update, per-world ops protection, scale-to-zero |
+| Persistent world workload | **OpenKruiseGame `GameServerSet` + PVC** | Open-source game-server workload (a sub-project of OpenKruise, a CNCF project); in-place update, per-world ops protection, scale-to-zero |
 | Ephemeral session maps | **Agones, optional** | Mature Kubernetes game-server Fleet/Allocation model |
 | Public modded onboarding | **Modrinth Server Projects** | Current 2026 flow can install required content and launch directly into the server |
-| Player client (launcher) | **AstralRinth** | Offline/cracked-capable Modrinth App fork; pinned in `42WASD/AstralRinth` (our own tracked fork) |
+| Player client (launcher) | **AstralRinth** | Modrinth-based launcher fork (Microsoft, Ely.by, external OAuth Device Authorization, offline-account support for local/testing) pinned in `42WASD/AstralRinth` (our own tracked fork) |
 | Pack source/CI | **packwiz, optional** | Git-friendly modpack definition and launcher/server update workflow |
-| Minecraft readiness probe & metrics | **itzg/mc-monitor** | Maintained status/ping probe (`status` subcommand); exports online count, latency, MOTD to Prometheus/Influx — shared source for readiness and perf metrics |
-| Scale trigger (idle / player-count) | **KEDA, optional** | CNCF-graduated; `ScaledObject` → HPA fires the GameServerSet 0↔1 transition; safe-to-stop decision stays in World Controller |
-| World/DB backup & restore | **Velero** | Apache-2.0, CNCF-governed; scheduled PVC snapshots + off-machine copy + restore-test hooks |
+| Minecraft readiness probe & metrics | **itzg/mc-monitor** | Maintained status/ping probe (`status` subcommand); exports online count, latency, MOTD to Prometheus/Influx. **Readiness/reachability, not TPS/GC metrics** (those come from backend/NetworkBridge telemetry + spark) |
+| Scale trigger (idle / player-count) | **KEDA, optional** | CNCF-graduated; `ScaledObject` → HPA. **Pooled-capacity replica owner only** — NOT attached to World-Controller-owned named-world GameServerSets |
+| World/DB backup & restore | **Velero** | Apache-2.0, CNCF-governed; resource backup + supported volume backup/snapshot (CSI/data-mover/object-store) with hooks. Restore drills/integrity = our runbook/CI, not an automatic Velero feature |
 | Dynamic infra source of truth | **Git + Kubernetes manifests** | Auditable, deterministic runtime/map definitions |
 
 ---
@@ -69,3 +69,9 @@ cluster converges to desired state
   itself, proxy, monitoring, CRDs). The two coexist: Argo CD keeps the
   platform definitions from drifting; the World Controller manages the
   on-demand world lifecycle on top of it.
+- **Single-writer rule:** because Argo CD reconciles Git, never let Git own a
+  field the World Controller writes. In particular `GameServerSet.spec.replicas`
+  for a named world is owned by the World Controller (and KEDA is not attached
+  to it) — otherwise Argo CD could reset a slept world back to `replicas: 1`.
+  See
+  [recommended-source-of-truth-model](../../04-technical-reference/recommended-source-of-truth-model/index.md).

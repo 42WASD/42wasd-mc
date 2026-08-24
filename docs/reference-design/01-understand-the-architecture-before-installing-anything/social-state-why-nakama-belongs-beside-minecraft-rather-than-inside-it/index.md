@@ -51,8 +51,9 @@ Example:
 ```text
 Discord / Google OAuth token
        ↓
-Nakama social-provider authentication (authenticateGoogle, or a custom OAuth
-                                        provider for Discord)
+Nakama social-provider authentication (authenticateGoogle for Google; for
+  Discord, our auth layer validates the token and maps the verified Discord
+  user ID into Nakama Custom Authentication)
        ↓
 nakama_user_id  (canonical identity)
        ↓
@@ -102,7 +103,9 @@ registration/login plugin that drops new players on the lobby until they
 4. Player completes the OAuth flow (browser or in-game prompt)
    ↓
 5. Nakama verifies the token and creates/returns the canonical
-   Nakama user account (authenticateGoogle / custom Discord provider)
+   Nakama user account (authenticateGoogle for Google; our auth layer /
+   Nakama runtime hook validates the Discord token and maps its verified
+   user ID into Nakama Custom Authentication)
    ↓
 6. NetworkBridge links the incoming (offline) Minecraft UUID/name to the
    verified account (Nakama account.link/custom)
@@ -159,41 +162,73 @@ UUID->Nakama mapping.
 ### 7.1.2 Session persistence across launcher restarts
 
 A player must **not** re-gate every time they restart the launcher to switch
-runtimes. The Nakama OAuth session survives a reconnect:
+runtimes. The Nakama OAuth session must survive a reconnect **without**
+re-running the Discord/Google prompt.
+
+**The key problem: the offline Minecraft UUID is spoofable.** If
+NetworkBridge chose a stored Nakama refresh token by looking up that offline
+identity, the *selector* used to retrieve the permanent credential would not
+be authenticated — anyone joining with a matching offline name could claim the
+session. So the durable credential must be held somewhere that is itself
+authenticated, and a **short-lived proof** (a join ticket) is what is presented
+to Velocity on each launch.
+
+Architecture (matches Nakama's documented pattern of storing the session in
+persistent client storage and restoring it on app start):
 
 ```text
-player authenticates once at the gate
-   ↓
-Nakama returns a session token + refresh token
-   ↓
-NetworkBridge persists the session (Nakama session/refresh tokens) keyed to
-   the linked account (server-side, in Nakama / CockroachDB)
-   ↓
-player restarts the launcher to switch runtimes
-   ↓
-reconnect: NetworkBridge restores/renews the Nakama session from the refresh
-   token — no new Discord/Google prompt
-   ↓
-player is routed onward immediately
+FIRST LOGIN (one time)
+   Discord / Google OAuth
+        ↓
+   Nakama account created
+        ↓
+   AstralRinth stores the Nakama session/refresh token
+      in its own private client storage  ← the durable credential
 ```
 
-Mechanics, per Nakama's session model:
+Then, on every (re)connect — including a launcher restart to install a new
+runtime:
 
-- The Nakama **access token** is short-lived; the **refresh token** is
-  long-lived and lets the server renew the session without re-authenticating.
-- On a fresh join the bridge restores the session to the *same* Nakama account
-  by presenting the stored **refresh token** (a bearer secret scoped to that
-  account), not by re-running the Discord/Google OAuth. The offline Minecraft
-  UUID/name alone is **never** enough to claim a session — the refresh token
-  is the credential that binds the reconnect to the account, so a spoofed UUID
-  cannot hijack a stored session without that token.
-- Only when the **refresh token also expires** (or the player explicitly signs
-  out) does the player go back through the gate.
+```text
+AstralRinth (holds authenticated Nakama session)
+        ↓
+   asks the Auth / Join-Ticket Service
+        ↓
+   service issues a short-lived, single-use, signed JOIN TICKET
+        ↓
+   launch Minecraft -> join the network
+        ↓
+   Velocity / NetworkBridge validates + CONSUMES the ticket
+        ↓
+   Nakama user established (not re-derived from the offline UUID)
+        ↓
+   pending invite resolved, player routed onward
+```
+
+The offline UUID/name is **never** enough to claim a session. It only identifies
+*which character* is presenting; the Nakama session held by the launcher is what
+proves *who* the player is, and the join ticket is the short-lived proof
+Velocity accepts on that connection.
+
+Distinguish the four credentials:
+
+```text
+Offline UUID/name   = Minecraft presentation identity (spoofable)
+Nakama account      = account identity (canonical)
+Nakama refresh token= long-lived credential (held by the launcher)
+Join ticket         = short-lived, single-use proof presented to Velocity
+Pending invite      = user intent, NOT authentication
+```
+
+Only when the **refresh token also expires** (or the player explicitly signs
+out) does the player go back through the gate — because the launcher can no
+longer renew the Nakama session, so it must re-run the OAuth flow.
 
 This is what makes the "seamless" cross-runtime invite (Example D) hold: the
-launcher restart to install a new runtime does **not** force a re-login,
-because the Nakama session persists. Document this explicitly so the auth gate
-("sign in before transfer") is understood to be *one-time*, not *per-join*.
+launcher restart to install a new runtime does **not** force a re-login, because
+the launcher's Nakama session persists and a fresh join ticket is minted on
+rejoin. The join ticket is what closes the "who came back" proof without
+trusting the offline UUID.
 
 ### 7.1.3 Logout and switching accounts
 
@@ -211,8 +246,10 @@ player is dropped back to the gate stage
 on next join, the gate prompts for Discord/Google sign-in again
 ```
 
-- **`/logout`** revokes the stored refresh token server-side, so the next join
-  cannot silently reuse it. The player must complete the OAuth gate again.
+- **`/logout`** revokes the Nakama session/refresh token **both server-side and
+  in the launcher's private storage**, so the next join cannot silently reuse
+  it. The player must complete the OAuth flow again (no valid session → no
+  fresh join ticket can be minted).
 - **Switch account** = logout, then re-auth as a different Discord/Google
   account. The new Nakama account becomes the canonical identity; the offline
   Minecraft UUID/name is re-linked to it. This is how a shared machine or a

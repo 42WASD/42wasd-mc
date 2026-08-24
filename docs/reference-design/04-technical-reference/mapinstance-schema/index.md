@@ -1,47 +1,75 @@
 # MapInstance schema
 
-```json
-{
-  "map_id": "fantasy-kingdom-001",
-  "runtime_id": "fantasy-1.20.1-forge",
-  "state": "READY",
-  "backend_id": "fantasy-kingdom-001",
-  "service_host": "fantasy-kingdom-001.minecraft.svc.cluster.local",
-  "port": 25565,
-  "players": 4,
-  "reservations": 1,
-  "max_players": 12,
-  "last_activity": "2026-08-19T...",
-  "revision": 14
-}
+`MapInstance` is a **Kubernetes custom resource** (CRD), not an arbitrary JSON
+record. It lives under the `platform.42wasd.dev/v1alpha1` API group. The World
+Controller is the sole writer of `MapInstance` (its `spec` comes from a
+`MapDefinition`; its `status` is maintained by the controller). Example:
+
+```yaml
+apiVersion: platform.42wasd.dev/v1alpha1
+kind: MapInstance
+metadata:
+  name: fantasy-kingdom-001
+  # Kubernetes supplies resourceVersion / generation for optimistic concurrency
+
+spec:
+  mapRef: fantasy-kingdom
+  runtimeRef: fantasy-1-20-1-r4
+
+status:
+  phase: Ready               # operational (Axis-2) phase
+  workloadRef:
+    apiVersion: game.kruise.io/v1alpha1
+    kind: GameServerSet
+    name: fantasy-kingdom-001
+  endpoint:
+    host: fantasy-kingdom-001.minecraft.svc.cluster.local
+    port: 25565
+  players: 4
+  reservations: 1
+  runtimeRevision: r4
+  conditions:
+    - type: KubernetesReady
+      status: "True"
+    - type: MinecraftReachable
+      status: "True"
+    - type: AcceptingPlayers
+      status: "True"
+  observedGeneration: 12
 ```
 
-`state` uses the **operational (Axis-2)** vocabulary from
-[routing-state-machine](../routing-state-machine/index.md): `ASLEEP`,
-`STARTING`, `READY`, `STOPPING`, `ERROR`. It is the world's long-lived health,
-**not** a routing-request state (`REQUESTED`/`TRANSFERRING`/`COMPLETE` belong
-to a per-join operation and are not stored here).
+## Key decisions
 
-`draining` is **not** a value of `state`. It is a separate boolean/derived flag
-used while the world is otherwise `READY` (winding down for scale-to-zero). Keep
-it out of the `state` enum so the five atomic operational states stay clean.
+- **`status.phase`** uses the **operational (Axis-2)** vocabulary from
+  [routing-state-machine](../routing-state-machine/index.md): `ASLEEP`,
+  `STARTING`, `READY`, `STOPPING`, `ERROR`. It is the world's long-lived
+  health, **not** a routing-request state (`REQUESTED`/`TRANSFERRING`/
+  `COMPLETE` belong to a per-join operation and are not stored here).
+- **`draining` is not a value of `status.phase`.** It is a separate boolean or
+  condition used while the world is otherwise `READY` (winding down for
+  scale-to-zero). Keep it out of the phase enum so the five atomic operational
+  states stay clean.
+- **`spec.workloadRef`** identifies the concrete backing workload (the
+  `GameServerSet` name + ordinal). It may point at a single instance for a
+  single-instance map, or an Agones `GameServer` in general.
+- **`status.conditions`** carries structured readiness state
+  (`KubernetesReady`, `MinecraftReachable`, `AcceptingPlayers`) and is the
+  place to add future checks rather than inventing more phase values.
+- **No home-grown integer revision.** Instead of a custom
+  `revision: 14` concurrency token, rely on Kubernetes' built-in
+  `metadata.resourceVersion` / `metadata.generation` + `status.observedGeneration`
+  for optimistic concurrency. `runtimeRevision` (a `r4`-style **pack/runtime
+  revision** string) is a *different* notion — it records which runtime pack
+  revision this instance is pinned to (see
+  [runtimedefinition-schema](../runtimedefinition-schema/index.md)).
 
-`backend_id` identifies the concrete backing workload (the `GameServerSet` name
-+ ordinal). It may coincide with `map_id` for a single-instance map, but is
-distinct in general — a map can be backed by multiple replicas or an Agones
-`GameServer`, so `backend_id` disambiguates which instance is READY.
+## Source-of-truth notes
 
-`last_activity` records the latest player activity or world update time. It is
-the raw signal behind the `freshness` factor in `random-routing-scoring` and the
-idle-drain decision (see `add-idle-sleep`).
-
-`reservations` counts seats already promised to joining players/parties but
-not yet connected; see `random-routing-scoring` and `reservations` semantics.
-
-`revision` is an **optimistic-concurrency token** (an integer) for the *running
-state*, used to guard idempotent releases if this state is persisted outside
-Kubernetes. It is a different notion from the `RuntimeDefinition.revision`
-(a `r1`-style **pack/runtime revision** string) and from a `MapDefinition`
-revision — see [runtimedefinition-schema](../runtimedefinition-schema/index.md)
-and the [world-readiness-contract](../world-readiness-contract/index.md).
+- The World Controller creates/updates/destroys `MapInstance` and owns its
+  `status`.
+- Kubernetes/OKG owns `Pod`/`GameServerSet`/`GameServer` status and PVC state.
+- `status.players`, `status.reservations`, and `status.conditions` are derived
+  from mc-monitor reachability + World Controller reservation state + backend
+  telemetry (see [world-readiness-contract](../world-readiness-contract/index.md)
+  and [random-routing-scoring](../random-routing-scoring/index.md)).
 
