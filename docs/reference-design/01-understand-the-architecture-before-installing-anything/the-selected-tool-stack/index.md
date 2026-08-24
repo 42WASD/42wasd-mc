@@ -8,8 +8,8 @@
 | Protocol translation | **ViaVersion 5.11.0 + ViaBackwards 5.11.0** | Current Jul 2026 release line; mature protocol bridge |
 | Forge 1.20.1 proxy compatibility | **Ambassador + ProxyCompatibleForge** | PaperMC's documented path for Velocity + Forge 1.13–1.20.1 and modern forwarding |
 | Social/meta backend | **Nakama 3.40.0** | Mature open-source game backend; friends, parties, presence, chat, matchmaking primitives. Also the **OAuth-first identity anchor** (Discord/Google social login), with the Minecraft UUID linked as a runtime binding |
-| Nakama production DB | **CockroachDB** | Nakama requires a Postgres-wire-compatible DB; current formal Nakama docs describe CockroachDB as the officially supported/optimized production target. PostgreSQL compatibility exists (dev-only) but we standardize production on CockroachDB |
-| Minecraft containers | **itzg/minecraft-server 2026.8.1 line** | Very active; supports versions/loaders/modpacks |
+| Nakama production DB | **CockroachDB** | Nakama uses PostgreSQL-wire-compatible DB semantics (PG examples exist), but current formal Nakama docs identify CockroachDB as the officially supported/optimized production target (PostgreSQL = unofficial/development). We standardize production on CockroachDB |
+| Minecraft containers | **itzg/minecraft-server 2026.8.2 line** | Very active; supports versions/loaders/modpacks |
 | Proxy container | **itzg/mc-proxy `java25` variant** | Convenient Velocity container; explicitly provides Java 25 variant |
 | Edge hostname routing / external wake | **itzg/mc-router** | K8s service discovery; edge wake via webhook (native 0↔1 auto-scale is StatefulSet-only); metrics |
 | Persistent world orchestration | **Custom World Controller** | Exact fit for persistent maps, portals, invites, readiness and policy |

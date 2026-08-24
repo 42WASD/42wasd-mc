@@ -14,7 +14,7 @@ components:
   viaversion: "5.11.0"
   viabackwards: "5.11.0"
   nakama: "3.40.0"
-  minecraftServerImage: "2026.8.1"
+  minecraftServerImage: "2026.8.2"
 ```
 
 For components without a desired fixed semantic release in this document:

@@ -38,7 +38,8 @@ launcher installs/updates the required runtime (Modrinth Server Project)
    ↓
 launcher mints a one-time JOIN TICKET from its authenticated Nakama session
    ↓
-launch Minecraft -> join network
+launch Minecraft against the ticket hostname (see "Join-ticket transport"
+   in social-state 7.1.2)
    ↓
 Velocity / NetworkBridge validates + CONSUMES the ticket
    ↓
