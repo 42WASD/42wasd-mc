@@ -64,6 +64,20 @@ transfer immediately
 
 is a much better user experience than restarting Minecraft for every horror map.
 
+> **Why `client_modpack_required: false` here?** This is a *per-runtime design
+> choice*, not a rule that "non-vanilla worlds can't have mods." It means the
+> Backrooms content is delivered **server-side** (resource packs + server-side
+> plugins/datapacks), so a plain vanilla client can join instantly — no launcher
+> install, no restart, seamless portal switching. The runtime-class system is
+> what makes **client-required mods** work *where they genuinely need to*: the
+> moment a runtime cannot be expressed server-side and needs real client mods,
+> that runtime sets `client_modpack_required: true` and becomes its own class
+> (see Runtime C, `fantasy-1.20.1-forge`), and the launcher (Modrinth Server
+> Project / AstralRinth) auto-installs and keeps that pack updated before
+> launch. So nothing is "disabled" globally — each runtime class explicitly
+> decides how heavy its client contract is, and only the mod-requiring ones pay
+> the install/restart cost.
+
 ---
 
 ## Runtime C — `fantasy-1.20.1-forge`

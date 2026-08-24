@@ -20,6 +20,17 @@ server runtime functions
 
 Use Minecraft as one client/frontend of that social system.
 
+> **What "use Minecraft as one client/frontend" means:** the Nakama backend is
+> the owner of identity, friends, parties and presence; the Minecraft client
+> (through Velocity/NetworkBridge) is just one *client* that reads/writes that
+> social state. The same social backend could equally serve a website, a mobile
+> app, or a Discord bot. Minecraft is not the database — it is the frontend.
+> In particular, login happens **server-side at the proxy gate** (via the
+> Velocity auth plugin), not in a built-in Minecraft login page. The Minecraft
+> client does not render HTML and has no custom-network account UI, so all
+> OAuth/login/logout UI is provided by NetworkBridge + Nakama (in-game
+> prompts/commands and a browser for the OAuth consent).
+
 ---
 
 ## 7.1 Identity mapping
@@ -183,6 +194,75 @@ This is what makes the "seamless" cross-runtime invite (Example D) hold: the
 launcher restart to install a new runtime does **not** force a re-login,
 because the Nakama session persists. Document this explicitly so the auth gate
 ("sign in before transfer") is understood to be *one-time*, not *per-join*.
+
+### 7.1.3 Logout and switching accounts
+
+Because the session is durable, you must provide an explicit escape hatch so a
+player can end it or sign in as someone else. NetworkBridge should expose a
+**logout / switch-account command** (e.g. `/logout` or `/switch-account`):
+
+```text
+/logout
+   ↓
+NetworkBridge tells Nakama to revoke/expire the session (revoke the refresh token)
+   ↓
+player is dropped back to the gate stage
+   ↓
+on next join, the gate prompts for Discord/Google sign-in again
+```
+
+- **`/logout`** revokes the stored refresh token server-side, so the next join
+  cannot silently reuse it. The player must complete the OAuth gate again.
+- **Switch account** = logout, then re-auth as a different Discord/Google
+  account. The new Nakama account becomes the canonical identity; the offline
+  Minecraft UUID/name is re-linked to it. This is how a shared machine or a
+  user with multiple social accounts switches cleanly without the old session
+  leaking.
+- The **same logout command works for cracked and premium players** — both are
+  just Nakama sessions, so signing out is identical.
+
+This keeps the auth gate *one-time-per-session* while still allowing a player
+to explicitly end or change their identity. The logout/switch command is part
+of NetworkBridge's command set, not a Minecraft-client feature (the Minecraft
+client has no built-in HTML or account-switch UI for a custom network — all of
+this happens through the proxy/bridge).
+
+### 7.1.4 One account, multiple characters (Terraria-style)
+
+The canonical identity is the **Nakama account**. A common game pattern is for
+one account to own **multiple in-world characters** — like Terraria, where one
+player account can create several named characters that each have their own
+inventory/progress.
+
+- The Nakama **account** is the security + ownership anchor (bans, purchases,
+  friends, login). It is identified by `nakama_user_id`.
+- **Characters** are a layer above the account, *not* Nakama users. They are
+  records owned by the account — naturally a Nakama **collection** (one record
+  per character) keyed by the account, plus an `active_character_id` pointer.
+- The **offline Minecraft UUID/name** becomes the *character's* presentation
+  identity, bound to the character record — so even if a player uses a
+  different username, or another person on a shared machine, the data and
+  inventory resolve to the same **account + character**, never to the raw
+  username. Two different usernames can no longer collide into the same world
+  data, and a username change does not lose the character.
+
+```text
+Discord/Google account  (nakama_user_id = stable identity anchor)
+        │  owns
+        ├── character "Steve"    (minecraft_uuid/name, inventory, settings)
+        ├── character "Pixel"     (a second, separate character)
+        └── active_character = "Steve"
+```
+
+- **Friends/parties attach to the account**, and the *active* character
+  determines what appears in the world and in TAB. When the player switches
+  character, their presence `activity`/`map` reflects the new character.
+- This is a **data/collection design on top of Nakama**, not a Nakama
+  feature. It is the established pattern: one authenticated user, with
+  per-account child records for characters/profiles. It decouples "who owns
+  the account" from "which character is in the world," which is exactly what
+  prevents two players with the same username from accidentally sharing a
+  character.
 
 ---
 

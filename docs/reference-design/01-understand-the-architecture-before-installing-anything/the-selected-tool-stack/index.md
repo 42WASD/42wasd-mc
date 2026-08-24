@@ -24,3 +24,48 @@
 | Dynamic infra source of truth | **Git + Kubernetes manifests** | Auditable, deterministic runtime/map definitions |
 
 ---
+
+## Why every container runs its own JVM (and why that is correct)
+
+A natural question is: *"every server/proxy runs a JVM — is that wasteful, and
+can we share one JVM across them?"* The short answer is **no — do not share a
+JVM**, and this is standard, intended container behavior:
+
+- Each Minecraft server and the proxy is a **separate Java process** that must
+  be independently started, stopped, scaled, restarted and memory-limited. A
+  single shared JVM cannot isolate one world's crash, GC pause, or OOM from
+  another; process isolation is the whole point.
+- The JVM is small relative to a world: a proxy needs ~1GB for 1000 players,
+  and a modded server's cost is dominated by the world/mod simulation, not the
+  JVM base overhead. Sharing the JVM saves little and sacrifices isolation.
+- Kernel sharing is handled by the **container runtime** (namespaces/cgroups);
+  JVM/class-sharing (CDS archives) can reduce *cold-start* time inside a
+  single process, but it does **not** mean multiple servers share one runtime.
+- LXD/system-containers share a kernel, not an application runtime. Minecraft
+  servers are not like stateless functions; each needs a stable, isolated JVM
+  on its own. If resource density matters, prefer **right-sizing requests/
+  limits and scale-to-zero** (already in this design) over trying to share a
+  JVM.
+
+## GitOps: applying the Git source of truth
+
+"Git is the source of truth" is realized with a **GitOps controller** —
+**Argo CD** (or Flux) reconciles the cluster to the manifests in Git:
+
+```text
+Git repo (runtime/map manifests, policy)
+   ↓
+Argo CD (watches the repo, applies to cluster)
+   ↓
+cluster converges to desired state
+```
+
+- Argo CD watches the Git repo and automatically applies changes, drift
+  (someone `kubectl apply`s something not in Git) is corrected back to the
+  repo, and every change is a reviewable commit.
+- The **custom World Controller** remains the live *runtime* authority for
+  dynamic map instances (it creates/sleeps GameServerSets on demand), while
+  Argo CD owns the *static* infrastructure (namespaces, the World Controller
+  itself, proxy, monitoring, CRDs). The two coexist: Argo CD keeps the
+  platform definitions from drifting; the World Controller manages the
+  on-demand world lifecycle on top of it.
