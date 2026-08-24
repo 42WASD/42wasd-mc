@@ -14,6 +14,7 @@
   decide-names-before-deploying: done
   create-repository-structure: done
   create-kubernetes-namespaces: done
+  install-openkruisegame: done
   # Phase 0 — Decide names before deploying
   # Phase 1 — Create repository structure
   # Phase 2 — Create Kubernetes namespaces

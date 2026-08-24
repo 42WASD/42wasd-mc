@@ -40,8 +40,12 @@ components:
     version: "3.40.0"
     status: SELECTED
 
+  kruise:
+    version: "1.9.1"   # core OpenKruise controllers (helm chart)
+    status: SELECTED
+
   openkruisegame:
-    version: "1.1.0"
+    version: "1.1.0"   # GameServer / GameServerSet (helm chart)
     status: SELECTED
 
   minecraft_server_image:
