@@ -20,27 +20,27 @@ section of the Reference Design.
 
 ## Overall progress
 
-**2 / 31** phases/sections complete (**6%**).
+**3 / 31** phases/sections complete (**10%**).
 
-<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:6.5%"></div></div><div class="progress-pct">6%</div></div>
+<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:9.7%"></div></div><div class="progress-pct">10%</div></div>
 
 | Status | Count |
 |--------|-------|
-| ✅ done | 2 |
+| ✅ done | 3 |
 | 🔶 in-progress | 0 |
-| ⬜ not-started | 29 |
+| ⬜ not-started | 28 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
 ## Progress by part
 
-### 6% — Part III — Step-by-step implementation
+### 10% — Part III — Step-by-step implementation
 
-<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:6.0%"></div></div><div class="progress-pct" style="font-size:.85em;">6%</div><div class="tip-box"><strong>Done (2)</strong>
+<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:10.0%"></div></div><div class="progress-pct" style="font-size:.85em;">10%</div><div class="tip-box"><strong>Done (3)</strong>
 • Decide names before deploying
 • Create repository structure
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (29)</strong>
 • Create Kubernetes namespaces
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (28)</strong>
 • Install OpenKruiseGame
 • Install KEDA and the observability stack
 • Deploy CockroachDB and Nakama
@@ -180,7 +180,67 @@ kubectl kustomize clusters/alpha | grep -E "kind:|name: prd-games|namespace:"
 
 </details>
 
-- ⬜ `not-started` — [Phase 2 — Create Kubernetes namespaces](../reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md)
+- ✅ `done` — [Phase 2 — Create Kubernetes namespaces](../reference-design/03-step-by-step-implementation/create-kubernetes-namespaces/index.md)
+
+<details markdown="1" class="runbook">
+<summary>✅ 📜 Build log — Create Kubernetes namespaces</summary>
+
+# Runbook — Phase 2: Create Kubernetes namespaces
+
+## What was done
+
+Reconciled the namespace strategy with the tenant-namespace policy that
+actually exists on `alpha-games-prd`, rather than creating the reference
+design's generic `minecraft` / `minecraft-system` split.
+
+- **Confirmed the live cluster state** (context `alpha-games-prd`):
+  `prd-games-42wasd-admin` already exists and is `Active`; its `dev-`
+  mirror `dev-games-42wasd-admin` also exists. No `minecraft`,
+  `minecraft-system`, `platform`, `proxy`, or `game-backends` namespaces
+  exist.
+- **Decision: one shared games namespace**, not the two-namespace split.
+  Grounded in Kubernetes namespace guidance (namespaces are for
+  team/tenant/resource boundaries; prefer labels within a shared namespace
+  unless hard isolation is needed) and Argo CD ApplicationSets (host many
+  games in one namespace, label-scoped).
+- **Documented the "why"** in the Phase-2 reference-design doc:
+  env boundary = namespace (`prd-` vs `dev-`); shared platform (Velocity,
+  lobby, World Controller, NetworkBridge, CockroachDB, Nakama) must not be
+  per-game; game/world boundary = labels + Argo CD `Application`s.
+- Kept the declarative source of truth at
+  `clusters/alpha/namespace.yaml` (namespace `prd-games-42wasd-admin`,
+  labels `environment: prd` + `app.kubernetes.io/managed-by: gitops`).
+
+## Commands run
+
+```bash
+# Read-only probes — confirm existing namespaces and context
+kubectl config current-context
+kubectl get ns
+
+# No mutation: the namespace already exists on the cluster.
+# Declarative manifest is the GitOps source of truth; apply only if a
+# fresh cluster lacks it:
+# kubectl apply -f clusters/alpha/namespace.yaml
+```
+
+## Verified / observed
+
+- Context is `alpha-games-prd`.
+- `prd-games-42wasd-admin` present (Active) — no `kubectl apply` needed for
+  the existing prod namespace.
+- All component manifests now target `prd-games-42wasd-admin` (reconciled in
+  Phase 1) — grep found no stale `platform`/`proxy`/`game-backends` refs.
+- Marked phase 2 `done` in `progress.yaml` and regenerated
+  `docs/implementation/index.md`.
+
+## Outcome
+
+Namespace strategy is locked as **single shared games namespace + labels +
+per-game Argo CD Applications**. Next: Phase 3 — Install OpenKruiseGame.
+
+</details>
+
 - ⬜ `not-started` — [Phase 3 — Install OpenKruiseGame](../reference-design/03-step-by-step-implementation/install-openkruisegame/index.md)
 - ⬜ `not-started` — [Phase 4 — Install KEDA and the observability stack](../reference-design/03-step-by-step-implementation/install-keda-and-observability/index.md)
 - ⬜ `not-started` — [Phase 5 — Deploy CockroachDB and Nakama](../reference-design/03-step-by-step-implementation/deploy-cockroachdb-and-nakama/index.md)
