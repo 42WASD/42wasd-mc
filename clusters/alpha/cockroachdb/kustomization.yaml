@@ -1,4 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# CockroachDB — Nakama's backing store (StatefulSet).
+#
+# Migrated from Helm (cockroachdb/cockroachdb chart 21.0.4) to plain manifests
+# so Argo CD owns the resource (single source of truth). The TLS cert secrets
+# (`cockroachdb-node-secret`, `cockroachdb-client-secret`) are created and
+# rotated by the self-signer CronJobs below and are NOT committed to git.
 resources:
-  - cockroachdb.yaml
+  - statefulset.yaml
+  - serviceaccount.yaml
+  - service-headless.yaml
+  - service-public.yaml
+  - cockroachdb-rotate-self-signer-ServiceAccount.yaml
+  - cockroachdb-rotate-self-signer-Role.yaml
+  - cockroachdb-rotate-self-signer-RoleBinding.yaml
+  - cockroachdb-rotate-self-signer-CronJob.yaml
+  - cockroachdb-rotate-self-signer-client-CronJob.yaml

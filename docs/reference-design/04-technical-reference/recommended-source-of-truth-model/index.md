@@ -103,3 +103,22 @@ defines `MinecraftCluster`/`MinecraftServer` CRDs) and OpenKruiseGame.
   the mechanism.
 
 ---
+
+## NetworkPolicies and the games namespace are Argo-owned
+
+The static networking in `prd-games-42wasd-admin` — the `NetworkPolicy` set
+and the CockroachDB backing store — has **exactly one writer: Argo CD**
+(app `tenant-games-alpha`, defined in the platform repo, syncing this repo's
+`clusters/alpha`). Never patch these by hand; if they drift, fix Git and let
+Argo `selfHeal` converge them.
+
+- `clusters/alpha/networkpolicy.yaml` — the games netpols
+  (`allow-games-egress`, `allow-games-ingress`, `allow-proxy-to-paper-lobby`,
+  `allow-nakama-to-cockroachdb`).
+- `clusters/alpha/cockroachdb/` — CockroachDB StatefulSet + Services + cert
+  rotation CronJobs (migrated from Helm so Argo owns it).
+
+The `prd-games-42wasd-admin` Namespace itself is owned by the platform
+`platform-namespaces` app, not here.
+
+---

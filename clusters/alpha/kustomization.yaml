@@ -1,10 +1,15 @@
 # Alpha cluster overlay (alpha-games-prd).
 # Aggregates the shared platform components deployed into the games namespace.
+#
+# NOTE: the Namespace itself is NOT managed here. `prd-games-42wasd-admin` is
+# owned by the platform repo's `platform-namespaces` Argo app (see
+# ubuntu-server-iac/infra/kubernetes/platform/namespaces/tenants.yaml). Two
+# Argo apps must not own the same resource, so this overlay only deploys the
+# game-layer workloads into that namespace.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: prd-games-42wasd-admin
 resources:
-  - namespace.yaml
   - networkpolicy.yaml
   - lobby
   - velocity
