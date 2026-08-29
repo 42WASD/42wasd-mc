@@ -20,32 +20,33 @@ section of the Reference Design.
 
 ## Overall progress
 
-**6 / 31** phases/sections complete (**19%**).
+**9 / 31** phases/sections complete (**29%**).
 
-<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:19.4%"></div></div><div class="progress-pct">19%</div></div>
+<div class="progress-row" style="max-width:720px;padding:8px 0;"><div class="progress-track"><div class="progress-fill progress-fill--shimmer" style="--w:29.0%"></div></div><div class="progress-pct">29%</div></div>
 
 | Status | Count |
 |--------|-------|
-| ✅ done | 6 |
+| ✅ done | 9 |
 | 🔶 in-progress | 0 |
-| ⬜ not-started | 25 |
+| ⬜ not-started | 22 |
 | ❌ blocked | 0 |
 | ⏸️ deferred | 0 |
 
 ## Progress by part
 
-### 19% — Part III — Step-by-step implementation
+### 29% — Part III — Step-by-step implementation
 
-<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:19.0%"></div></div><div class="progress-pct" style="font-size:.85em;">19%</div><div class="tip-box"><strong>Done (6)</strong>
+<div class="tip" style="display:flex;align-items:center;gap:8px;max-width:520px;padding:2px 0 10px;"><div class="progress-track"><div class="progress-fill" style="--w:29.0%"></div></div><div class="progress-pct" style="font-size:.85em;">29%</div><div class="tip-box"><strong>Done (9)</strong>
 • Decide names before deploying
 • Create repository structure
 • Create Kubernetes namespaces
 • Install OpenKruiseGame
 • Install KEDA and the observability stack
 • Deploy CockroachDB and Nakama
-<hr style="opacity:.3;margin:6px 0;"><strong>Pending (25)</strong>
 • Deploy Velocity
 • Deploy the Paper lobby
+• Rollout order
+<hr style="opacity:.3;margin:6px 0;"><strong>Pending (22)</strong>
 • Install TAB
 • Add ViaVersion and ViaBackwards
 • Deploy the Forge 1.20.1 fantasy runtime
@@ -67,8 +68,7 @@ section of the Reference Design.
 • Add object storage for the community upload pipeline
 • Community map upload pipeline
 • Backups
-• Monitoring
-• Rollout order</div></div>
+• Monitoring</div></div>
 
 - ✅ `done` — [Phase 0 — Decide names before deploying](../reference-design/03-step-by-step-implementation/decide-names-before-deploying/index.md)
 
@@ -617,10 +617,10 @@ Nakama blockers that this runbook did not originally capture.
 
 </details>
 
-- ⬜ `not-started` — [Phase 6 — Deploy Velocity](../reference-design/03-step-by-step-implementation/deploy-velocity/index.md)
+- ✅ `done` — [Phase 6 — Deploy Velocity](../reference-design/03-step-by-step-implementation/deploy-velocity/index.md)
 
 <details markdown="1" class="runbook">
-<summary>⬜ 📜 Build log — Deploy Velocity</summary>
+<summary>✅ 📜 Build log — Deploy Velocity</summary>
 
 # Runbook — Phase 6: Deploy Velocity
 
@@ -760,10 +760,10 @@ kubectl -n prd-games-42wasd-admin exec deploy/velocity -- bash -c \
 
 </details>
 
-- ⬜ `not-started` — [Phase 7 — Deploy the Paper lobby](../reference-design/03-step-by-step-implementation/deploy-the-paper-lobby/index.md)
+- ✅ `done` — [Phase 7 — Deploy the Paper lobby](../reference-design/03-step-by-step-implementation/deploy-the-paper-lobby/index.md)
 
 <details markdown="1" class="runbook">
-<summary>⬜ 📜 Build log — Deploy the Paper lobby</summary>
+<summary>✅ 📜 Build log — Deploy the Paper lobby</summary>
 
 # Runbook — Phase 7: Deploy the Paper lobby
 
@@ -947,6 +947,184 @@ to **not remove** it and instead fix the spawn/world issue. AuthMe
 - ⬜ `not-started` — [Phase 27 — Community map upload pipeline](../reference-design/03-step-by-step-implementation/community-map-upload-pipeline/index.md)
 - ⬜ `not-started` — [Phase 28 — Backups](../reference-design/03-step-by-step-implementation/backups/index.md)
 - ⬜ `not-started` — [Phase 29 — Monitoring](../reference-design/03-step-by-step-implementation/monitoring/index.md)
-- ⬜ `not-started` — [Phase 30 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md)
+- ✅ `done` — [Phase 30 — Rollout order](../reference-design/03-step-by-step-implementation/rollout-order/index.md)
+
+<details markdown="1" class="runbook">
+<summary>✅ 📜 Build log — Rollout order</summary>
+
+# Runbook — Incident: prod-games pods crashing after reboot
+
+After a host reboot, every workload in `prd-games-42wasd-admin` was crashing:
+`velocity` (2×) and `paper-lobby` in `CrashLoopBackOff`, `nakama` (2×) stuck in
+`Unknown`. Root cause was **not** a manifest bug and **not** the networkpolicy
+YAML — it was **stale CiliumEndpoint (CEP) data carrying the old DHCP node IP
+`192.168.8.132`** after the node had been pinned to static `192.168.8.240`.
+The namespaces ended healthy (`cockroachdb`, `velocity`×2, `paper-lobby`,
+`nakama`×2 all `1/1 Running`).
+
+## Root cause
+
+After the node IP was changed from the DHCP lease (`.132`) to the pinned static
+IP (`.240`), the persisted **`CiliumEndpoint` CRs still stored
+`status.networking.node: 192.168.8.132`**, while Cilium ran at `192.168.8.240`.
+Cilium's endpoint synchronizer refused to take ownership of these "not local"
+CEPs:
+
+```
+error="endpoint sync cannot take ownership of CEP that is not local:
+CEP's pod \"...\", pod's hostIP \"192.168.8.132\", cilium nodeIP \"192.168.8.240\")"
+```
+
+Because Cilium would not program the datapath for those endpoints, **pod-to-pod
+and pod-to-DNS traffic broke**, which cascaded:
+
+- `velocity` / `paper-lobby` → could not resolve `fill.papermc.io` via CoreDNS
+  (they download the server jar on first start) → `CrashLoopBackOff`.
+- `nakama` → could not reach CockroachDB (`10.43.45.225:26257` connect timeout)
+  → crash.
+
+DNS itself was confirmed broken *inside* the namespace (a PSS-compliant
+`busybox` probe got `connection timed out; no servers could be reached` for
+`nslookup ... 10.43.0.10`), while the same probe in the `default` namespace
+resolved fine — pointing squarely at the CNI dataplane, not at the apps.
+
+## What was done
+
+### 1. Diagnose
+
+- `kubectl get pods -n prd-games-42wasd-admin -o wide` → crash/unknown pods.
+- `kubectl logs` on the crashing pods → DNS `DnsNameResolverTimeoutException`
+  (`velocity`, `paper-lobby`) and `dial tcp ...26257 connection timed out`
+  (`nakama`).
+- Probes: `nslookup fill.papermc.io 10.43.0.10` inside the namespace failed,
+  outside succeeded.
+- `kubectl -n kube-system logs ds/cilium` → the endpoint-ownership warnings
+  against `.132`.
+
+### 2. Fix the stale Cilium endpoints
+
+- Confirmed pod `hostIP=192.168.8.240` while CEP `node=192.168.8.132`.
+- Counted `38` stale CEPs (of 43) carrying `.132`; only 5 already `.240`.
+- Deleted the stale CEPs so Cilium would regenerate them.
+- **Restarted the Cilium agent** so it re-discovered all local endpoints and
+  rewrote every CEP with the correct node IP (deleting CEPs alone only
+  regenerated a few — the in-memory node identity needed a restart):
+
+```bash
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+# count CEPs by node
+kubectl get cep -A -o json | python3 -c 'import sys,json;from collections import Counter;
+d=json.load(sys.stdin);print(Counter(i["status"]["networking"]["node"] for i in d["items"]))'
+# delete all stale CEPs (node == old DHCP IP)
+kubectl delete cep -A -l ...  # per-CEP delete for the 38 stale ones
+# restart the agent so it regenerates everything with the correct node
+kubectl -n kube-system rollout restart daemonset cilium
+kubectl -n kube-system rollout status ds/cilium --timeout=180s
+```
+
+After restart: `CEP count=43`, `{'192.168.8.240': 43}`, `sync errors=0`.
+
+### 3. Recreate the game pods now that networking is healthy
+
+The deployment definitions were already correct; the old pods had been
+crash-looping for ~40 h with stale CEPs. After the Cilium fix, `paper-lobby`
+recovered by itself. For `velocity` and `nakama`, deleted the stale pods so the
+Deployment recreated them fresh:
+
+```bash
+kubectl -n prd-games-42wasd-admin delete pod -l app=velocity
+kubectl -n prd-games-42wasd-admin delete pod -l app=nakama
+```
+
+`velocity` and `paper-lobby` then came up `1/1 Running` immediately.
+
+### 4. Add the missing one-way ingress NetworkPolicy for Nakama → CockroachDB
+
+`nakama`'s init container (`nakama-migrate`) then hit a **second, separate**
+issue: it could not reach CockroachDB on `26257`. The namespace is
+`default-deny` on **both ingress and egress**. `allow-games-egress` grants
+nakama egress → cockroachdb, but Kubernetes NetworkPolicies are **one-way** —
+the DB pod also needs an **ingress** allow from nakama. This was the same
+pattern as the existing `allow-proxy-to-paper-lobby` (velocity → paper).
+
+Added `allow-nakama-to-cockroachdb` (in `clusters/alpha/networkpolicy.yaml`):
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nakama-to-cockroachdb
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cockroachdb
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nakama
+      ports:
+        - protocol: TCP
+          port: 26257
+```
+
+Applied and restarted nakama. The init container connected to
+`CockroachDB CCL v26.2.5`, applied migrations, and both nakama pods came up
+`1/1 Running`.
+
+## End state
+
+```
+cockroachdb-0    1/1  Running
+nakama           1/1  Running  (×2)
+paper-lobby      1/1  Running
+velocity         1/1  Running  (×2)
+```
+
+All CiliumEndpoints carry `node: 192.168.8.240`; no endpoint-ownership errors.
+
+## Lessons / follow-ups
+
+- After any change of a node's IP, **restart the Cilium agent** (or delete
+  stale CEPs **and** restart) so all `CiliumEndpoint` CRs are rewritten with the
+  current node IP. Deleting CEPs alone is insufficient — the in-memory node
+  identity must re-discover endpoints.
+- `default-deny` on ingress **and** egress means every intra-namespace flow
+  needs a matching ingress allow on the destination, not just an egress allow
+  on the source.
+- DNS timeouts in a namespace are a strong hint the CNI dataplane is broken for
+  those pods, not that CoreDNS is down — verify by comparing a probe in the
+  affected namespace vs the `default` namespace.
+
+## Follow-up: the games namespace is now Argo CD-managed (GitOps)
+
+After this incident, the whole `clusters/alpha` overlay (netpols + all game
+workloads) was wired into Argo CD so the exact network state is declared in
+Git and re-converged automatically — no more manual `kubectl apply` of
+networkpolicies.
+
+- Argo app **`tenant-games-alpha`** (defined in the **iac** repo at
+  `infra/kubernetes/bootstrap/argocd/apps/tenant-games-alpha.yaml`) points at
+  this repo's `clusters/alpha` path, destination
+  `prd-games-42wasd-admin`, with `ServerSideApply` + `selfHeal` + `prune`.
+- The `prd-games-42wasd-admin` **Namespace** is owned by the iac
+  `platform-namespaces` app, so it is NOT declared in this repo's
+  `clusters/alpha/kustomization.yaml` (two Argo apps must not own the same
+  resource).
+- **CockroachDB was migrated from Helm to plain manifests** so Argo owns it:
+  the bogus `CrdbCluster` (operator CR) was replaced with the real running
+  StatefulSet + its headless/public Services + the cert-rotation CronJobs.
+  The TLS cert secrets (`cockroachdb-node-secret`,
+  `cockroachdb-client-secret`) are regenerated by the self-signer CronJobs and
+  are **not** committed.
+
+If game workloads or netpols drift again, check that the `tenant-games-alpha`
+Argo app is `Synced`/`Healthy` first, then the Git state under
+`clusters/alpha/` — that is now the single source of truth.
+
+</details>
 
 <!-- END_GENERATED_IMPLEMENTATION -->

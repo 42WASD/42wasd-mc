@@ -1,5 +1,5 @@
 ---
-phase: 03-step-by-step-implementation/incident-recover-prod-games
+phase: 03-step-by-step-implementation/rollout-order
 ---
 
 # Runbook — Incident: prod-games pods crashing after reboot

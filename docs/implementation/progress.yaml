@@ -17,7 +17,9 @@
   install-openkruisegame: done
   install-keda-and-observability: done
   deploy-cockroachdb-and-nakama: done  # CRDB + Nakama 3.40.0 Running; --database.address + label-based egress netpol
-  deploy-velocity-and-paper-lobby: done  # Velocity + Paper lobby 1/1 Running; Java21 fixes Spark async-profiler SIGSEGV on Java25 (lucko/spark#565)
+  deploy-velocity: done  # Velocity 2x 1/1 Running (Java21 fixes Spark async-profiler SIGSEGV on Java25, lucko/spark#565)
+  deploy-the-paper-lobby: done  # Paper lobby 1/1 Running
+  rollout-order: done  # incident runbook: stale-CEP recovery after node IP change
   # Phase 0 — Decide names before deploying
   # Phase 1 — Create repository structure
   # Phase 2 — Create Kubernetes namespaces

@@ -82,3 +82,12 @@ verified before an earlier one):
 > map requires the KEDA `ScaledObject` from that phase.
 
 ---
+
+## Incident recovery (operational)
+
+Rollout phases 6–7 (Velocity + Paper lobby) have one recorded operational
+incident: after a host reboot, prod-games pods CrashLooped due to **stale
+CiliumEndpoint data carrying the old DHCP node IP**. The recovery runbook
+(implementation page, Part III → `rollout-order`) documents the
+diagnose → delete-stale-CEPs → restart-Cilium-agent sequence and the
+prevention (pin the node IP before first bring-up).
