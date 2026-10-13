@@ -41,12 +41,25 @@ spec:
             imagePullPolicy: IfNotPresent
             name: cert-rotate-job
             resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
             terminationMessagePath: /dev/termination-log
             terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
           restartPolicy: Never
           schedulerName: default-scheduler
-          securityContext: {}
+          # PodSecurity "restricted" requires these explicit fields on the POD
+          # template. securityContext: {} is not enough — the admission
+          # controller rejects the pod with "must set securityContext.…".
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
           serviceAccount: cockroachdb-rotate-self-signer
           serviceAccountName: cockroachdb-rotate-self-signer
           terminationGracePeriodSeconds: 30
