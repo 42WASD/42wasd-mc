@@ -30,12 +30,14 @@ spec:
       - args:
         - shell
         - -ecx
-        - exec /cockroach/cockroach start-single-node --advertise-host=$(hostname).${STATEFULSET_FQDN}
+        - exec /cockroach/cockroach start-single-node --advertise-host=${STATEFULSET_FQDN}
           --certs-dir=/cockroach/cockroach-certs/ --http-port=8080 --port=26257 --cache=25%
           --max-sql-memory=25% --logtostderr=INFO
         env:
         - name: STATEFULSET_NAME
           value: cockroachdb
+        # Advertise the service FQDN (which IS in the node cert's SANs), not the
+        # per-pod hostname. Single-node cluster, so there is exactly one peer.
         - name: STATEFULSET_FQDN
           value: cockroachdb-public.prd-games-42wasd-admin.svc.cluster.local
         - name: GODEBUG
