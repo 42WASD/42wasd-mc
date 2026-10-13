@@ -72,6 +72,11 @@ spec:
             # velocity-config configmap instead.
             - name: SKIP_DOWNLOAD_DEFAULTS
               value: "true"
+            # The 42WASD server icon, embedded in the velocity-config ConfigMap
+            # (binaryData). The itzg/mc-proxy init script copies it from
+            # /config/server-icon.png into the server directory at startup.
+            - name: ICON
+              value: "/config/server-icon.png"
           securityContext:
             # Compliant with the namespace PodSecurity "restricted" profile.
             allowPrivilegeEscalation: false
@@ -108,6 +113,11 @@ kind: ConfigMap
 metadata:
   name: velocity-config
   namespace: prd-games-42wasd-admin
+binaryData:
+  # The 42WASD server icon. itzg/mc-proxy copies this from /config/server-icon.png
+  # into the server directory when ICON=/config/server-icon.png is set.
+  server-icon.png: |
+    iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAAl0lEQVR4nO3YwQmAMAxA0c7RIRzceRxIoSBB6jH9Rj58ryGvhR5s7dhrd329b0UTQCeATgCdADoBdALoBNAJoBNAJ4BOAJ0AOgF0iYA49v6PWQYQ131ICgDGwOnYAoDpwSdtnwWIpW6fAphunPfQrQC83cnXAWsSQCeATgCdADoBdALoBNAJoBNAJ4BOAJ0AOgF0fwGU7gQlplcKlcneKwAAAABJRU5ErkJggg==
 data:
   # Complete, valid Velocity 4.x configuration. This REPLACES the image default
   # (SKIP_DOWNLOAD_DEFAULTS=true) so the example [forced-hosts] entries that
