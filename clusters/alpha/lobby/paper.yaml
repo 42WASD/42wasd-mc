@@ -75,6 +75,18 @@ spec:
               value: "PAPER"
             - name: VERSION
               value: "1.21.10"
+            # Boot-order race fix: with TYPE=PAPER the image's start-deployPaper
+            # ALWAYS calls the PaperMC API (fill.papermc.io) to resolve the build,
+            # even though the jar already exists in /data. On host reboot the pod
+            # starts before CoreDNS/Cilium are serving, the DNS lookup fails with
+            # "No route to host" and the init exits 1 -> CrashLoopBackOff until
+            # the network settles (26 restarts accumulated over host reboots).
+            # PAPER_CUSTOM_JAR points at the already-persisted jar in /data; the
+            # script then does `export SERVER=...` and SKIPS the whole download
+            # block -> no network needed at startup, fully idempotent.
+            # To upgrade Paper: download the new jar into /data, bump this path.
+            - name: PAPER_CUSTOM_JAR
+              value: "/data/paper-1.21.10-130.jar"
             - name: ONLINE_MODE
               value: "FALSE"
             - name: PUID
