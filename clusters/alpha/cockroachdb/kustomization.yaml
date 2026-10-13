@@ -1,15 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-# CockroachDB — Nakama's backing store (StatefulSet).
+# CockroachDB — Nakama's backing store (single-node StatefulSet).
 #
 # Migrated from Helm (cockroachdb/cockroachdb chart 21.0.4) to plain manifests
 # so Argo CD owns the resource (single source of truth). The TLS cert secrets
 # (`cockroachdb-node-secret`, `cockroachdb-client-secret`) are created and
 # rotated by the self-signer CronJobs below and are NOT committed to git.
+#
+# Single-node cluster: the pod never calls the Kubernetes API (it reads certs
+# from a mounted secret volume), so it has no serviceAccount. There is no
+# headless service — a normal ClusterIP service is sufficient for a single
+# node, and that is what Nakama connects to.
 resources:
   - statefulset.yaml
-  - serviceaccount.yaml
-  - service-headless.yaml
   - service-public.yaml
   - cockroachdb-rotate-self-signer-ServiceAccount.yaml
   - cockroachdb-rotate-self-signer-Role.yaml

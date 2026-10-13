@@ -8,10 +8,6 @@ metadata:
   name: cockroachdb
   namespace: prd-games-42wasd-admin
 spec:
-  persistentVolumeClaimRetentionPolicy:
-    whenDeleted: Retain
-    whenScaled: Retain
-  podManagementPolicy: OrderedReady
   replicas: 1
   revisionHistoryLimit: 10
   selector:
@@ -19,7 +15,10 @@ spec:
       app.kubernetes.io/component: cockroachdb
       app.kubernetes.io/instance: cockroachdb
       app.kubernetes.io/name: cockroachdb
-  serviceName: cockroachdb
+  # serviceName must point at a real Service for the headless DNS to resolve;
+  # we use the public ClusterIP service (single node — a headless service
+  # adds nothing).
+  serviceName: cockroachdb-public
   template:
     metadata:
       labels:
@@ -27,17 +26,6 @@ spec:
         app.kubernetes.io/instance: cockroachdb
         app.kubernetes.io/name: cockroachdb
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  app.kubernetes.io/component: cockroachdb
-                  app.kubernetes.io/instance: cockroachdb
-                  app.kubernetes.io/name: cockroachdb
-              topologyKey: kubernetes.io/hostname
-            weight: 100
       containers:
       - args:
         - shell
@@ -49,9 +37,7 @@ spec:
         - name: STATEFULSET_NAME
           value: cockroachdb
         - name: STATEFULSET_FQDN
-          value: cockroachdb.prd-games-42wasd-admin.svc.cluster.local
-        - name: COCKROACH_CHANNEL
-          value: kubernetes-helm
+          value: cockroachdb-public.prd-games-42wasd-admin.svc.cluster.local
         - name: GODEBUG
           value: disablethp=1
         image: cockroachdb/cockroach:v26.2.5
@@ -90,7 +76,6 @@ spec:
           capabilities:
             drop:
             - ALL
-          privileged: false
           readOnlyRootFilesystem: true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
@@ -105,12 +90,6 @@ spec:
         - /bin/sh
         - -c
         - cp -f /certs/* /cockroach/cockroach-certs/; chmod 0400 /cockroach/cockroach-certs/*.key
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
         image: busybox
         imagePullPolicy: IfNotPresent
         name: copy-certs
@@ -120,7 +99,6 @@ spec:
           capabilities:
             drop:
             - ALL
-          privileged: false
           readOnlyRootFilesystem: true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
@@ -130,7 +108,6 @@ spec:
         - mountPath: /certs/
           name: certs-secret
       restartPolicy: Always
-      schedulerName: default-scheduler
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000
@@ -138,18 +115,10 @@ spec:
         runAsUser: 1000
         seccompProfile:
           type: RuntimeDefault
-      serviceAccount: cockroachdb
-      serviceAccountName: cockroachdb
-      terminationGracePeriodSeconds: 300
-      topologySpreadConstraints:
-      - labelSelector:
-          matchLabels:
-            app.kubernetes.io/component: cockroachdb
-            app.kubernetes.io/instance: cockroachdb
-            app.kubernetes.io/name: cockroachdb
-        maxSkew: 1
-        topologyKey: topology.kubernetes.io/zone
-        whenUnsatisfiable: ScheduleAnyway
+      # No serviceAccount: the pod never calls the Kubernetes API — it reads
+      # TLS certs from a mounted secret volume. A SA exists only to carry the
+      # automounted token, which is unnecessary here.
+      automountServiceAccountToken: false
       volumes:
       - name: datadir
         persistentVolumeClaim:
@@ -172,22 +141,6 @@ spec:
                 mode: 256
                 path: node.key
               name: cockroachdb-node-secret
-      - name: client-secret
-        projected:
-          defaultMode: 420
-          sources:
-          - secret:
-              items:
-              - key: ca.crt
-                mode: 256
-                path: ca.crt
-              - key: tls.crt
-                mode: 256
-                path: client.root.crt
-              - key: tls.key
-                mode: 256
-                path: client.root.key
-              name: cockroachdb-client-secret
   updateStrategy:
     type: RollingUpdate
   volumeClaimTemplates:
@@ -206,5 +159,3 @@ spec:
           storage: 100Gi
       storageClassName: nvme-db
       volumeMode: Filesystem
-    status:
-      phase: Pending
