@@ -115,14 +115,18 @@ metadata:
   namespace: prd-games-42wasd-admin
 binaryData:
   # THE 42WASD server icon — the canonical lobby/proxy icon.
-  # Source: recovered from the world export
+  # SOURCE OF TRUTH (viewable/diffable PNG): ./server-icon.png in this same
+  #   directory (clusters/alpha/velocity/server-icon.png). The base64 below is
+  #   generated from that exact file — they MUST stay in sync (same md5).
+  # Provenance: recovered from the world export
   #   (world-data/plugins/MOTD/server icon/server-icon.png — the original
   #   hand-made 42WASD graphic, NOT the auto-generated placeholder it replaced).
   # 64x64 PNG, md5 6eaf0798d7c85ff68edb9e90b8f3e9cd.
   # itzg/mc-proxy copies /config/server-icon.png into the server directory at
   # startup when ICON=/config/server-icon.png is set (see the Deployment env).
-  # To change the icon: replace this base64 with a new 64x64 PNG and bump the
-  # md5 in this comment. Do NOT hand-patch the live ConfigMap.
+  # To change the icon: edit ./server-icon.png, regenerate this base64 with
+  #   `base64 -w0 server-icon.png`, paste it below, and bump the md5 here.
+  #   Do NOT hand-patch the live ConfigMap.
   server-icon.png: |
     iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAvxJREFUeJztW7+LE0EUfpMNByeKIIgJlloINnLdHSS2B9eIYGPSCoL/g1wjdrbKCVaJ/4FovQGvk+PAAwtTKdlSm5NTcmPjrHNzM7Pz483Ohp2vSnbefPP229nZN98mBDyR90bUl4PHsJgSTL4qdOocrIlIAsROIDZQBRgsJtrvTUSaASFIV+HKM6QZgE04WExg1h+vzCzwLjpSIbTiSALETiA2kgCxE4iNLibZ1+VPp343ssuYaVgBbQa4nrxvX1+gCIBxArFE8BYAM/EYIrR+EUxIaDkI5m6O38mF3iVi8bd+EWy9AOdKYd7JmfXHaAOF4gUAuPXyCVy9t+nELZ0B2AnyvKG4Gb+tFScVIJSfN1hMGucV1jYDQl99V6Buh3Wo48ozR9oGqQ7AIFllJAFiJxAbSYDYCcRG6wU4Uwe4eHImlnZou9wn73IGuCZZ1S+0Xe6bd8eHpCqJ0HY5Rt4dLCta5Altl2Pxt34RbD0IQPXGYlhMrTZNFCi5W7xF3xD5QHUO5cE773alHQ92/h+XxRw+eA6nxydlOx8v9jnY2VWOYxrD+E15Tk/+wOH9Z6UAYj5lHXBp46aWUBVDupm2XTzmOo5rzPLXb22/LoDcsGTH+J+98WYDa9/6sneun8ghg4lxIeORmR4+TpPSEfIhNXF/ZDGuY4pcNjxSAVSEJifGO7M6lxbTHzThUi3Ira8DrFxh5uxWKd4UB3jWH0O2vnZmPePbAP7dAvxUxXBvTeoAk1vDdJ3QxYm3L99/WEyJUSFki6YUQnS53CBZ9knWxlzmIGsAAULRTp42pphUI++NaN4bURm+7b2nYjv7LorEx7G2/NrDF2LfHx+PpGPpuFVAmwFb8zdYVLUCTYBsfa38zD8Frj/aDvpaTHwy2Y4V9N1gHY9CnyoQoMaXoy4wuY/Fx6btC9KgAmx+flV+3r/9WBpjcpI8DzaCCtC9crFRPFJuLCJVNfn99QeYPzX/Rylb0FyrQOvfB1hFa5D3RsdYXBgYFtMLJnF/AZu53mgIZ4mxAAAAAElFTkSuQmCC
 data:
