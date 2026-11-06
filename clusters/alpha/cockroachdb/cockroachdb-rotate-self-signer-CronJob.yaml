@@ -48,11 +48,14 @@ spec:
           # PodSecurity "restricted" requires these explicit fields on the POD
           # template. securityContext: {} is not enough — the admission
           # controller rejects the pod with "must set securityContext.…".
+          # UID 10000 = dedicated workload identity (not the human uid 1000),
+          # so cert writes into the emptyDir are never charged to a person's
+          # ext4 user quota on `/` (see the games runbook).
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            fsGroup: 1000
+            runAsUser: 10000
+            runAsGroup: 10000
+            fsGroup: 10000
             seccompProfile:
               type: RuntimeDefault
           serviceAccount: cockroachdb-rotate-self-signer

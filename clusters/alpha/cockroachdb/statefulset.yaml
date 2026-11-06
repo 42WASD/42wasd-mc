@@ -111,10 +111,15 @@ spec:
           name: certs-secret
       restartPolicy: Always
       securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
+        # UID/GID 10000 = dedicated workload identity. Do NOT use 1000: / is
+        # mounted ext4 `quota,usrquota`, the certs emptyDir lives on /, and
+        # 1000 is the human `jyao` — which caused EDQUOT on cert copy.
+        # The 100Gi datadir PVC ownership was migrated 1000:1000 -> 10000:10000
+        # before this change (see runbook).
+        fsGroup: 10000
+        runAsGroup: 10000
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 10000
         seccompProfile:
           type: RuntimeDefault
       # No serviceAccount: the pod never calls the Kubernetes API — it reads

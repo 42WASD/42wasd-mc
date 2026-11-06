@@ -40,11 +40,15 @@ spec:
       labels:
         app: velocity
     spec:
+      # UID/GID 10000 = dedicated workload identity. Do NOT use 1000: / is
+      # mounted ext4 `quota,usrquota`, emptyDir lives on /, and 1000 is the
+      # human `jyao` — so proxy writes used to be charged to a person's 10 GiB
+      # home quota and hit EDQUOT ("Disk quota exceeded") mid-download.
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -59,10 +63,12 @@ spec:
               value: VELOCITY
             - name: MEMORY
               value: 1G
+            # PUID/PGID must match the pod securityContext above, otherwise the
+            # itzg image re-chowns /server to the old uid on startup.
             - name: PUID
-              value: "1000"
+              value: "10000"
             - name: PGID
-              value: "1000"
+              value: "10000"
             # Do NOT download the image's default velocity.toml template. That
             # default ships a [forced-hosts] section with example entries
             # (factions.example.com/minigames.example.com) referencing example
@@ -83,8 +89,8 @@ spec:
             capabilities:
               drop: ["ALL"]
             runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
+            runAsUser: 10000
+            runAsGroup: 10000
             seccompProfile:
               type: RuntimeDefault
           ports:
@@ -106,7 +112,12 @@ spec:
           configMap:
             name: velocity-config
         - name: data
-          emptyDir: {}
+          # Explicit cap so the proxy can never silently consume node-local
+          # disk. The image needs ~150 MB (jar + logs + configs); 2Gi is ample
+          # headroom. Exceeding this evicts the pod instead of filling the
+          # node, and a fresh pod re-downloads into a clean volume.
+          emptyDir:
+            sizeLimit: 2Gi
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -55,11 +55,27 @@ spec:
       labels:
         app: paper-lobby
     spec:
+      # UID/GID 10000 = dedicated, non-human "workload" identity.
+      #
+      # WHY NOT 1000: container emptyDir volumes live under
+      # /var/lib/kubelet/pods/... which is on `/` — and `/` is mounted
+      # `ext4 quota,usrquota`. UID 1000 is the host login `jyao`, so every byte
+      # a game pod wrote to an emptyDir was charged to a human's 10 GiB home
+      # quota. When it filled, the JVM/init got `EDQUOT` ("Disk quota
+      # exceeded"), which surfaced as random crash loops that a reboot
+      # "fixed" (restarting pods wipes their emptyDir). UID 10000 has no
+      # quota configured, so workloads can no longer poison a human quota
+      # bucket, and a human filling their home can no longer kill the servers.
+      #
+      # NOTE: the PVC data on disk is owned by 1000:1000. Ownership was
+      # migrated to 10000:10000 before this change (see runbook). CSI
+      # fsGroupPolicy is ReadWriteOnceWithFSType, so fsGroup is applied
+      # consistently.
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -89,10 +105,12 @@ spec:
               value: "/data/paper-1.21.10-130.jar"
             - name: ONLINE_MODE
               value: "FALSE"
+            # PUID/PGID must match the pod securityContext above, otherwise the
+            # itzg image re-chowns /data to the old uid on startup.
             - name: PUID
-              value: "1000"
+              value: "10000"
             - name: PGID
-              value: "1000"
+              value: "10000"
             # itzg/minecraft-server does NOT read k8s resources.limits.memory.
             # Without this it defaults to 1G heap (-Xms/-Xmx 1G), which starves
             # 55 plugins + the 4.8G world (FAWE "high memory" spam). Match the
@@ -117,8 +135,8 @@ spec:
             capabilities:
               drop: ["ALL"]
             runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
+            runAsUser: 10000
+            runAsGroup: 10000
             seccompProfile:
               type: RuntimeDefault
           ports:

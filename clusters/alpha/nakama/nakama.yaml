@@ -17,11 +17,15 @@ spec:
       labels:
         app: nakama
     spec:
+      # UID/GID 10000 = dedicated workload identity. Do NOT use 1000: / is
+      # mounted ext4 `quota,usrquota`, emptyDir lives on /, and 1000 is the
+      # human `jyao` — so Nakama's emptyDir writes used to be charged to a
+      # person's 10 GiB home quota and die with EDQUOT.
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
         seccompProfile:
           type: RuntimeDefault
       initContainers:
@@ -70,7 +74,11 @@ spec:
               readOnly: true
       volumes:
         - name: data
-          emptyDir: {}
+          # Explicit cap so Nakama cannot silently consume node-local disk.
+          # Exceeding it evicts the pod (Nakama keeps no durable state in this
+          # volume; the real state is in CockroachDB).
+          emptyDir:
+            sizeLimit: 2Gi
         - name: crdb-client-certs
           secret:
             secretName: cockroachdb-client-secret
