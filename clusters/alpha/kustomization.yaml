@@ -15,4 +15,5 @@ resources:
   - velocity
   - nakama
   - cockroachdb
+  - atm10sky
   - monitoring

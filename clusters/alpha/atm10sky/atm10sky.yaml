@@ -1,0 +1,218 @@
+# ATM10SKY — All the Mods 10: To the Sky (server pack 2.2.0).
+#
+# 322 mods on NeoForge 21.1.250 / Minecraft 1.21.1. Runs STANDALONE (NodePort
+# 30080), NOT behind the Velocity proxy:
+#   - Velocity's documented modded support covers Forge >1.20.2; NeoForge is a
+#     fork with no explicit compatibility guarantee.
+#   - Our velocity.toml uses player-info-forwarding-mode = "none", so the proxy
+#     passes no identity anyway — routing modded traffic through it buys
+#     nothing and adds a failure domain across 322 mods.
+#   - The UAE relay already DNATs 30000-30199, so a NodePort is reachable
+#     exactly like the lobby's proxy port.
+#
+# OFFLINE / CRACKED CLIENTS: ONLINE_MODE=FALSE writes online-mode=false into
+# server.properties, same as paper-lobby. Auth is vanilla-only and entirely
+# independent of the mod loader, so cracked clients join as long as they run
+# the matching modpack client-side.
+#
+# BOOT SAFETY (AGENTS.md "no startup remote-fetch"):
+# With TYPE=NEOFORGE the itzg image calls `mc-image-helper install-neoforge`
+# on EVERY start. On a host reboot that runs before CoreDNS/Cilium are serving
+# and fails -> CrashLoopBackOff (identical to the paper-lobby incident, see
+# require-pinned-minecraft-server-jar). Two things make it idempotent here:
+#   1. NEOFORGE_INSTALLER points at the installer already persisted in /data,
+#      so nothing is downloaded.
+#   2. ForgeLikeInstaller skips the install entirely when the saved manifest
+#      matches (same MC + loader version and same server entry present):
+#      "NeoForge version … is already installed".
+# So after the one-time bootstrap the container needs NO network to start.
+# The egress rule for maven.neoforged.net exists only for that first bootstrap.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: atm10sky-data
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: atm10sky
+    uuid.42wasd.dev/map: 03a74e18-71ec-4e1e-a4a8-cce319440b39
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 40Gi
+  storageClassName: nvme-fast
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atm10sky
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: atm10sky
+spec:
+  type: NodePort
+  selector:
+    app: atm10sky
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: 25565
+      nodePort: 30080
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atm10sky
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: atm10sky
+spec:
+  replicas: 1
+  # RWO PVC + single node: RollingUpdate deadlocks (new pod can't mount until
+  # the old one releases the volume, and the old one isn't removed until the new
+  # one is Ready). Recreate removes the old pod first. Same reasoning as
+  # paper-lobby.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: atm10sky
+  template:
+    metadata:
+      labels:
+        app: atm10sky
+    spec:
+      # UID/GID 10000 — the dedicated workload identity, NOT the human uid
+      # 1000. `/` is ext4 with quota,usrquota and emptyDir lives on
+      # /var/lib/kubelet, so running as 1000 would charge a modded server's
+      # writes (far heavier than the lobby's) to a person's 10 GiB home quota
+      # and reproduce the 2026-11-06 EDQUOT crash loop.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: atm10sky
+          # Java 21, matching the pack's requirement. Same tag as paper-lobby
+          # for consistency (Java 25 breaks Spark's async-profiler, and the
+          # pack ships Spark).
+          image: itzg/minecraft-server:2026.8.2-java21
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: TYPE
+              value: "NEOFORGE"
+            - name: VERSION
+              value: "1.21.1"
+            # Pinned to the version declared by server pack 2.2.0. Do not use
+            # "latest": the pack's mods are built against this exact loader.
+            - name: NEOFORGE_VERSION
+              value: "21.1.250"
+            # Pre-staged on the PVC during bootstrap. Makes install-neoforge
+            # read a local file instead of downloading from the internet.
+            - name: NEOFORGE_INSTALLER
+              value: "/data/.bootstrap/neoforge-21.1.250-installer.jar"
+            # Offline / cracked clients, same as the lobby.
+            - name: ONLINE_MODE
+              value: "FALSE"
+            # Pack defaults, from its startserver.sh:
+            #   allow-flight=true (required by several mods)
+            #   max-tick-time=180000 (modded worlds tick slowly)
+            #   level-type=skyblockbuilder:skyblock (this IS a skyblock pack)
+            # Put the pack's defaults into server.properties.
+            - name: ALLOW_FLIGHT
+              value: "TRUE"
+            - name: MAX_TICK_TIME
+              value: "180000"
+            - name: LEVEL_TYPE
+              value: "skyblockbuilder:skyblock"
+            - name: MOTD
+              value: "All the Mods 10: To the Sky"
+            # RCON is needed by the preStop hook below to issue a graceful
+            # `stop`. Without ENABLE_RCON the hook silently no-ops and the
+            # kubelet SIGTERMs the JVM mid-save, which can corrupt region
+            # files on a 322-mod world.
+            - name: ENABLE_RCON
+              value: "true"
+            # Never exposed outside the pod network: RCON binds inside the
+            # container and no Service publishes 25575. The value is
+            # deliberately not a secret-grade password because nothing off-pod
+            # can reach it; rotate it if that ever changes.
+            - name: RCON_PASSWORD
+              value: "atm10sky-rcon-internal"
+            # PUID/PGID must match the pod securityContext, or the itzg image
+            # re-chowns /data to a different uid on startup.
+            - name: PUID
+              value: "10000"
+            - name: PGID
+              value: "10000"
+            # itzg ignores resources.limits.memory; this is the JVM heap.
+            # 8G heap for 322 mods. The 14Gi pod limit below leaves room for
+            # metaspace/GC/native — heap is only part of process memory.
+            - name: MEMORY
+              value: "8G"
+            # Do not let the image rewrite server.properties on every start;
+            # the pack's values are applied once and then owned by the user.
+            - name: OVERRIDE_SERVER_PROPERTIES
+              value: "false"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 10Gi
+              ephemeral-storage: 2Gi
+            limits:
+              cpu: "4"
+              memory: 14Gi
+              ephemeral-storage: 8Gi
+          securityContext:
+            # PSS "restricted" compliant.
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - containerPort: 25565
+              name: minecraft
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          # Modded first boot generates a 500 MB world and loads 322 mods;
+          # it can exceed 10 minutes on this hardware. Give it room before the
+          # kubelet kills it.
+          startupProbe:
+            tcpSocket:
+              port: minecraft
+            periodSeconds: 15
+            failureThreshold: 60 # 15 min
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: minecraft
+            periodSeconds: 10
+            timeoutSeconds: 5
+          # Graceful shutdown: a 322-mod world takes a while to flush regions.
+          # Ask the server to `stop` via RCON, then let the JVM exit on its own
+          # within terminationGracePeriodSeconds. If RCON is not yet up (pod
+          # never became ready) this fails fast and the kubelet falls back to
+          # SIGTERM, so it is safe either way.
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - "rcon-cli stop || true"
+      terminationGracePeriodSeconds: 300
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: atm10sky-data

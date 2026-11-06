@@ -1,0 +1,68 @@
+# NetworkPolicy for the ATM10SKY server.
+#
+# The namespace is default-deny on BOTH ingress and egress
+# (platform `default-deny` NetworkPolicy), so this workload needs its own
+# explicit allows or it cannot be reached or reach anything.
+#
+# NOTE: `allow-games-egress` grants egress to `app: paper-lobby` and
+# `app: velocity` only; it does NOT cover atm10sky. That is deliberate — this
+# policy keeps the modded server's rules local to this file so its (slightly
+# different) egress needs are visible in one place.
+---
+# Ingress: Minecraft client connections on :25565.
+#
+# Same shape as `allow-games-ingress` for velocity: no `from:` peers means
+# "any source", which is required because external players arrive via the
+# UAE relay DNAT / node IP, which standard NetworkPolicy cannot express as a
+# selector. Egress stays default-deny.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-atm10sky-ingress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: atm10sky
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 25565
+---
+# Egress: DNS + the one-time NeoForge/modpack bootstrap.
+#
+# DNS is already granted namespace-wide by the platform `allow-cluster-dns`
+# policy, and the apiserver by the `allow-to-kube-apiserver` CCNP, so neither
+# is repeated here.
+#
+# HTTPS/HTTP egress exists ONLY for the first bootstrap:
+#   - maven.neoforged.net  : NeoForge installer (pre-staged, but the image may
+#                            re-fetch if the local copy is missing)
+#   - CurseForge/CDN      : pack + mod downloads, if you ever switch to
+#                            AUTO_CURSEFORGE instead of a pre-staged /data
+#   - fill.papermc.io     : unused for NeoForge, harmless
+# Once /data is bootstrapped, ForgeLikeInstaller skips the install entirely and
+# the server needs no external network at all. Cilium ipBlock DOES match
+# external CIDRs (the in-cluster caveat in networkpolicy.yaml does not apply).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-atm10sky-egress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: atm10sky
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80

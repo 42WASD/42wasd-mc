@@ -1,0 +1,50 @@
+# Map definition — ATM10SKY skyblock world.
+#
+# Logical ID per the Phase 0 convention: <map-slug>-<uuid8>
+#   atm10sky-03a74e18
+# The full UUID lives on the `uuid.42wasd.dev/map` label of the PVC
+# (clusters/alpha/atm10sky/atm10sky.yaml).
+#
+# World data is NOT in Git (see .gitignore: world-data/). The 155 MB save was
+# staged into the PVC once, out of band — see the runbook
+# 03-step-by-step-implementation/phase-09-deploy-atm10sky.md.
+id: atm10sky-03a74e18
+uuid: 03a74e18-71ec-4e1e-a4a8-cce319440b39
+slug: atm10sky
+name: "All the Mods 10: To the Sky"
+
+runtime-id: atm10sky-neoforge-1.21.1
+runtime:
+  software: neoforge
+  loader-version: "21.1.250"
+  minecraft: "1.21.1"
+  java: "21"
+
+# Runtime is a modded server pack, not a plugin stack. 322 mods.
+modpack:
+  source: curseforge
+  project-id: 1298402 # all-the-mods-10-sky
+  server-pack-file-id: 9262010 # ATM10SKY-2.2.0-server.zip
+  server-pack-version: "2.2.0"
+
+# Saved-world properties that must match the pack or the world will not load.
+level-type: "skyblockbuilder:skyblock"
+allow-flight: true
+generator-mods:
+  # The world is a pre-generated skyblock; SkyBlock Builder must be present or
+  # the level-type is unknown and the server generates a void/overworld instead.
+  - skyblockbuilder
+
+# Exposure: standalone NodePort, NOT behind the Velocity proxy (modded +
+# forwarding-mode=none means the proxy adds a failure domain and no benefit).
+exposure:
+  type: nodeport
+  node-port: 30080
+  online-mode: false # cracked/offline clients allowed, same as the lobby
+
+kubernetes:
+  namespace: prd-games-42wasd-admin
+  workload: deployment/atm10sky
+  pvc: atm10sky-data
+  storage-class: nvme-fast
+  storage-request: 40Gi
