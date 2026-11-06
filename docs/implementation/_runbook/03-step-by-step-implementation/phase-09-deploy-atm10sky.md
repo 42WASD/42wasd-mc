@@ -97,82 +97,105 @@ RCON is not exposed by any Service, so the password stays pod-local.
 ## One-time bootstrap (data, not GitOps)
 
 The server pack (503 MB) and world save (155 MB) are **not** in Git
-(`.gitignore` excludes `world-data/`). Apply the manifests first so the PVC
-exists, then stage the data into it.
+(`.gitignore` excludes `world-data/`). Let Argo create the PVC first, then stage
+the data into it out of band.
 
-```bash
-# 1. let Argo create the PVC (Deployment will crash-loop until data lands)
-kubectl -n argocd annotate application tenant-games-alpha \
-  argocd.argoproj.io/refresh=hard --overwrite
+### Why not a staging pod
 
-# 2. stage the pack + world + installer into the PVC via a helper pod
-#    (see "Staging" below)
+A second pod **cannot** mount this volume. OpenEBS local-LVM is
+`ReadWriteOnce` at the *mount* level here, not merely per-node — a staging pod
+fails with:
+
+```
+MountVolume.SetUp failed ... rpc error: code = Internal
+desc = verifyMount: device already mounted at [/var/lib/kubelet/pods/<uid>/...]
 ```
 
-### Staging
+Scaling the Deployment to zero to free the volume also does not stick:
+`platform-root` owns the Application and `selfHeal` reverts the replica count,
+and patching `/spec/syncPolicy/automated` out of the Application is reverted for
+the same reason.
 
-The PVC is `ReadWriteOnce` and the Deployment owns it, so scale the Deployment
-to zero first, then mount the PVC in a throwaway pod:
-
-```bash
-kubectl -n prd-games-42wasd-admin scale deploy/atm10sky --replicas=0
-
-cat <<'EOF' | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata: {name: atm10sky-staging, namespace: prd-games-42wasd-admin}
-spec:
-  restartPolicy: Never
-  securityContext: {runAsUser: 10000, runAsGroup: 10000, fsGroup: 10000}
-  containers:
-    - name: stage
-      image: alpine:3.20
-      command: ["sh","-c","sleep 3600"]
-      volumeMounts: [{name: data, mountPath: /data}]
-  volumes:
-    - name: data
-      persistentVolumeClaim: {claimName: atm10sky-data}
-EOF
-
-# copy the archives in
-kubectl -n prd-games-42wasd-admin cp ~/Downloads/ATM10SKY-2.2.0-server.zip \
-  atm10sky-staging:/data/.bootstrap/server-pack.zip
-kubectl -n prd-games-42wasd-admin cp ~/Downloads/world.zip \
-  atm10sky-staging:/data/.bootstrap/world.zip
-
-# unpack as uid 10000, and pre-seed the NeoForge installer
-kubectl -n prd-games-42wasd-admin exec atm10sky-staging -- sh -c '
-  cd /data
-  apk add --no-cache unzip curl >/dev/null
-  unzip -q .bootstrap/server-pack.zip -d /data
-  mkdir -p /data/.bootstrap
-  curl -fsSL -o /data/.bootstrap/neoforge-21.1.250-installer.jar \
-    https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.250/neoforge-21.1.250-installer.jar
-  # world must land as /data/world (LEVEL default)
-  rm -rf /data/world
-  unzip -q .bootstrap/world.zip -d /data
-  chown -R 10000:10000 /data
-  ls -la /data | head
-'
-
-kubectl -n prd-games-42wasd-admin delete pod atm10sky-staging
-kubectl -n prd-games-42wasd-admin scale deploy/atm10sky --replicas=1
-```
-
-**Important:** the world must be extracted so that `level.dat` sits at
-`/data/world/level.dat`. The provided `world.zip` already contains a top-level
-`world/` directory, so `unzip -d /data` produces exactly that.
-
-## Verify
+**Therefore the correct approach is to stage directly through the host mount**
+that the running pod already holds. This is a single-node cluster, so the path is
+local:
 
 ```bash
-kubectl -n prd-games-42wasd-admin get pods -l app=atm10sky -w
-kubectl -n prd-games-42wasd-admin logs -f deploy/atm10sky | grep -E "Done|ERROR"
-kubectl -n prd-games-42wasd-admin exec deploy/atm10sky -- id -u   # 10000
+# resolve the mount the atm10sky pod is holding
+MNT=$(sudo mount | awk '/pvc-89104c77/{print $3}')
 ```
 
-Expected: `Done (NNN.NNNs)! For help, type "help"`, and the port accepting
-connections on the node at `192.168.8.240:30080`.
+### Staging commands (what was actually run)
+
+The Deployment is left crash-looping (it cannot boot without data); the crash
+loop itself keeps the PVC mounted, which is exactly what we need.
+
+```bash
+MNT=/var/lib/kubelet/pods/<pod-uid>/volumes/kubernetes.io~csi/pvc-89104c77-.../mount
+
+sudo cp ~/Downloads/ATM10SKY-2.2.0-server.zip "$MNT/.server-pack.zip"
+sudo cp ~/Downloads/world.zip                    "$MNT/.world.zip"
+
+# pack: config/ defaultconfigs/ kubejs/ mods/ (+ startserver.sh, user_jvm_args.txt)
+sudo unzip -q -o "$MNT/.server-pack.zip" -d "$MNT"
+# world: the archive already contains a top-level world/ dir -> /data/world
+sudo unzip -q -o "$MNT/.world.zip" -d "$MNT"
+
+# pre-seed the NeoForge installer so startup never touches the network
+sudo mkdir -p "$MNT/.bootstrap"
+sudo curl -fsSL -o "$MNT/.bootstrap/neoforge-21.1.250-installer.jar" \
+  https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.250/neoforge-21.1.250-installer.jar
+
+# the container runs as 10000; root-owned files would be unwritable
+sudo chown -R 10000:10000 "$MNT"
+
+# reclaim 1.5 GB — the archives are no longer needed
+sudo rm -f "$MNT/.server-pack.zip" "$MNT/.world.zip"
+```
+
+Verify the layout before letting it boot:
+
+```bash
+sudo ls "$MNT"                      # config defaultconfigs kubejs mods world .bootstrap
+sudo ls "$MNT/world/level.dat"      # must exist
+sudo du -sh "$MNT"/{mods,world}     # 603M, 644M
+```
+
+The crash loop then recovers on its next back-off expiry — no further action
+needed.
+
+### Observed result
+
+```
+[22:44:04] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[22:44:05] [Server thread/INFO] [minecraft/DedicatedServer]: Done (1.706s)! For help, type "help"
+[22:44:05] [Server thread/INFO] [minecraft/RconThread]: RCON running on 0.0.0.0:25575
+```
+
+`install-neoforge` did **not** run: the pre-seeded installer plus the matching
+loader version made `ForgeLikeInstaller` skip it, so startup consumed no
+external network.
+
+Verification:
+
+```
+$ kubectl -n prd-games-42wasd-admin exec deploy/atm10sky -- id -u
+10000
+$ ... grep -E '^(online-mode|level-type|allow-flight|max-tick-time|enable-rcon)' /data/server.properties
+allow-flight=true
+enable-rcon=true
+level-type=skyblockbuilder\:skyblock
+max-tick-time=180000
+online-mode=false
+$ ... ls /data/mods/*.jar | wc -l
+322
+$ timeout 5 bash -c 'cat < /dev/null > /dev/tcp/192.168.8.240/30080'
+PORT 30080 OPEN
+```
+
+Note `6` restarts on the pod: those are all from the pre-staging crash loop
+(`install-neoforge` failing / no `libraries/`), not post-boot failures. The
+container has been stable since data landed.
 
 ## Client requirement
 
