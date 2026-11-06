@@ -1,10 +1,16 @@
 # Velocity proxy — front door of the Minecraft network.
 # Deployed to the games namespace (prd-games-42wasd-admin on alpha-games-prd).
 #
-# Public game edge: the UAE relay VPS DNATs public :25565 -> 10.200.0.2:30079
-# (range 30000-30199 passthrough), so velocity must be exposed as a NodePort in
-# that range. Reuses nodePort 30079 (formerly the dev minecraft-demo); the dev
-# tenant was scaled to zero so this port is free for the prd lobby path.
+# ClusterIP ONLY — not publicly reachable.
+#
+# The reference design's public boundary is explicit: "Expose only Velocity /
+# mc-router Minecraft entry ... Backends remain private ClusterIP services", and
+# the acceptance test requires "lobby cannot be reached directly from public
+# Internet". Velocity is now reached only through mc-router (clusters/alpha/
+# mc-router/), which owns the sole NodePort (30079) and dispatches by hostname.
+#
+# This is a real security boundary, not tidying: while velocity held a NodePort,
+# anyone who knew the relay IP could bypass the edge router entirely.
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,14 +19,13 @@ metadata:
   labels:
     app: velocity
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: velocity
   ports:
     - name: minecraft
       port: 25565
       targetPort: 25565
-      nodePort: 30079
       protocol: TCP
 ---
 apiVersion: apps/v1

@@ -35,12 +35,29 @@ generator-mods:
   # the level-type is unknown and the server generates a void/overworld instead.
   - skyblockbuilder
 
-# Exposure: standalone NodePort, NOT behind the Velocity proxy (modded +
-# forwarding-mode=none means the proxy adds a failure domain and no benefit).
+# Exposure: reached by HOSTNAME through the mc-router edge, not by a public
+# port of its own. The Service is ClusterIP; mc-router owns the only NodePort
+# (30079) and dispatches on the hostname inside the Minecraft handshake.
+#
+#   mc-oompas.42base.com:25565 -> mc-router -> atm10sky
+#
+# Not behind Velocity: this is a modded runtime (NeoForge 1.21.1) and
+# velocity.toml uses player-info-forwarding-mode = "none", so proxying would add
+# a failure domain across 322 mods and pass no identity benefit. mc-router is a
+# different thing — it reads the hostname and proxies raw TCP, needing no
+# Velocity or mod compatibility.
+#
+# Runtime class D (`experimental-*`): the client runtime differs from vanilla,
+# so it must be launcher-matched (AstralRinth + Modrinth Server Project) and is
+# EXCLUDED from the instant-portal pool per the runtime-class rule.
 exposure:
-  type: nodeport
-  node-port: 30080
+  type: clusterip
+  hostname: mc-oompas.42base.com
+  via: mc-router
   online-mode: false # cracked/offline clients allowed, same as the lobby
+  runtime-class: experimental-atm10sky
+  require-launcher: true
+  instant-portal-pool: false
 
 kubernetes:
   namespace: prd-games-42wasd-admin

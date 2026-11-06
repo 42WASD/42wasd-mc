@@ -1,0 +1,78 @@
+# NetworkPolicy for mc-router — the single public door into the games namespace.
+#
+# The namespace is default-deny on BOTH ingress and egress (platform
+# `default-deny` NetworkPolicy), so this workload needs explicit allows for
+# everything it touches. Because mc-router is now the ONLY publicly reachable
+# pod, these rules define the network's entire public attack surface.
+---
+# Ingress: Minecraft clients reach the router's handshake port.
+#
+# No `from:` peers means "any source". That is required and correct here:
+# external players arrive via the UAE relay DNAT, which rewrites the packet to
+# 10.200.0.2 before it reaches the cluster, so the original client IP is gone by
+# the time Cilium evaluates this policy. Standard NetworkPolicy cannot express
+# "whoever the relay forwarded", so the port is open and the relay's own
+# firewall/MASQUERADE is what constrains reachability.
+#
+# Intentionally NOT open:
+#   - 8081 (REST API /metrics). Left to cluster-internal scrapers only; the
+#     Service exposes it as ClusterIP-side only (no nodePort on that port).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mc-router-ingress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: mc-router
+  policyTypes:
+    - Ingress
+  ingress:
+    # Minecraft handshake/status/login connections from the public edge.
+    - ports:
+        - protocol: TCP
+          port: 25565
+    # Prometheus scrape of the REST API / metrics port, cluster-internal.
+    - ports:
+        - protocol: TCP
+          port: 8081
+---
+# Egress: DNS + the two game backends it dispatches to.
+#
+# Expressed with pod label selectors, NOT ipBlock. In Cilium, ipBlock/CIDR
+# selectors do NOT match in-cluster pod IPs by default, so
+# `ipBlock: 0.0.0.0/0` would silently drop the pod-to-pod forwards to velocity
+# and atm10sky. See iac reference design
+# `05-gitops-bootstrap/default-deny-networkpolicy`.
+#
+# DNS is already granted namespace-wide by the platform `allow-cluster-dns`
+# policy, so it is not repeated here.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mc-router-egress
+  namespace: prd-games-42wasd-admin
+spec:
+  podSelector:
+    matchLabels:
+      app: mc-router
+  policyTypes:
+    - Egress
+  egress:
+    # -> Velocity (the network front door / lobby path)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: velocity
+      ports:
+        - protocol: TCP
+          port: 25565
+    # -> ATM10SKY (the modded skyblock world)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: atm10sky
+      ports:
+        - protocol: TCP
+          port: 25565

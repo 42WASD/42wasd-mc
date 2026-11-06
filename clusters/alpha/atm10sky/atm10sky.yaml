@@ -1,14 +1,26 @@
 # ATM10SKY — All the Mods 10: To the Sky (server pack 2.2.0).
 #
-# 322 mods on NeoForge 21.1.250 / Minecraft 1.21.1. Runs STANDALONE (NodePort
-# 30080), NOT behind the Velocity proxy:
+# 322 mods on NeoForge 21.1.250 / Minecraft 1.21.1. Reached through mc-router by
+# HOSTNAME (mc-oompas.42base.com), not by a public port of its own.
+#
 #   - Velocity's documented modded support covers Forge >1.20.2; NeoForge is a
 #     fork with no explicit compatibility guarantee.
 #   - Our velocity.toml uses player-info-forwarding-mode = "none", so the proxy
 #     passes no identity anyway — routing modded traffic through it buys
 #     nothing and adds a failure domain across 322 mods.
-#   - The UAE relay already DNATs 30000-30199, so a NodePort is reachable
-#     exactly like the lobby's proxy port.
+#   - mc-router dispatches at the handshake layer (L7) and proxies raw TCP, so
+#     it needs no Velocity/mod compatibility at all: it does not speak Minecraft
+#     beyond reading the hostname out of the handshake.
+#
+# So this world is a SIBLING of Velocity behind the edge router, not a child:
+#
+#   mc-oompas.42base.com:25565  -> mc-router -> atm10sky   (this file)
+#   minecraft.42base.com:25565  -> mc-router -> velocity   -> paper-lobby
+#
+# Citing this as reference class D (`experimental-*`) per the runtime-class
+# rule: a required client runtime that differs from vanilla must be
+# launcher-matched, and Runtime D worlds are excluded from the instant-portal
+# pool. See maps/atm10sky-03a74e18/map.yaml.
 #
 # OFFLINE / CRACKED CLIENTS: ONLINE_MODE=FALSE writes online-mode=false into
 # server.properties, same as paper-lobby. Auth is vanilla-only and entirely
@@ -43,6 +55,17 @@ spec:
       storage: 40Gi
   storageClassName: nvme-fast
 ---
+# ClusterIP ONLY — reachable exclusively through mc-router.
+#
+# The reference design forbids exposing backends directly ("Backends remain
+# private ClusterIP services"; acceptance test: "lobby cannot be reached
+# directly from public Internet"). The former NodePort 30080 bypassed the edge
+# router entirely, so any player who learned the relay IP skipped hostname
+# routing altogether.
+#
+# mc-router resolves this by Service DNS name
+# (atm10sky.prd-games-42wasd-admin.svc.cluster.local:25565), so changing the
+# port here means updating MAPPING in clusters/alpha/mc-router/mc-router.yaml.
 apiVersion: v1
 kind: Service
 metadata:
@@ -51,14 +74,13 @@ metadata:
   labels:
     app: atm10sky
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: atm10sky
   ports:
     - name: minecraft
       port: 25565
       targetPort: 25565
-      nodePort: 30080
       protocol: TCP
 ---
 apiVersion: apps/v1

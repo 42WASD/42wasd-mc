@@ -1,0 +1,168 @@
+# mc-router — the public edge: routes Minecraft connections by HOSTNAME.
+#
+# This is Phase 22 of the reference design (sources/
+# verified_dynamic_minecraft_network_architecture_2026-08-19.md §37), promoted
+# ahead of schedule because it is the component that lets a player type a bare
+# hostname and reach the right world without a port number.
+#
+# WHY IT MUST EXIST HERE
+# The public relay (Melbicom 89.36.162.171) can only multiplex by L4 PORT. A
+# DNS name resolving to that IP changes nothing — hostnames are invisible to
+# NAT. mc-router instead parses the Minecraft handshake packet, which *contains*
+# the hostname the player typed, and dispatches on it. One IP, one port, many
+# worlds:
+#
+#   mc-oompas.42base.com:25565  -> atm10sky   (All the Mods 10: To the Sky)
+#   minecraft.42base.com:25565  -> velocity   (the 42WASD network / lobby)
+#   <anything else / raw IP>    -> velocity   (default route)
+#
+# WHY THE RELAY NEEDS NO CHANGE
+# The relay already DNATs public :25565 -> 10.200.0.2:30079. This Service takes
+# over that NodePort. DNAT rewrites IP headers only, never the payload, so the
+# hostname survives the tunnel intact and arrives here for dispatch.
+#
+# BACKENDS ARE ClusterIP ONLY (reference design §16 "Public network boundary":
+# "Backends remain private ClusterIP services", acceptance test "lobby cannot be
+# reached directly from public Internet"). velocity and atm10sky therefore have
+# NO NodePort — this router is the single public door.
+#
+# STATIC MAPPING, NOT SERVICE DISCOVERY
+# The image can discover annotated Services (`--in-kube-cluster` +
+# `mc-router.itzg.me/externalServerName`). We deliberately use static MAPPING
+# instead: it needs no ClusterRole to watch Services, the routing table is fully
+# visible in Git, and nothing can become publicly routable as a side effect of
+# annotating an unrelated Service (§16 "Kubernetes RBAC boundary"). Switch to
+# discovery if/when scale-to-zero worlds land, since native 0<->1 auto-scaling
+# requires watching a StatefulSet.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-router
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: mc-router
+spec:
+  # NodePort 30079 is inside the relay's pass-through range (30000-30199), so
+  # the existing relay alias (25565 -> 10.200.0.2:30079) routes here with no
+  # change to /usr/local/bin/mc-relay-nat.sh on the VPS.
+  type: NodePort
+  selector:
+    app: mc-router
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: 25565
+      nodePort: 30079
+      protocol: TCP
+    # REST API: GET /routes for observability/debugging.
+    - name: api
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-router
+  namespace: prd-games-42wasd-admin
+  labels:
+    app: mc-router
+spec:
+  # Two replicas: this is the single public entry point for every world, so a
+  # restart must not black-hole the whole network. Both are stateless — the
+  # routing table comes from env, and connections are long-lived TCP streams
+  # that survive independently on each replica.
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mc-router
+  template:
+    metadata:
+      labels:
+        app: mc-router
+    spec:
+      securityContext:
+        # UID/GID 10000 = dedicated workload identity. Do NOT use 1000: / is
+        # mounted ext4 `quota,usrquota` and 1000 is the human `jyao`, so
+        # writes would be charged to a person's 10 GiB home quota and fail with
+        # EDQUOT ("Disk quota exceeded"). mc-router writes nothing, but keep
+        # the convention uniform so no workload silently regresses.
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mc-router
+          # Pinned exact tag, not `latest` — a floating tag would silently
+          # change the public edge on any pod restart. 1.54.2 is the current
+          # release (2026-11-04) and matches the upstream README's "Latest".
+          image: itzg/mc-router:1.54.2
+          env:
+            # hostname=host:port. Comma or newline delimited.
+            # In-cluster Service DNS names: stable across pod restarts and
+            # independent of which node a backend lands on.
+            - name: MAPPING
+              value: >-
+                mc-oompas.42base.com=atm10sky.prd-games-42wasd-admin.svc.cluster.local:25565,
+                minecraft.42base.com=velocity.prd-games-42wasd-admin.svc.cluster.local:25565
+            # Unknown hostname, bare IP, or a raw port-only connection still
+            # lands somewhere sensible instead of being refused. Velocity is
+            # the network front door, so it is the correct fallback.
+            - name: DEFAULT
+              value: velocity.prd-games-42wasd-admin.svc.cluster.local:25565
+            # REST API on a separate port so the proxy port carries only
+            # Minecraft traffic.
+            - name: API_BINDING
+              value: "0.0.0.0:8081"
+            # Prometheus metrics for the edge (connections, route hits).
+            - name: METRICS_BACKEND
+              value: prometheus
+            # Rate limit hostile port-scanners. Default is 1/s which is too
+            # strict for a server-list refresh flicking through entries; 5/s
+            # still shuts out scanners while feeling instant to players.
+            - name: CONNECTION_RATE_LIMIT
+              value: "5"
+            # mc-router only accepts a connection whose handshake names a
+            # mapped hostname (or the default route), which by itself defeats
+            # most Minecraft port scanners.
+            - name: LOG_LEVEL
+              value: info
+          securityContext:
+            # Compliant with the namespace PodSecurity "restricted" profile.
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 10000
+            runAsGroup: 10000
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - containerPort: 25565
+              name: minecraft
+            - containerPort: 8081
+              name: api
+          # TCP probe on the real proxy port: mc-router binds it only after the
+          # routing table is loaded, so this is a genuine readiness signal.
+          readinessProbe:
+            tcpSocket:
+              port: minecraft
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: minecraft
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            # Go TCP proxy: tiny and constant. No JVM, no world data.
+            requests:
+              cpu: 50m
+              memory: 64Mi
+              ephemeral-storage: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+              ephemeral-storage: 256Mi

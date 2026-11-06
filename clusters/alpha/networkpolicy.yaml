@@ -62,36 +62,44 @@ spec:
         - protocol: TCP
           port: 80
 ---
-# Scoped ingress for the games namespace.
+# Ingress for the Minecraft backends: mc-router only.
 #
-# Unlike the previous ad-hoc `allow-games-ingress` (which was `ingress: [{}]` —
-# allow ALL ingress to EVERY pod), this policy only opens the ports each
-# workload actually needs:
-#   - Velocity  :25565 Minecraft client connections (the public front door;
-#     itzg/mc-proxy binds SERVER_PORT=25565 regardless of the velocity.toml).
-#   - Velocity  :25577 (config bind port; retained for parity).
+# The namespace is default-deny on BOTH ingress and egress, so every backend
+# needs an explicit allow or it is unreachable even from inside the cluster.
+#
+# This replaced the previous `allow-games-ingress` (podSelector app: velocity,
+# no `from:` peers = any source). That policy existed because external players
+# used to arrive at Velocity directly through the relay's DNAT. Now the ONLY
+# pod the relay can reach is mc-router, so Velocity and ATM10SKY accept traffic
+# from the edge router and nothing else — which is exactly the reference
+# design's "backends remain private" boundary, enforced rather than documented.
+#
+# `allow-atm10sky-ingress` (clusters/alpha/atm10sky/networkpolicy.yaml) was
+# removed for the same reason; both backends are covered here so the public
+# boundary lives in one reviewable place.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-games-ingress
+  name: allow-mc-router-to-game-backends
   namespace: prd-games-42wasd-admin
 spec:
   podSelector:
-    matchLabels:
-      app: velocity
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - velocity
+          - atm10sky
   policyTypes:
     - Ingress
   ingress:
-    # Allow Minecraft clients (external) to reach the Velocity proxy.
-    # External traffic arrives via the cloudflared tunnel / node, represented
-    # by the Cilium remote-node + kube-apiserver entities. Because this is a
-    # standard NetworkPolicy (not a Cilium one), we allow from all peers so
-    # external ingress still works while egress stays default-deny.
-    - ports:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mc-router
+      ports:
         - protocol: TCP
           port: 25565
-        - protocol: TCP
-          port: 25577
 ---
 # Backend ingress: allow the Velocity proxy to connect to the Paper lobby.
 #

@@ -1,35 +1,20 @@
-# NetworkPolicy for the ATM10SKY server.
+# NetworkPolicy for the ATM10SKY server — EGRESS ONLY.
 #
-# The namespace is default-deny on BOTH ingress and egress
-# (platform `default-deny` NetworkPolicy), so this workload needs its own
-# explicit allows or it cannot be reached or reach anything.
+# Ingress is intentionally NOT defined here. ATM10SKY is a private ClusterIP
+# backend reached solely through mc-router, and that rule lives with the rest of
+# the public boundary in clusters/alpha/networkpolicy.yaml
+# (`allow-mc-router-to-game-backends`). Keeping it there means the set of pods
+# the public edge may reach is reviewable in one file rather than scattered
+# across every workload — the failure mode being a forgotten `ingress: [{}]`
+# that silently re-exposes a backend.
+#
+# The namespace is default-deny on BOTH ingress and egress, so egress still
+# needs this explicit allow or the modded server cannot bootstrap.
 #
 # NOTE: `allow-games-egress` grants egress to `app: paper-lobby` and
 # `app: velocity` only; it does NOT cover atm10sky. That is deliberate — this
 # policy keeps the modded server's rules local to this file so its (slightly
 # different) egress needs are visible in one place.
----
-# Ingress: Minecraft client connections on :25565.
-#
-# Same shape as `allow-games-ingress` for velocity: no `from:` peers means
-# "any source", which is required because external players arrive via the
-# UAE relay DNAT / node IP, which standard NetworkPolicy cannot express as a
-# selector. Egress stays default-deny.
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-atm10sky-ingress
-  namespace: prd-games-42wasd-admin
-spec:
-  podSelector:
-    matchLabels:
-      app: atm10sky
-  policyTypes:
-    - Ingress
-  ingress:
-    - ports:
-        - protocol: TCP
-          port: 25565
 ---
 # Egress: DNS + the one-time NeoForge/modpack bootstrap.
 #

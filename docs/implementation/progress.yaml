@@ -20,6 +20,8 @@
   deploy-velocity: done  # Velocity 2x 1/1 Running (Java21 fixes Spark async-profiler SIGSEGV on Java25, lucko/spark#565)
   deploy-the-paper-lobby: done  # Paper lobby 1/1 Running
   rollout-order: done  # incident runbook: stale-CEP recovery after node IP change
+  deploy-the-forge-1-20-1-fantasy-runtime: done  # ATM10SKY NeoForge 1.21.1 behind the edge
+  add-mc-router: done  # hostname edge: mc-oompas->skyblock, minecraft->velocity; backends ClusterIP-only
   # Phase 0 — Decide names before deploying
   # Phase 1 — Create repository structure
   # Phase 2 — Create Kubernetes namespaces
