@@ -199,9 +199,117 @@ container has been stable since data landed.
 
 ## Client requirement
 
-Cracked/offline clients work (server `online-mode=false`), but the **client
-must run the matching ATM10SKY 2.2.0 modpack** — 322 mods are not optional. Set
-`ONLINE_MODE=FALSE` only; never enable `velocity` forwarding on this server.
+Minecraft **1.21.1** + **NeoForge 21.1.250**, running the **All the Mods 10: To
+the Sky** pack v**2.2.0** (CurseForge slug `all-the-mods-10-sky`, project ID
+**1298402**, server pack file ID **9262010**). 322 mods are not optional.
+
+This is the **"To the Sky"** pack, not base "All the Mods 10" — a different
+pack that will not connect. Skyblock-identifying mods confirmed on disk:
+`SkyblockBuilder-21.1.37`, `cobblegengalore`.
+
+Connection: `mc-oompas.42base.com` — **no port needed** (mc-router dispatches on
+the handshake hostname; see `phase-10-add-mc-router.md`). Never enable
+`velocity` forwarding on this server.
+
+### ⚠️ Offline / cracked clients are currently BLOCKED
+
+An earlier version of this section claimed cracked clients work because
+`online-mode=false`. **That was wrong.** The live properties are:
+
+```text
+online-mode=false
+enforce-secure-profile=true
+```
+
+`enforce-secure-profile=true` requires a **cryptographically signed profile key**
+that only a genuine Microsoft-authenticated session can produce. With
+`online-mode=false` there is no such key, so offline clients are rejected at
+login. A legitimately-owned account works fine.
+
+### Turning off `enforce-secure-profile` (when you want offline clients)
+
+**The trap:** this server sets `OVERRIDE_SERVER_PROPERTIES=false`, so the image
+applies env-var-derived properties **only on a fresh `/data`**. After that
+`server.properties` on the PVC is authoritative. Adding
+`ENFORCE_SECURE_PROFILE` to the Deployment and resyncing Argo will therefore
+**change nothing** — the pod restarts and keeps the old value.
+
+The image *does* support the variable (it is in
+`/image/property-definitions.json` as `"enforce-secure-profile": {"env":
+"ENFORCE_SECURE_PROFILE"}`), but `OVERRIDE_SERVER_PROPERTIES=false` gates it
+out. Two changes are needed, in this order.
+
+**1. Edit the property on the PVC, then restart the server.**
+
+The volume is `ReadWriteOnce` and OpenEBS local-LVM allows exactly **one
+mount**, so do not scale to zero first: with no pod running there is no mount
+point and the host path does not exist. Edit in place while the pod is up
+(the JVM reads `server.properties` once at boot, so the edit only takes effect
+on the next start), then stop the server cleanly.
+
+```bash
+NS=prd-games-42wasd-admin
+
+# Resolve the host-side mount. Note it is keyed on the PVC *UID*
+# (pvc-<uid>), NOT on the PVC name — searching for "atm10sky-data" finds
+# nothing, because local-LVM directories are named by UID.
+PVC_UID=$(kubectl -n $NS get pvc atm10sky-data -o jsonpath='{.metadata.uid}')
+MOUNT=$(sudo find /var/lib/kubelet/pods -maxdepth 6 -type d \
+          -path "*pvc-$PVC_UID/mount" 2>/dev/null | head -1)
+echo "$MOUNT"
+# expected shape:
+#   /var/lib/kubelet/pods/<pod-uid>/volumes/kubernetes.io~csi/pvc-<uid>/mount
+
+# Flip the property on the live mount
+sudo sed -i 's/^enforce-secure-profile=.*/enforce-secure-profile=false/' \
+  "$MOUNT/server.properties"
+sudo grep -E '^(online-mode|enforce-secure-profile)' "$MOUNT/server.properties"
+```
+
+Then restart so the JVM re-reads it. `rcon-cli stop` is the clean path — a
+SIGKILL risks a half-written world across 322 mods.
+
+```bash
+POD=$(kubectl -n $NS get pod -l app=atm10sky -o jsonpath='{.items[0].metadata.name}')
+kubectl -n $NS exec "$POD" -- rcon-cli stop
+```
+
+`restartPolicy: Always` brings the container straight back, and the image
+finds `/data` already populated, so `OVERRIDE_SERVER_PROPERTIES=false` leaves
+your edited file alone.
+
+> **If `$MOUNT` is empty:** no pod is running, so the volume is unmounted. Scale
+> up first (`kubectl -n $NS scale deploy atm10sky --replicas=1`), wait for
+> `Running`, then re-run the block above.
+
+**2. Make it survive a re-bootstrap.** While you are there, add the variable to
+the Deployment so a *fresh* `/data` gets the same value:
+
+```yaml
+- name: ENFORCE_SECURE_PROFILE
+  value: "false"
+```
+
+Without step 1 it does nothing; without step 2 a rebuilt volume silently
+reverts to `true`. Do both.
+
+**3. Verify from a client.** The status ping always answers (it has no login
+stage), so a ping is **not** proof. You need an actual login attempt from an
+offline client; a rejection reads roughly:
+
+```text
+Failed to verify username! / Invalid session
+```
+
+Also mirror the change on `paper-lobby` (`clusters/alpha/lobby/paper.yaml`),
+which has the same `online-mode=false` + `enforce-secure-profile=true` pair and
+therefore the same restriction behind Velocity.
+
+> Prefer to keep it `true`? That is the safer default: it stops username
+> spoofing, and with no auth gate on this network
+> (see the reference design's "in-game auth gate") an offline client can claim
+> any username it likes. Turning it off is a deliberate, reversible choice, not
+> a fix.
 
 ## Follow-ups
 

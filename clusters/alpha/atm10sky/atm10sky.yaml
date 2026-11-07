@@ -180,6 +180,23 @@ spec:
               value: "8G"
             # Do not let the image rewrite server.properties on every start;
             # the pack's values are applied once and then owned by the user.
+            #
+            # ⚠️ CONSEQUENCE — env vars no longer reach server.properties:
+            # With OVERRIDE_SERVER_PROPERTIES=false, ONLINE_MODE / ALLOW_FLIGHT /
+            # LEVEL_TYPE / MOTD above are applied ONLY on a fresh /data. After
+            # that the file is authoritative and ADDING AN ENV VAR HERE HAS NO
+            # EFFECT (including ENFORCE_SECURE_PROFILE, which the image does
+            # otherwise support — see /image/property-definitions.json).
+            #
+            # Currently live: online-mode=false AND enforce-secure-profile=true.
+            # That combination REJECTS offline/cracked clients, because a signed
+            # profile key can only come from a real Microsoft session.
+            #
+            # To let offline clients in, flip the property on the PVC (a manifest
+            # change alone will silently do nothing). Full procedure, including
+            # the one-time manifest update that makes it persist:
+            #   docs/implementation/_runbook/03-step-by-step-implementation/
+            #   phase-09-deploy-atm10sky.md  -> "Turning off enforce-secure-profile"
             - name: OVERRIDE_SERVER_PROPERTIES
               value: "false"
           resources:
