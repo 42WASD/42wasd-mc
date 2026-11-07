@@ -757,6 +757,63 @@ kubectl -n prd-games-42wasd-admin exec deploy/velocity -- bash -c \
   `30079` no longer held by dev.
 - Netpol list: `default-deny`, `allow-cluster-dns`, `allow-games-egress`,
   `allow-games-ingress`, `allow-proxy-to-paper-lobby`.
+---
+
+## Decision — the boot-order download race is accepted, not fixed (2026-11-07)
+
+On a host reboot, `velocity` can crash-loop briefly:
+
+```text
+Failed to resolve 'fill.papermc.io'
+DnsNameResolverException: [.. /10.43.0.10:53] failed to send a query via UDP
+NativeIoException: sendToAddress(..) failed with error(-113): No route to host
+ERROR: failed to download
+```
+
+`TYPE=VELOCITY` calls `getFromPaperMc` on **every** start to re-resolve
+`latest`. On a reboot that runs before Cilium/CoreDNS serve DNS the fetch fails,
+the container exits, and kubelet backs off.
+
+### Verified behaviour: it self-heals
+
+Reboot 1 (2026-11-06 23:56): velocity and cloudflared both crash-looped, then
+recovered on their own within ~40 s once CoreDNS was up.
+
+Reboot 2 (2026-11-07 00:05): **zero** DNS-related failures.
+
+So this is a transient first-boot race, not a persistent fault. Progression:
+
+```text
+[1] velocity ready=0/2  cloudflared ready=1/2
+[2] velocity ready=2/2  cloudflared ready=1/2
+[4] velocity ready=2/2  cloudflared ready=2/2
+```
+
+### Options considered and rejected
+
+| Option | Why rejected |
+|---|---|
+| **Accepted:** leave it, document it | Restart costs players a reconnect. Zero added complexity. The race needs a reboot after long uptime to appear at all. |
+| Pin `VELOCITY_VERSION` + `VELOCITY_BUILD_ID` | Still downloads; only narrows the window. Worth doing if it ever becomes frequent. |
+| Generic DNS-wait guard (initContainer / Kyverno) | The most "correct" per AGENTS.md's "prefer a generic guard", but adds a component to solve a 40 s transient. Revisit if a second workload hits the same race. |
+| PVC + pinned jar via `TYPE=CUSTOM` + `BUNGEE_JAR_FILE` | **Implemented, verified working, then reverted.** Guarantees no network at startup — but costs `replicas: 2 -> 1` (RWO = one mount) and a `Recreate` outage on every update. Trading a self-healing crash-loop for permanent loss of a replica is a bad trade. |
+
+That last one is worth recording because it *worked*: the pinned-jar mechanism is
+real and documented (`CUSTOM` + `CUSTOM_FAMILY=velocity` + `BUNGEE_JAR_FILE`
+sets `download_required=false`, so `run-bungeecord.sh` never fetches). It is the
+right answer only if offline-capable startup is a requirement. **It is not** —
+this cluster is allowed to depend on internet at boot.
+
+> **If you are here to "fix" the velocity crash-loop on reboot:** it is
+> deliberately left alone. Confirm it self-heals (above), and stop. Reintroducing
+> a PVC to pin the jar will silently halve your proxy replicas.
+
+### Related
+
+`platform-cloudflared` hits the identical race (its log: `Couldn't resolve SRV
+record region1.v2.argotunnel.com` on `10.43.0.10:53: no route to host`) and
+self-heals the same way — which is further evidence the cause is the CNI/DNS
+readiness window, not anything specific to the proxy.
 
 </details>
 
